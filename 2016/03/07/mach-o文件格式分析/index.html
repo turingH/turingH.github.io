@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>mach-o格式分析 | mrh的学习分享</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="0x00 摘要
+人生无根蒂，飘如陌上尘。 分散逐风转，此已非常身。
+— 陶渊明 《杂诗》
+
+mach-o格式是OS X系统上的可执行文件格式，类似于windows的PE与linux的ELF，如果不彻底搞清楚mach-o的格式与相关知识，去做其他研究，无异于建造空中阁楼。
+每个Mach-O文件斗包含一个Mach-O头，然后是载入命令(Load Commands),最后是数据块(Data)。
+接下来就">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mach-o格式分析">
+<meta property="og:url" content="http://yoursite.com/2016/03/07/mach-o文件格式分析/index.html">
+<meta property="og:site_name" content="mrh的学习分享">
+<meta property="og:description" content="0x00 摘要
+人生无根蒂，飘如陌上尘。 分散逐风转，此已非常身。
+— 陶渊明 《杂诗》
+
+mach-o格式是OS X系统上的可执行文件格式，类似于windows的PE与linux的ELF，如果不彻底搞清楚mach-o的格式与相关知识，去做其他研究，无异于建造空中阁楼。
+每个Mach-O文件斗包含一个Mach-O头，然后是载入命令(Load Commands),最后是数据块(Data)。
+接下来就">
+<meta property="og:image" content="http://www.codeproject.com/KB/recipes/dynamic_linking-in-mach-o/im1.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/Mach-O-fmt/Header.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/Mach-O-fmt/macho_header.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/Mach-O-fmt/Header_butter_fly.png">
+<meta property="og:updated_time" content="2016-03-24T03:37:29.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="mach-o格式分析">
+<meta name="twitter:description" content="0x00 摘要
+人生无根蒂，飘如陌上尘。 分散逐风转，此已非常身。
+— 陶渊明 《杂诗》
+
+mach-o格式是OS X系统上的可执行文件格式，类似于windows的PE与linux的ELF，如果不彻底搞清楚mach-o的格式与相关知识，去做其他研究，无异于建造空中阁楼。
+每个Mach-O文件斗包含一个Mach-O头，然后是载入命令(Load Commands),最后是数据块(Data)。
+接下来就">
+  
+    <link rel="alternative" href="/atom.xml" title="mrh的学习分享" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/img/touxiang.jpeg">
+  
+  
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  
+  
+      <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  <!-- 加载特效 -->
+    <script src="/js/pace.js"></script>
+    <link href="/css/pace/pace-theme-flash.css" rel="stylesheet" />
+  <script>
+      var yiliaConfig = {
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            
+            <img lazy-src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/touxiang.jpeg" class="js-avatar">
+            
+        </a>
+
+        <hgroup>
+          <h1 class="header-author"><a href="/">mrh</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">胸口写一个勇字</p>
+        
+        
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">博客首页</a></li>
+                        
+                            <li><a href="/archives">所有文章</a></li>
+                        
+                            <li><a href="https://github.com/turingH/OSX_CRACKME">CrackMe</a></li>
+                        
+                            <li><a href="https://raw.githubusercontent.com/turingH/ad/master/README.md">安全站点</a></li>
+                        
+                            <li><a href="https://github.com/turingH/MACOSX-SecurityUpdate/blob/master/OSX/10.11.4/10.11.4_03_22_16.csv">10.11.4补丁</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fl github" target="_blank" href="https://github.com/turingH" title="github">github</a>
+                            
+                                <a class="fl weibo" target="_blank" href="http://weibo.com/u/2047262653" title="weibo">weibo</a>
+                            
+                                <a class="fl twitter" target="_blank" href="https://twitter.com/samulehuang" title="twitter">twitter</a>
+                            
+                                <a class="fl facebook" target="_blank" href="https://www.facebook.com/huang.samuel.94" title="facebook">facebook</a>
+                            
+                                <a class="fl rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <a href="/tags/CVE/" style="font-size: 13.33px;">CVE</a> <a href="/tags/DWORDSHOOT/" style="font-size: 10px;">DWORDSHOOT</a> <a href="/tags/OS-X/" style="font-size: 10px;">OS X</a> <a href="/tags/OSX/" style="font-size: 11.67px;">OSX</a> <a href="/tags/bounds-checking/" style="font-size: 10px;">bounds checking</a> <a href="/tags/dlopen/" style="font-size: 10px;">dlopen</a> <a href="/tags/dns/" style="font-size: 10px;">dns</a> <a href="/tags/dos/" style="font-size: 10px;">dos</a> <a href="/tags/dyld/" style="font-size: 15px;">dyld</a> <a href="/tags/dynamic-link/" style="font-size: 10px;">dynamic link</a> <a href="/tags/execv/" style="font-size: 11.67px;">execv</a> <a href="/tags/execve/" style="font-size: 10px;">execve</a> <a href="/tags/exploit/" style="font-size: 20px;">exploit</a> <a href="/tags/frame-faking/" style="font-size: 10px;">frame-faking</a> <a href="/tags/free/" style="font-size: 10px;">free</a> <a href="/tags/freebsd/" style="font-size: 10px;">freebsd</a> <a href="/tags/gethostbyname/" style="font-size: 10px;">gethostbyname</a> <a href="/tags/glibc/" style="font-size: 10px;">glibc</a> <a href="/tags/heap/" style="font-size: 16.67px;">heap</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/kernel/" style="font-size: 15px;">kernel</a> <a href="/tags/kextload/" style="font-size: 10px;">kextload</a> <a href="/tags/level02/" style="font-size: 10px;">level02</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/mach-o/" style="font-size: 18.33px;">mach-o</a> <a href="/tags/openssl/" style="font-size: 10px;">openssl</a> <a href="/tags/osx/" style="font-size: 16.67px;">osx</a> <a href="/tags/patch/" style="font-size: 10px;">patch</a> <a href="/tags/ports/" style="font-size: 11.67px;">ports</a> <a href="/tags/race/" style="font-size: 11.67px;">race</a> <a href="/tags/sandbox/" style="font-size: 10px;">sandbox</a> <a href="/tags/stack/" style="font-size: 13.33px;">stack</a> <a href="/tags/stackoverflow/" style="font-size: 10px;">stackoverflow</a> <a href="/tags/unlink/" style="font-size: 10px;">unlink</a> <a href="/tags/wargame/" style="font-size: 11.67px;">wargame</a>
+                    </div>
+                </section>
+                
+                
+                
+
+                
+                
+                <section class="switch-part switch-part3">
+                
+                    <div id="js-aboutme">啥也不说了，先干黄旭东</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">mrh</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                
+                    <img lazy-src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/touxiang.jpeg" class="js-avatar">
+                
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">mrh</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">胸口写一个勇字</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">博客首页</a></li>
+                
+                    <li><a href="/archives">所有文章</a></li>
+                
+                    <li><a href="https://github.com/turingH/OSX_CRACKME">CrackMe</a></li>
+                
+                    <li><a href="https://raw.githubusercontent.com/turingH/ad/master/README.md">安全站点</a></li>
+                
+                    <li><a href="https://github.com/turingH/MACOSX-SecurityUpdate/blob/master/OSX/10.11.4/10.11.4_03_22_16.csv">10.11.4补丁</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a class="github" target="_blank" href="https://github.com/turingH" title="github">github</a>
+                    
+                        <a class="weibo" target="_blank" href="http://weibo.com/u/2047262653" title="weibo">weibo</a>
+                    
+                        <a class="twitter" target="_blank" href="https://twitter.com/samulehuang" title="twitter">twitter</a>
+                    
+                        <a class="facebook" target="_blank" href="https://www.facebook.com/huang.samuel.94" title="facebook">facebook</a>
+                    
+                        <a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+                    
+                </div>
+            </nav>
+        </header>                
+    </div>
+</nav>
+      <div class="body-wrap"><article id="post-mach-o文件格式分析" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/03/07/mach-o文件格式分析/" class="article-date">
+      <time datetime="2016-03-07T16:18:09.000Z" itemprop="datePublished">2016-03-07</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      mach-o格式分析
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/OS-X/">OS X</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mach-o/">mach-o</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/osx/">osx</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h1 id="0x00_摘要">0x00 摘要</h1><blockquote>
+<p>人生无根蒂，飘如陌上尘。 分散逐风转，此已非常身。</p>
+<p>— 陶渊明 《杂诗》</p>
+</blockquote>
+<p><code>mach-o</code>格式是OS X系统上的可执行文件格式，类似于windows的<code>PE</code>与linux的<code>ELF</code>，如果不彻底搞清楚<code>mach-o</code>的格式与相关知识，去做其他研究，无异于建造空中阁楼。</p>
+<p>每个Mach-O文件斗包含一个Mach-O头，然后是载入命令(Load Commands),最后是数据块(Data)。</p>
+<p>接下来就对整个Mach-O的格式做出详细的分析。</p>
+<a id="more"></a>
+<h1 id="0x01_Mach-O格式简单介绍">0x01 Mach-O格式简单介绍</h1><p>Mach-O文件的格式如下图所示：</p>
+<p><img src="http://www.codeproject.com/KB/recipes/dynamic_linking-in-mach-o/im1.jpg" alt="Mach-O"></p>
+<p>又如下几个部分组成：</p>
+<ul>
+<li>Header：保存了Mach-O的一些基本信息，包括了平台、文件类型、LoadCommands的个数等等。</li>
+<li>LoadCommands：这一段紧跟Header，加载Mach-O文件时会使用这里的数据来确定内存的分布。</li>
+<li>Data：每一个segment的具体数据都保存在这里，这里包含了具体的代码、数据等等。</li>
+</ul>
+<h1 id="0x02_Headers">0x02 Headers</h1><h2 id="2-1_数据结构">2.1 数据结构</h2><p>Headers的定义可以在开源的内核代码中找到。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span><br><span class="line"> * The 32-bit mach header appears at the very beginning of the object file for</span><br><span class="line"> * 32-bit architectures.</span><br><span class="line"> */</span></span><br><span class="line"><span class="keyword">struct</span> mach_header &#123;</span><br><span class="line">	<span class="keyword">uint32_t</span>	magic;		<span class="comment">/* mach magic number identifier */</span></span><br><span class="line">	<span class="keyword">cpu_type_t</span>	cputype;	<span class="comment">/* cpu specifier */</span></span><br><span class="line">	<span class="keyword">cpu_subtype_t</span>	cpusubtype;	<span class="comment">/* machine specifier */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	filetype;	<span class="comment">/* type of file */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	ncmds;		<span class="comment">/* number of load commands */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	sizeofcmds;	<span class="comment">/* the size of all the load commands */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	flags;		<span class="comment">/* flags */</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Constant for the magic field of the mach_header (32-bit architectures) */</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span>	MH_MAGIC	<span class="number">0xfeedface</span>	<span class="comment">/* the mach magic number */</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MH_CIGAM	<span class="number">0xcefaedfe</span>	<span class="comment">/* NXSwapInt(MH_MAGIC) */</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span><br><span class="line"> * The 64-bit mach header appears at the very beginning of object files for</span><br><span class="line"> * 64-bit architectures.</span><br><span class="line"> */</span></span><br><span class="line"><span class="keyword">struct</span> mach_header_64 &#123;</span><br><span class="line">	<span class="keyword">uint32_t</span>	magic;		<span class="comment">/* mach magic number identifier */</span></span><br><span class="line">	<span class="keyword">cpu_type_t</span>	cputype;	<span class="comment">/* cpu specifier */</span></span><br><span class="line">	<span class="keyword">cpu_subtype_t</span>	cpusubtype;	<span class="comment">/* machine specifier */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	filetype;	<span class="comment">/* type of file */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	ncmds;		<span class="comment">/* number of load commands */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	sizeofcmds;	<span class="comment">/* the size of all the load commands */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	flags;		<span class="comment">/* flags */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	reserved;	<span class="comment">/* reserved */</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Constant for the magic field of the mach_header_64 (64-bit architectures) */</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MH_MAGIC_64 <span class="number">0xfeedfacf</span> <span class="comment">/* the 64-bit mach magic number */</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MH_CIGAM_64 <span class="number">0xcffaedfe</span> <span class="comment">/* NXSwapInt(MH_MAGIC_64) */</span></span></span><br></pre></td></tr></table></figure>
+<p>根据<code>mach_header</code>与<code>mach_header_64</code>的定义，很明显可以看出，Headers的主要作用就是帮助系统迅速的定位Mach-O文件的运行环境，文件类型。</p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/Mach-O-fmt/Header.png" alt="Header"></p>
+<h2 id="2-2_实例">2.2 实例</h2><p>使用工具分析一个mach-o文件来具体的看一下Mach-O Headers。</p>
+<p>通过otool可以得到Mach header的具体的情况，但是可读性略微有一点差。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  bin otool -h git</span><br><span class="line">git:</span><br><span class="line">Mach header</span><br><span class="line">      magic cputype cpusubtype  caps    filetype ncmds sizeofcmds      flags</span><br><span class="line"> <span class="number">0xfeedfacf</span> <span class="number">16777223</span>          <span class="number">3</span>  <span class="number">0x80</span>           <span class="number">2</span>    <span class="number">17</span>       <span class="number">1432</span> <span class="number">0x00200085</span></span><br></pre></td></tr></table></figure>
+<p>还有一个工具是MachOview可以看的更清楚一点。</p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/Mach-O-fmt/macho_header.png" alt="Header"></p>
+<ul>
+<li>MagicNumber的值为0xFEEDFACF所以该文件是一个64位平台上的文件</li>
+<li>CPU Type和CPU SubType也很容易理解，运行在X86_64的CPU平台上</li>
+<li>File Type标示了该文件是一个可执行文件，后面具体分析</li>
+<li>Flags标示了这个MachO文件的四个特性，后面具体分析</li>
+</ul>
+<h2 id="2-3_具体参数">2.3 具体参数</h2><h3 id="2-3-1_FileType">2.3.1 FileType</h3><p>因为Mach-O文件不仅仅用来实现可执行文件，同时还用来实现了其他内容</p>
+<ul>
+<li>内核扩展</li>
+<li>库文件</li>
+<li>CoreDump</li>
+<li>…</li>
+</ul>
+<p>他的源码定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">define</span>	MH_OBJECT	<span class="number">0x1</span>		<span class="comment">/* relocatable object file */</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span>	MH_EXECUTE	<span class="number">0x2</span>		<span class="comment">/* demand paged executable file */</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span>	MH_FVMLIB	<span class="number">0x3</span>		<span class="comment">/* fixed VM shared library file */</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span>	MH_CORE		<span class="number">0x4</span>		<span class="comment">/* core file */</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span>	MH_PRELOAD	<span class="number">0x5</span>		<span class="comment">/* preloaded executable file */</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span>	MH_DYLIB	<span class="number">0x6</span>		<span class="comment">/* dynamically bound shared library */</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span>	MH_DYLINKER	<span class="number">0x7</span>		<span class="comment">/* dynamic link editor */</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span>	MH_BUNDLE	<span class="number">0x8</span>		<span class="comment">/* dynamically bound bundle file */</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span>	MH_DYLIB_STUB	<span class="number">0x9</span>		<span class="comment">/* shared library stub for static */</span></span></span><br><span class="line">					<span class="comment">/*  linking only, no section contents */</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span>	MH_DSYM		<span class="number">0xa</span>		<span class="comment">/* companion file with only debug */</span></span></span><br><span class="line">					<span class="comment">/*  sections */</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span>	MH_KEXT_BUNDLE	<span class="number">0xb</span>		<span class="comment">/* x86_64 kexts */</span></span></span><br></pre></td></tr></table></figure>
+<p>解释一下一些常用到的文件类型。</p>
+<table>
+<thead>
+<tr>
+<th>File Type</th>
+<th>用处</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MH_OBJECT</td>
+<td>编译过程中产生的*.obj文件</td>
+<td>gcc -c xxx.c 生成xxx.o文件</td>
+</tr>
+<tr>
+<td>MH_EXECUTABLE</td>
+<td>可执行二进制文件</td>
+<td>/usr/bin/git</td>
+</tr>
+<tr>
+<td>MH_CORE</td>
+<td>CoreDump</td>
+<td>崩溃时的Dump文件</td>
+</tr>
+<tr>
+<td>MH_DYLIB</td>
+<td>动态库</td>
+<td>/usr/lib/里面的那些库文件</td>
+</tr>
+<tr>
+<td>MH_DYLINKER</td>
+<td>连接器linker</td>
+<td>/usr/lib/dyld文件</td>
+</tr>
+<tr>
+<td>MH_KEXT_BUNDLE</td>
+<td>内核扩展文件</td>
+<td>自己开发的简单内核模块</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-3-2_flags">2.3.2 flags</h3><p>Mach-O headers还包含了一些很重要的dyld的加载参数。代码中的定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">define</span>	MH_INCRLINK	<span class="number">0x2</span>		<span class="comment">/* the object file is the output of an</span><br><span class="line">					   incremental link against a base file</span><br><span class="line">					   and can't be link edited again */</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MH_DYLDLINK	<span class="number">0x4</span>		<span class="comment">/* the object file is input for the</span><br><span class="line">					   dynamic linker and can't be staticly</span><br><span class="line">					   link edited again */</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MH_BINDATLOAD	<span class="number">0x8</span>		<span class="comment">/* the object file's undefined</span><br><span class="line">					   references are bound by the dynamic</span><br><span class="line">					   linker when loaded. */</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MH_PREBOUND	<span class="number">0x10</span>		<span class="comment">/* the file has its dynamic undefined</span><br><span class="line">					   references prebound. */</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MH_SPLIT_SEGS	<span class="number">0x20</span>		<span class="comment">/* the file has its read-only and</span><br><span class="line">					   read-write segments split */</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MH_LAZY_INIT	<span class="number">0x40</span>		<span class="comment">/* the shared library init routine is</span><br><span class="line">					   to be run lazily via catching memory</span><br><span class="line">					   faults to its writeable segments</span><br><span class="line">					   (obsolete) */</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MH_TWOLEVEL	<span class="number">0x80</span>		<span class="comment">/* the image is using two-level name</span><br><span class="line">					   space bindings */</span></span></span><br><span class="line">...</span><br><span class="line"><span class="comment">//太长，有兴趣可以自己看源码</span></span><br><span class="line"><span class="comment">// EXTERNAL_HEADERS/mach-o/x86_64/loader.h</span></span><br></pre></td></tr></table></figure>
+<p>同样简单的介绍几个比较重要的。</p>
+<table>
+<thead>
+<tr>
+<th>Flag Type</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MH_NOUNDEFS</td>
+<td>目标没有未定义的符号，不存在链接依赖</td>
+</tr>
+<tr>
+<td>MH_DYLDLINK</td>
+<td>该目标文件是dyld的输入文件，无法被再次的静态链接</td>
+</tr>
+<tr>
+<td>MH_PIE</td>
+<td>允许随机的地址空间</td>
+</tr>
+<tr>
+<td>MH_ALLOW_STACK_EXECUTION</td>
+<td>栈内存可执行代码，一般是默认关闭的。</td>
+</tr>
+<tr>
+<td>MH_NO_HEAP_EXECUTION</td>
+<td>堆内存无法执行代码</td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-4_Headers小结">2.4 Headers小结</h2><p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/Mach-O-fmt/Header_butter_fly.png" alt="Headers"></p>
+<h1 id="0x03_Load_Commands">0x03 Load Commands</h1><p>这是load_command的数据结构</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> load_command &#123;</span><br><span class="line">	<span class="keyword">uint32_t</span> cmd;		<span class="comment">/* type of load command */</span></span><br><span class="line">	<span class="keyword">uint32_t</span> cmdsize;	<span class="comment">/* total size of command in bytes */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>Load Commands 直接就跟在Header后面，所有command占用内存的<strong>总和</strong>在Mach-O Header里面已经给出了。在加载过Header之后就是通过解析LoadCommand来加载接下来的数据了。我简单的看了一下内核中是如何解析macho数据的，抛开内核的实现细节，逻辑其实也十分简单。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span></span><br><span class="line">load_return_t</span><br><span class="line"><span class="title">parse_machfile</span><span class="params">(</span><br><span class="line">	<span class="keyword">struct</span> vnode 		*vp,       </span><br><span class="line">	vm_map_t		<span class="built_in">map</span>,</span><br><span class="line">	thread_t		thread,</span><br><span class="line">	<span class="keyword">struct</span> mach_header	*header,</span><br><span class="line">	off_t			file_offset,</span><br><span class="line">	off_t			macho_size,</span><br><span class="line">	<span class="keyword">int</span>			depth,</span><br><span class="line">	int64_t			aslr_offset,</span><br><span class="line">	int64_t			dyld_aslr_offset,</span><br><span class="line">	load_result_t		*result</span><br><span class="line">)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	[...] <span class="comment">//此处省略大量初始化与检测</span></span><br><span class="line"></span><br><span class="line">		<span class="comment">/*</span><br><span class="line">		 * Loop through each of the load_commands indicated by the</span><br><span class="line">		 * Mach-O header; if an absurd value is provided, we just</span><br><span class="line">		 * run off the end of the reserved section by incrementing</span><br><span class="line">		 * the offset too far, so we are implicitly fail-safe.</span><br><span class="line">		 */</span></span><br><span class="line">		offset = mach_header_sz;</span><br><span class="line">		ncmds = header-&gt;ncmds;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">while</span> (ncmds--) &#123;</span><br><span class="line">			<span class="comment">/*</span><br><span class="line">			 *	Get a pointer to the command.</span><br><span class="line">			 */</span></span><br><span class="line">			lcp = (<span class="keyword">struct</span> load_command *)(addr + offset);</span><br><span class="line">			<span class="comment">//lcp设为当前要解析的cmd的地址</span></span><br><span class="line">			oldoffset = offset;</span><br><span class="line">			<span class="comment">//oldoffset是从macho文件内存开始的地方偏移到当前command的偏移量</span></span><br><span class="line">			offset += lcp-&gt;cmdsize;</span><br><span class="line">			<span class="comment">//重新计算offset，再加上当前command的长度，offset的值为文件内存起始地址到下一个command的偏移量</span></span><br><span class="line">			<span class="comment">/*</span><br><span class="line">			 * Perform prevalidation of the struct load_command</span><br><span class="line">			 * before we attempt to use its contents.  Invalid</span><br><span class="line">			 * values are ones which result in an overflow, or</span><br><span class="line">			 * which can not possibly be valid commands, or which</span><br><span class="line">			 * straddle or exist past the reserved section at the</span><br><span class="line">			 * start of the image.</span><br><span class="line">			 */</span></span><br><span class="line">			<span class="keyword">if</span> (oldoffset &gt; offset ||</span><br><span class="line">			    lcp-&gt;cmdsize &lt; <span class="keyword">sizeof</span>(<span class="keyword">struct</span> load_command) ||</span><br><span class="line">			    offset &gt; header-&gt;sizeofcmds + mach_header_sz) &#123;</span><br><span class="line">				ret = LOAD_BADMACHO;</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">//做了一个检测，与如何加载进入内存无关</span></span><br><span class="line"></span><br><span class="line">			<span class="comment">/*</span><br><span class="line">			 * Act on struct load_command's for which kernel</span><br><span class="line">			 * intervention is required.</span><br><span class="line">			 */</span></span><br><span class="line">			<span class="keyword">switch</span>(lcp-&gt;cmd) &#123;</span><br><span class="line">			<span class="keyword">case</span> LC_SEGMENT:</span><br><span class="line">				[...]</span><br><span class="line">				ret = load_segment(lcp,</span><br><span class="line">				                   header-&gt;filetype,</span><br><span class="line">				                   control,</span><br><span class="line">				                   file_offset,</span><br><span class="line">				                   macho_size,</span><br><span class="line">				                   vp,</span><br><span class="line">				                   <span class="built_in">map</span>,</span><br><span class="line">				                   slide,</span><br><span class="line">				                   result);</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			<span class="keyword">case</span> LC_SEGMENT_64:</span><br><span class="line">				[...]</span><br><span class="line">				ret = load_segment(lcp,</span><br><span class="line">				                   header-&gt;filetype,</span><br><span class="line">				                   control,</span><br><span class="line">				                   file_offset,</span><br><span class="line">				                   macho_size,</span><br><span class="line">				                   vp,</span><br><span class="line">				                   <span class="built_in">map</span>,</span><br><span class="line">				                   slide,</span><br><span class="line">				                   result);</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			<span class="keyword">case</span> LC_UNIXTHREAD:</span><br><span class="line">				<span class="keyword">if</span> (pass != <span class="number">1</span>)</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				ret = load_unixthread(</span><br><span class="line">						 (<span class="keyword">struct</span> thread_command *) lcp,</span><br><span class="line">						 thread,</span><br><span class="line">						 slide,</span><br><span class="line">						 result);</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			<span class="keyword">case</span> LC_MAIN:</span><br><span class="line">				<span class="keyword">if</span> (pass != <span class="number">1</span>)</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				<span class="keyword">if</span> (depth != <span class="number">1</span>)</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				ret = load_main(</span><br><span class="line">						 (<span class="keyword">struct</span> entry_point_command *) lcp,</span><br><span class="line">						 thread,</span><br><span class="line">						 slide,</span><br><span class="line">						 result);</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			<span class="keyword">case</span> LC_LOAD_DYLINKER:</span><br><span class="line">				<span class="keyword">if</span> (pass != <span class="number">3</span>)</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				<span class="keyword">if</span> ((depth == <span class="number">1</span>) &amp;&amp; (dlp == <span class="number">0</span>)) &#123;</span><br><span class="line">					dlp = (<span class="keyword">struct</span> dylinker_command *)lcp;</span><br><span class="line">					dlarchbits = (header-&gt;cputype &amp; CPU_ARCH_MASK);</span><br><span class="line">				&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">					ret = LOAD_FAILURE;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			<span class="keyword">case</span> LC_UUID:</span><br><span class="line">				<span class="keyword">if</span> (pass == <span class="number">1</span> &amp;&amp; depth == <span class="number">1</span>) &#123;</span><br><span class="line">					ret = load_uuid((<span class="keyword">struct</span> uuid_command *) lcp,</span><br><span class="line">							(<span class="keyword">char</span> *)addr + mach_header_sz + header-&gt;sizeofcmds,</span><br><span class="line">							result);</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			<span class="keyword">case</span> LC_CODE_SIGNATURE:</span><br><span class="line">				[...]</span><br><span class="line">				ret = load_code_signature(</span><br><span class="line">					(<span class="keyword">struct</span> linkedit_data_command *) lcp,</span><br><span class="line">					vp,</span><br><span class="line">					file_offset,</span><br><span class="line">					macho_size,</span><br><span class="line">					header-&gt;cputype,</span><br><span class="line">					result);</span><br><span class="line">				[...]</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line"><span class="preprocessor">#<span class="keyword">if</span> CONFIG_CODE_DECRYPTION</span></span><br><span class="line">			<span class="keyword">case</span> LC_ENCRYPTION_INFO:</span><br><span class="line">			<span class="keyword">case</span> LC_ENCRYPTION_INFO_64:</span><br><span class="line">				<span class="keyword">if</span> (pass != <span class="number">3</span>)</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				ret = set_code_unprotect(</span><br><span class="line">					(<span class="keyword">struct</span> encryption_info_command *) lcp,</span><br><span class="line">					addr, <span class="built_in">map</span>, slide, vp, file_offset,</span><br><span class="line">					header-&gt;cputype, header-&gt;cpusubtype);</span><br><span class="line">				<span class="keyword">if</span> (ret != LOAD_SUCCESS) &#123;</span><br><span class="line">					<span class="built_in">printf</span>(<span class="string">"proc %d: set_code_unprotect() error %d "</span></span><br><span class="line">					       <span class="string">"for file \"%s\"\n"</span>,</span><br><span class="line">					       p-&gt;p_pid, ret, vp-&gt;v_name);</span><br><span class="line">					<span class="comment">/* </span><br><span class="line">					 * Don't let the app run if it's </span><br><span class="line">					 * encrypted but we failed to set up the</span><br><span class="line">					 * decrypter. If the keys are missing it will</span><br><span class="line">					 * return LOAD_DECRYPTFAIL.</span><br><span class="line">					 */</span></span><br><span class="line">					 <span class="keyword">if</span> (ret == LOAD_DECRYPTFAIL) &#123;</span><br><span class="line">						<span class="comment">/* failed to load due to missing FP keys */</span></span><br><span class="line">						proc_lock(p);</span><br><span class="line">						p-&gt;p_lflag |= P_LTERM_DECRYPTFAIL;</span><br><span class="line">						proc_unlock(p);</span><br><span class="line">					 &#125;</span><br><span class="line">					 psignal(p, SIGKILL);</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line"><span class="preprocessor">#<span class="keyword">endif</span></span></span><br><span class="line">			<span class="keyword">default</span>:</span><br><span class="line">				<span class="comment">/* Other commands are ignored by the kernel */</span></span><br><span class="line">				ret = LOAD_SUCCESS;</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span> (ret != LOAD_SUCCESS)</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (ret != LOAD_SUCCESS)</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	[...] <span class="comment">//此处略去加载之后的处理代码</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-1cmdsize字段">3.1cmdsize字段</h3><p>这里主要看while循环刚刚进入的时候几行代码,来理解是如何通过load_command的cmd字段来解析Macho文件的数据。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">lcp = (<span class="keyword">struct</span> load_command *)(addr + offset);</span><br><span class="line"><span class="comment">//lcp设为当前要解析的cmd的地址</span></span><br><span class="line">oldoffset = offset;</span><br><span class="line"><span class="comment">//oldoffset是从macho文件内存开始的地方偏移到当前command的偏移量</span></span><br><span class="line">offset += lcp-&gt;cmdsize;</span><br><span class="line"><span class="comment">//重新计算offset，再加上当前command的长度，offset的值为文件内存起始地址到下一个command的偏移量</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<h3 id="3-2_cmd字段">3.2 cmd字段</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span>(lcp-&gt;cmd) &#123;</span><br><span class="line">			<span class="keyword">case</span> LC_SEGMENT:</span><br><span class="line">				[...]</span><br><span class="line">				ret = load_segment(lcp,</span><br><span class="line">				                   header-&gt;filetype,</span><br><span class="line">				                   control,</span><br><span class="line">				                   file_offset,</span><br><span class="line">				                   macho_size,</span><br><span class="line">				                   vp,</span><br><span class="line">				                   <span class="built_in">map</span>,</span><br><span class="line">				                   slide,</span><br><span class="line">				                   result);</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			<span class="keyword">case</span> LC_SEGMENT_64:</span><br><span class="line">				[...]</span><br><span class="line">				ret = load_segment(lcp,</span><br><span class="line">				                   header-&gt;filetype,</span><br><span class="line">				                   control,</span><br><span class="line">				                   file_offset,</span><br><span class="line">				                   macho_size,</span><br><span class="line">				                   vp,</span><br><span class="line">				                   <span class="built_in">map</span>,</span><br><span class="line">				                   slide,</span><br><span class="line">				                   result);</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			<span class="keyword">case</span> LC_UNIXTHREAD:</span><br><span class="line">				<span class="keyword">if</span> (pass != <span class="number">1</span>)</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				ret = load_unixthread(</span><br><span class="line">						 (<span class="keyword">struct</span> thread_command *) lcp,</span><br><span class="line">						 thread,</span><br><span class="line">						 slide,</span><br><span class="line">						 result);</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			<span class="keyword">case</span> LC_MAIN:</span><br><span class="line">				<span class="keyword">if</span> (pass != <span class="number">1</span>)</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				<span class="keyword">if</span> (depth != <span class="number">1</span>)</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				ret = load_main(</span><br><span class="line">						 (<span class="keyword">struct</span> entry_point_command *) lcp,</span><br><span class="line">						 thread,</span><br><span class="line">						 slide,</span><br><span class="line">						 result);</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			<span class="keyword">case</span> LC_LOAD_DYLINKER:</span><br><span class="line">				<span class="keyword">if</span> (pass != <span class="number">3</span>)</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				<span class="keyword">if</span> ((depth == <span class="number">1</span>) &amp;&amp; (dlp == <span class="number">0</span>)) &#123;</span><br><span class="line">					dlp = (<span class="keyword">struct</span> dylinker_command *)lcp;</span><br><span class="line">					dlarchbits = (header-&gt;cputype &amp; CPU_ARCH_MASK);</span><br><span class="line">				&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">					ret = LOAD_FAILURE;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			<span class="keyword">case</span> LC_UUID:</span><br><span class="line">				<span class="keyword">if</span> (pass == <span class="number">1</span> &amp;&amp; depth == <span class="number">1</span>) &#123;</span><br><span class="line">					ret = load_uuid((<span class="keyword">struct</span> uuid_command *) lcp,</span><br><span class="line">							(<span class="keyword">char</span> *)addr + mach_header_sz + header-&gt;sizeofcmds,</span><br><span class="line">							result);</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			<span class="keyword">case</span> LC_CODE_SIGNATURE:</span><br><span class="line">				[...]</span><br><span class="line">				ret = load_code_signature(</span><br><span class="line">					(<span class="keyword">struct</span> linkedit_data_command *) lcp,</span><br><span class="line">					vp,</span><br><span class="line">					file_offset,</span><br><span class="line">					macho_size,</span><br><span class="line">					header-&gt;cputype,</span><br><span class="line">					result);</span><br><span class="line">				[...]</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line"><span class="preprocessor">#<span class="keyword">if</span> CONFIG_CODE_DECRYPTION</span></span><br><span class="line">			<span class="keyword">case</span> LC_ENCRYPTION_INFO:</span><br><span class="line">			<span class="keyword">case</span> LC_ENCRYPTION_INFO_64:</span><br><span class="line">				<span class="keyword">if</span> (pass != <span class="number">3</span>)</span><br><span class="line">					<span class="keyword">break</span>;</span><br><span class="line">				ret = set_code_unprotect(</span><br><span class="line">					(<span class="keyword">struct</span> encryption_info_command *) lcp,</span><br><span class="line">					addr, <span class="built_in">map</span>, slide, vp, file_offset,</span><br><span class="line">					header-&gt;cputype, header-&gt;cpusubtype);</span><br><span class="line">				<span class="keyword">if</span> (ret != LOAD_SUCCESS) &#123;</span><br><span class="line">					<span class="built_in">printf</span>(<span class="string">"proc %d: set_code_unprotect() error %d "</span></span><br><span class="line">					       <span class="string">"for file \"%s\"\n"</span>,</span><br><span class="line">					       p-&gt;p_pid, ret, vp-&gt;v_name);</span><br><span class="line">					<span class="comment">/* </span><br><span class="line">					 * Don't let the app run if it's </span><br><span class="line">					 * encrypted but we failed to set up the</span><br><span class="line">					 * decrypter. If the keys are missing it will</span><br><span class="line">					 * return LOAD_DECRYPTFAIL.</span><br><span class="line">					 */</span></span><br><span class="line">					 <span class="keyword">if</span> (ret == LOAD_DECRYPTFAIL) &#123;</span><br><span class="line">						<span class="comment">/* failed to load due to missing FP keys */</span></span><br><span class="line">						proc_lock(p);</span><br><span class="line">						p-&gt;p_lflag |= P_LTERM_DECRYPTFAIL;</span><br><span class="line">						proc_unlock(p);</span><br><span class="line">					 &#125;</span><br><span class="line">					 psignal(p, SIGKILL);</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line"><span class="preprocessor">#<span class="keyword">endif</span></span></span><br><span class="line">			<span class="keyword">default</span>:</span><br><span class="line">				<span class="comment">/* Other commands are ignored by the kernel */</span></span><br><span class="line">				ret = LOAD_SUCCESS;</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			&#125;</span><br></pre></td></tr></table></figure>
+<p>从这一段代码可以看出，根据cmd字段的类型不同，使用了不同的函数来加载。简单的列出一张表看一看在内核代码中不同的command类型都有哪些作用。</p>
+<table>
+<thead>
+<tr>
+<th>Command类型</th>
+<th style="text-align:left">处理函数</th>
+<th style="text-align:left">用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LC_SEGMENT；LC_SEGMENT_64</td>
+<td style="text-align:left">load_segment</td>
+<td style="text-align:left">将segment中的数据加载并映射到进程的内存空间去</td>
+</tr>
+<tr>
+<td>LC_LOAD_DYLINKER</td>
+<td style="text-align:left">load_dylinker</td>
+<td style="text-align:left">调用/usr/lib/dyld程序</td>
+</tr>
+<tr>
+<td>LC_UUID</td>
+<td style="text-align:left">load_uuid</td>
+<td style="text-align:left">加载128-bit的唯一ID</td>
+</tr>
+<tr>
+<td>LC_THREAD</td>
+<td style="text-align:left">load_thread</td>
+<td style="text-align:left">开启一个MACH线程，但是不分配栈空间。</td>
+</tr>
+<tr>
+<td>LC_UNIXTHREAD</td>
+<td style="text-align:left">load_unixthread</td>
+<td style="text-align:left">开启一个UNIX线程</td>
+</tr>
+<tr>
+<td>LC_CODE_SIGNATURE</td>
+<td style="text-align:left">load_code_signature</td>
+<td style="text-align:left">进行数字签名</td>
+</tr>
+<tr>
+<td>LC_ENCRYPTION_INFO</td>
+<td style="text-align:left">set_code_unprotect</td>
+<td style="text-align:left">加密二进制文件</td>
+</tr>
+</tbody>
+</table>
+<h1 id="0x04_Segment&amp;Section">0x04 Segment&amp;Section</h1><p>加载数据时，主要加载的就是LC_SEGMET活着LC_SEGMENT_64。其他的Segment的用途在上一节已经简单的介绍了，这里不做深究。</p>
+<p>LCSEGMENT以及LC_SEGMENT_64的数据结构是这样的。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">struct</span> segment_command &#123; <span class="comment">/* for 32-bit architectures */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	cmd;		<span class="comment">/* LC_SEGMENT */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	cmdsize;	<span class="comment">/* includes sizeof section structs */</span></span><br><span class="line">	<span class="keyword">char</span>		segname[<span class="number">16</span>];	<span class="comment">/* segment name */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	vmaddr;		<span class="comment">/* memory address of this segment */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	vmsize;		<span class="comment">/* memory size of this segment */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	fileoff;	<span class="comment">/* file offset of this segment */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	filesize;	<span class="comment">/* amount to map from the file */</span></span><br><span class="line">	<span class="keyword">vm_prot_t</span>	maxprot;	<span class="comment">/* maximum VM protection */</span></span><br><span class="line">	<span class="keyword">vm_prot_t</span>	initprot;	<span class="comment">/* initial VM protection */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	nsects;		<span class="comment">/* number of sections in segment */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	flags;		<span class="comment">/* flags */</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> segment_command_64 &#123; <span class="comment">/* for 64-bit architectures */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	cmd;		<span class="comment">/* LC_SEGMENT_64 */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	cmdsize;	<span class="comment">/* includes sizeof section_64 structs */</span></span><br><span class="line">	<span class="keyword">char</span>		segname[<span class="number">16</span>];	<span class="comment">/* segment name */</span></span><br><span class="line">	<span class="keyword">uint64_t</span>	vmaddr;		<span class="comment">/* memory address of this segment */</span></span><br><span class="line">	<span class="keyword">uint64_t</span>	vmsize;		<span class="comment">/* memory size of this segment */</span></span><br><span class="line">	<span class="keyword">uint64_t</span>	fileoff;	<span class="comment">/* file offset of this segment */</span></span><br><span class="line">	<span class="keyword">uint64_t</span>	filesize;	<span class="comment">/* amount to map from the file */</span></span><br><span class="line">	<span class="keyword">vm_prot_t</span>	maxprot;	<span class="comment">/* maximum VM protection */</span></span><br><span class="line">	<span class="keyword">vm_prot_t</span>	initprot;	<span class="comment">/* initial VM protection */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	nsects;		<span class="comment">/* number of sections in segment */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	flags;		<span class="comment">/* flags */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>可以看出，这里大部分的数据是用来帮助内核将Segment映射到虚拟内存的。主要要关注的是<code>nsects</code></p>
+<p>字段，标示了Segment中有多少secetion。section是具体有用的数据存放的地方。</p>
+<p>Section的数据结构如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> section &#123; <span class="comment">/* for 32-bit architectures */</span></span><br><span class="line">	<span class="keyword">char</span>		sectname[<span class="number">16</span>];	<span class="comment">/* name of this section */</span></span><br><span class="line">	<span class="keyword">char</span>		segname[<span class="number">16</span>];	<span class="comment">/* segment this section goes in */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	addr;		<span class="comment">/* memory address of this section */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	size;		<span class="comment">/* size in bytes of this section */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	offset;		<span class="comment">/* file offset of this section */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	align;		<span class="comment">/* section alignment (power of 2) */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	reloff;		<span class="comment">/* file offset of relocation entries */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	nreloc;		<span class="comment">/* number of relocation entries */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	flags;		<span class="comment">/* flags (section type and attributes)*/</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	reserved1;	<span class="comment">/* reserved (for offset or index) */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	reserved2;	<span class="comment">/* reserved (for count or sizeof) */</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> section_64 &#123; <span class="comment">/* for 64-bit architectures */</span></span><br><span class="line">	<span class="keyword">char</span>		sectname[<span class="number">16</span>];	<span class="comment">/* name of this section */</span></span><br><span class="line">	<span class="keyword">char</span>		segname[<span class="number">16</span>];	<span class="comment">/* segment this section goes in */</span></span><br><span class="line">	<span class="keyword">uint64_t</span>	addr;		<span class="comment">/* memory address of this section */</span></span><br><span class="line">	<span class="keyword">uint64_t</span>	size;		<span class="comment">/* size in bytes of this section */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	offset;		<span class="comment">/* file offset of this section */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	align;		<span class="comment">/* section alignment (power of 2) */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	reloff;		<span class="comment">/* file offset of relocation entries */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	nreloc;		<span class="comment">/* number of relocation entries */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	flags;		<span class="comment">/* flags (section type and attributes)*/</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	reserved1;	<span class="comment">/* reserved (for offset or index) */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	reserved2;	<span class="comment">/* reserved (for count or sizeof) */</span></span><br><span class="line">	<span class="keyword">uint32_t</span>	reserved3;	<span class="comment">/* reserved */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>除了同样有帮助内存映射的变量外，在了解Mach-O格式的时候，只需要知道不同的Section有着不同的作用就可以了。</p>
+<table>
+<thead>
+<tr>
+<th>Section</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>__text</td>
+<td>代码</td>
+</tr>
+<tr>
+<td>__cstring</td>
+<td>硬编码的字符串</td>
+</tr>
+<tr>
+<td>__const</td>
+<td>const 关键词修饰过的变量</td>
+</tr>
+<tr>
+<td>__DATA.__bss</td>
+<td>bss段</td>
+</tr>
+</tbody>
+</table>
+<p>因为section类型已经是最小的分类了，还有更多复杂section段就不一一例举了，遇到没见过的section类型可以自行查找Apple文档。</p>
+<h1 id="0x05_小结">0x05 小结</h1><p>通过对Mach-O格式的仔细分析，可以更好的理解Mach-O文件的加载过程，为研究dyld或者其他OS X系统下的模块打好基础。</p>
+<h1 id="参考">参考</h1><p>1.mach-o文件加载的全过程(1)</p>
+<p><a href="http://dongaxis.github.io/2015/01/01/mac-o%E6%96%87%E4%BB%B6%E5%8A%A0%E8%BD%BD%E7%9A%84%E5%85%A8%E8%BF%87%E7%A8%8B-1/" target="_blank" rel="external">http://dongaxis.github.io/2015/01/01/mac-o%E6%96%87%E4%BB%B6%E5%8A%A0%E8%BD%BD%E7%9A%84%E5%85%A8%E8%BF%87%E7%A8%8B-1/</a></p>
+<p>2.Mach-O 可执行文件</p>
+<p><a href="http://objccn.io/issue-6-3/" target="_blank" rel="external">http://objccn.io/issue-6-3/</a></p>
+<p>3.iPhone Mach-O文件格式与代码签名</p>
+<p><a href="http://zhiwei.li/text/2012/02/15/iphone-mach-o%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%A0%81%E7%AD%BE%E5%90%8D/" target="_blank" rel="external">http://zhiwei.li/text/2012/02/15/iphone-mach-o%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E4%B8%8E%E4%BB%A3%E7%A0%81%E7%AD%BE%E5%90%8D/</a></p>
+<p>4.Dynamic Linking of Imported Functions in Mach-O</p>
+<p><a href="http://www.codeproject.com/Articles/187181/Dynamic-Linking-of-Imported-Functions-in-Mach-O" target="_blank" rel="external">http://www.codeproject.com/Articles/187181/Dynamic-Linking-of-Imported-Functions-in-Mach-O</a></p>
+<p>5.otool详解Mach-o文件头部</p>
+<p><a href="http://www.mc2lab.com/?p=68" target="_blank" rel="external">http://www.mc2lab.com/?p=68</a></p>
+<h1 id="PS:">PS:</h1><p>更多文章可以在我的学习分享博客<a href="http://BLOGIMAGE/" target="_blank" rel="external">http://BLOGIMAGE/</a></p>
+<p>希望可以多多交流，不足之处还希望大家可以给与指正：）</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/03/07/mach-o文件格式分析/">mach-o格式分析</a></p>
+        <p><span>文章作者:</span><a href="/" title="访问 mrh 的个人博客">mrh</a></p>
+        <p><span>发布时间:</span>2016年03月07日 - 11时18分</p>
+        <p><span>最后更新:</span>2016年03月23日 - 23时37分</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/03/07/mach-o文件格式分析/" title="mach-o格式分析">http://yoursite.com/2016/03/07/mach-o文件格式分析/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2016/03/07/mach-o文件格式分析/　　作者: mrh" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script src="/js/clipboard.min.js"></script>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="中国大陆 (CC BY-NC-SA 3.0 CN)" target = "_blank">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+<nav id="article-nav">
+  
+    <a href="/2016/03/10/Mach-O的动态链接/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          Mach-O的动态链接相关知识
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/03/03/CVE-2016-0799简单分析/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">CVE-2016-0799简单分析</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x00_摘要"><span class="toc-number">1.</span> <span class="toc-text">0x00 摘要</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01_Mach-O格式简单介绍"><span class="toc-number">2.</span> <span class="toc-text">0x01 Mach-O格式简单介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02_Headers"><span class="toc-number">3.</span> <span class="toc-text">0x02 Headers</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1_数据结构"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 数据结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2_实例"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 实例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3_具体参数"><span class="toc-number">3.3.</span> <span class="toc-text">2.3 具体参数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-1_FileType"><span class="toc-number">3.3.1.</span> <span class="toc-text">2.3.1 FileType</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-2_flags"><span class="toc-number">3.3.2.</span> <span class="toc-text">2.3.2 flags</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4_Headers小结"><span class="toc-number">3.4.</span> <span class="toc-text">2.4 Headers小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03_Load_Commands"><span class="toc-number">4.</span> <span class="toc-text">0x03 Load Commands</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1cmdsize字段"><span class="toc-number">4.0.1.</span> <span class="toc-text">3.1cmdsize字段</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2_cmd字段"><span class="toc-number">4.0.2.</span> <span class="toc-text">3.2 cmd字段</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04_Segment&Section"><span class="toc-number">5.</span> <span class="toc-text">0x04 Segment&Section</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x05_小结"><span class="toc-number">6.</span> <span class="toc-text">0x05 小结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">7.</span> <span class="toc-text">参考</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#PS:"><span class="toc-number">8.</span> <span class="toc-text">PS:</span></a></li></ol>
+</div>
+<style>
+    .left-col .switch-btn {
+        display: none;
+    }
+    .left-col .switch-area {
+        display: none;
+    }
+</style>
+
+<input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+            $(".switch-btn, .switch-area").fadeOut(300);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+            $(".switch-btn, .switch-area").fadeIn(500);
+        }
+    })
+
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+        $(".switch-btn, .switch-area").show();
+    }
+</script>
+
+
+
+
+
+
+
+    
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/03/10/Mach-O的动态链接/" title="上一篇: Mach-O的动态链接相关知识">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+        
+            <a href="/2016/03/03/CVE-2016-0799简单分析/" title="下一篇: CVE-2016-0799简单分析">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2016/04/29/CVE-2016-1749内核代码执行POC分析/">CVE-2016-1749内核代码执行POC分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/19/CVE-2016-1757利用程序分析/">CVE-2016-1757利用程序分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/18/apple沙盒研究之基础知识/">apple沙盒研究之基础知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/13/利用patch绕过kextload对内核签名的检测/">利用patch绕过kextload对内核签名的检测</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/03/CVE-2016-1757简单分析/">CVE-2016-1757简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/30/OSX内核加载mach-o流程分析/">OSX内核加载mach-o流程分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/fishhook源码分析/">fishhook源码分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/16/dyld源码分析load/">dyld源码分析-动态加载load</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/10/Mach-O的动态链接/">Mach-O的动态链接相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/07/mach-o文件格式分析/">mach-o格式分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/03/CVE-2016-0799简单分析/">CVE-2016-0799简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/01/dyld中macho加载的简单分析/">dyld中mach-o文件加载的简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/29/OS-X-内核研究-基础知识/">OS X 内核研究 准备知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/23/通过fusion level02浅谈exploit中的函数调用伪造/">通过fusion level02浅谈exploit中的函数调用伪造</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/19/CVE-2015-7547分析与调试/">对CVE-2015-7547简单的分析与调试</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/09/CVE-2016-1879调试&分析/">CVE-2016-1879 调试&分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/27/frame-faking/">frame-faking-介绍-函数调用伪造</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/14/protostar-heap3/">protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/12/图解DWORDSHOOT/">图解DWORDSHOOT</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/09/protostar-heap2/">protostar详细解析 heap2 解答</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/09/protostar-heap1/">protostar详细解析 heap1 解答</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/04/栈溢出练习小结/">wargame简单入门</a></li></ul>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+    <script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#toc, .switch-btn, .switch-area").toggle();
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+                $(".switch-btn, .switch-area").fadeToggle(300);
+            }
+        })
+    </script>
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                &copy; 2016 mrh
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" >本站到访数: 
+                            <span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>, </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+
+    </div>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="/js/main.js" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function() {
+            var backgroundnum = 21;
+            var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-71141416-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+  <script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>wargame简单入门 | mrh的学习分享</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1 学会用wargame加快学习效率​    简单的wargame可以理解成一种解题。提供对所学知识简单的练习与巩固。最近花了一些时间在这两个wargame上面。
+​    overthewire
+​    exploit-exercises
+​    在进行wargame练习之前需要 需要简单了解一下wargame的流程，以及一些需要的工具。         
+
+wargame会分成不同的lev">
+<meta property="og:type" content="article">
+<meta property="og:title" content="wargame简单入门">
+<meta property="og:url" content="http://yoursite.com/2015/12/04/栈溢出练习小结/index.html">
+<meta property="og:site_name" content="mrh的学习分享">
+<meta property="og:description" content="1 学会用wargame加快学习效率​    简单的wargame可以理解成一种解题。提供对所学知识简单的练习与巩固。最近花了一些时间在这两个wargame上面。
+​    overthewire
+​    exploit-exercises
+​    在进行wargame练习之前需要 需要简单了解一下wargame的流程，以及一些需要的工具。         
+
+wargame会分成不同的lev">
+<meta property="og:updated_time" content="2016-03-24T03:38:41.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="wargame简单入门">
+<meta name="twitter:description" content="1 学会用wargame加快学习效率​    简单的wargame可以理解成一种解题。提供对所学知识简单的练习与巩固。最近花了一些时间在这两个wargame上面。
+​    overthewire
+​    exploit-exercises
+​    在进行wargame练习之前需要 需要简单了解一下wargame的流程，以及一些需要的工具。         
+
+wargame会分成不同的lev">
+  
+    <link rel="alternative" href="/atom.xml" title="mrh的学习分享" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/img/touxiang.jpeg">
+  
+  
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  
+  
+      <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  <!-- 加载特效 -->
+    <script src="/js/pace.js"></script>
+    <link href="/css/pace/pace-theme-flash.css" rel="stylesheet" />
+  <script>
+      var yiliaConfig = {
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            
+            <img lazy-src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/touxiang.jpeg" class="js-avatar">
+            
+        </a>
+
+        <hgroup>
+          <h1 class="header-author"><a href="/">mrh</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">胸口写一个勇字</p>
+        
+        
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">博客首页</a></li>
+                        
+                            <li><a href="/archives">所有文章</a></li>
+                        
+                            <li><a href="https://github.com/turingH/OSX_CRACKME">CrackMe</a></li>
+                        
+                            <li><a href="https://raw.githubusercontent.com/turingH/ad/master/README.md">安全站点</a></li>
+                        
+                            <li><a href="https://github.com/turingH/MACOSX-SecurityUpdate/blob/master/OSX/10.11.4/10.11.4_03_22_16.csv">10.11.4补丁</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fl github" target="_blank" href="https://github.com/turingH" title="github">github</a>
+                            
+                                <a class="fl weibo" target="_blank" href="http://weibo.com/u/2047262653" title="weibo">weibo</a>
+                            
+                                <a class="fl twitter" target="_blank" href="https://twitter.com/samulehuang" title="twitter">twitter</a>
+                            
+                                <a class="fl facebook" target="_blank" href="https://www.facebook.com/huang.samuel.94" title="facebook">facebook</a>
+                            
+                                <a class="fl rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <a href="/tags/CVE/" style="font-size: 13.33px;">CVE</a> <a href="/tags/DWORDSHOOT/" style="font-size: 10px;">DWORDSHOOT</a> <a href="/tags/OS-X/" style="font-size: 10px;">OS X</a> <a href="/tags/OSX/" style="font-size: 11.67px;">OSX</a> <a href="/tags/bounds-checking/" style="font-size: 10px;">bounds checking</a> <a href="/tags/dlopen/" style="font-size: 10px;">dlopen</a> <a href="/tags/dns/" style="font-size: 10px;">dns</a> <a href="/tags/dos/" style="font-size: 10px;">dos</a> <a href="/tags/dyld/" style="font-size: 15px;">dyld</a> <a href="/tags/dynamic-link/" style="font-size: 10px;">dynamic link</a> <a href="/tags/execv/" style="font-size: 11.67px;">execv</a> <a href="/tags/execve/" style="font-size: 10px;">execve</a> <a href="/tags/exploit/" style="font-size: 20px;">exploit</a> <a href="/tags/frame-faking/" style="font-size: 10px;">frame-faking</a> <a href="/tags/free/" style="font-size: 10px;">free</a> <a href="/tags/freebsd/" style="font-size: 10px;">freebsd</a> <a href="/tags/gethostbyname/" style="font-size: 10px;">gethostbyname</a> <a href="/tags/glibc/" style="font-size: 10px;">glibc</a> <a href="/tags/heap/" style="font-size: 16.67px;">heap</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/kernel/" style="font-size: 15px;">kernel</a> <a href="/tags/kextload/" style="font-size: 10px;">kextload</a> <a href="/tags/level02/" style="font-size: 10px;">level02</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/mach-o/" style="font-size: 18.33px;">mach-o</a> <a href="/tags/openssl/" style="font-size: 10px;">openssl</a> <a href="/tags/osx/" style="font-size: 16.67px;">osx</a> <a href="/tags/patch/" style="font-size: 10px;">patch</a> <a href="/tags/ports/" style="font-size: 11.67px;">ports</a> <a href="/tags/race/" style="font-size: 11.67px;">race</a> <a href="/tags/sandbox/" style="font-size: 10px;">sandbox</a> <a href="/tags/stack/" style="font-size: 13.33px;">stack</a> <a href="/tags/stackoverflow/" style="font-size: 10px;">stackoverflow</a> <a href="/tags/unlink/" style="font-size: 10px;">unlink</a> <a href="/tags/wargame/" style="font-size: 11.67px;">wargame</a>
+                    </div>
+                </section>
+                
+                
+                
+
+                
+                
+                <section class="switch-part switch-part3">
+                
+                    <div id="js-aboutme">啥也不说了，先干黄旭东</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">mrh</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                
+                    <img lazy-src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/touxiang.jpeg" class="js-avatar">
+                
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">mrh</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">胸口写一个勇字</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">博客首页</a></li>
+                
+                    <li><a href="/archives">所有文章</a></li>
+                
+                    <li><a href="https://github.com/turingH/OSX_CRACKME">CrackMe</a></li>
+                
+                    <li><a href="https://raw.githubusercontent.com/turingH/ad/master/README.md">安全站点</a></li>
+                
+                    <li><a href="https://github.com/turingH/MACOSX-SecurityUpdate/blob/master/OSX/10.11.4/10.11.4_03_22_16.csv">10.11.4补丁</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a class="github" target="_blank" href="https://github.com/turingH" title="github">github</a>
+                    
+                        <a class="weibo" target="_blank" href="http://weibo.com/u/2047262653" title="weibo">weibo</a>
+                    
+                        <a class="twitter" target="_blank" href="https://twitter.com/samulehuang" title="twitter">twitter</a>
+                    
+                        <a class="facebook" target="_blank" href="https://www.facebook.com/huang.samuel.94" title="facebook">facebook</a>
+                    
+                        <a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+                    
+                </div>
+            </nav>
+        </header>                
+    </div>
+</nav>
+      <div class="body-wrap"><article id="post-栈溢出练习小结" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2015/12/04/栈溢出练习小结/" class="article-date">
+      <time datetime="2015-12-04T22:24:39.000Z" itemprop="datePublished">2015-12-04</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      wargame简单入门
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/protostar/">protostar</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/exploit/">exploit</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/stack/">stack</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/wargame/">wargame</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h1 id="1_学会用wargame加快学习效率">1 学会用wargame加快学习效率</h1><p>​    简单的wargame可以理解成一种解题。提供对所学知识简单的练习与巩固。最近花了一些时间在这两个wargame上面。</p>
+<p>​    <a href="http://overthewire.org/wargames/" target="_blank" rel="external">overthewire</a></p>
+<p>​    <a href="https://exploit-exercises.com/" target="_blank" rel="external">exploit-exercises</a></p>
+<p>​    在进行wargame练习之前需要 需要简单了解一下wargame的流程，以及一些需要的工具。         </p>
+<ul>
+<li>wargame会分成不同的level，过关的方法其实就是通过当前账号登陆之后的一些操作来获取下一个level账号的密码</li>
+</ul>
+<a id="more"></a>
+<ul>
+<li>工具</li>
+</ul>
+<p>​    在进入wargame的练习之前，需要了解一些工具来帮助问题的解决。</p>
+<p>​    <strong>python</strong></p>
+<p>​    在做缓冲区溢出时会需要从shell输入一些二进制数据，这时就可以通过python来构造。例如我们需要40个字节长有’A’组成的字符串。那么只需要如下一段python脚本就可以获得了。</p>
+<p>​    <pre><code>python -c ‘print “A”*40’</code></pre></p>
+<p>​    <strong>gdb</strong></p>
+<p>​    1. r &lt; file</p>
+<p>​        在程序需要接受标准输入时(get,scanf等函数)，从file文件中读取</p>
+<p>​    2. disas main</p>
+<p>​        查看main函数的汇编代码，如果需要看其他函数写入相应的函数名就好</p>
+<p>​    3. p /x $esp</p>
+<p>​        以16进制的形式查看esp寄存器中的值</p>
+<p>​    4. x /100x $esp</p>
+<p>​        查看从$esp指向的地址开始往后100个64位的16进制数</p>
+<p>​    5. b *0x12345678</p>
+<p>​        在某处下断点。</p>
+<h1 id="2_简单的栈溢解题思路与扩展">2 简单的栈溢解题思路与扩展</h1><p>​    刚刚接触栈溢出可能会被一些略微复杂的底层原理搞晕，或者直接面对比较难的一些漏洞分析文章无从下手而失去信心。我们就可以从简单的wargame开始一个level一个level的做下去，<em>巩固知识</em>以及<em>加强信心</em></p>
+<h2 id="第一式_投石问路">第一式 投石问路</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">"stdlib.h"</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">"unistd.h"</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">"stdio.h"</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">"string.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">win</span><span class="params">()</span></span><br><span class="line"></span>&#123;</span><br><span class="line"> 	<span class="built_in">printf</span>(<span class="string">"code flow successfully changed\n"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span><br><span class="line"></span>&#123;</span><br><span class="line"> 	<span class="keyword">char</span> buffer[<span class="number">64</span>];</span><br><span class="line">	gets(buffer);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    这种情况呢可以什么都不管直接往buff里写数据，一直写到程序崩溃。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">user<span class="variable">@protostar</span><span class="symbol">:/tmp</span><span class="variable">$ </span>bin/stack4 </span><br><span class="line"><span class="constant">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span></span><br><span class="line"><span class="constant">Segmentation </span>fault</span><br></pre></td></tr></table></figure>
+<p>​    使用gdb查看再试一次。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">user<span class="annotation">@protostar</span>:<span class="regexp">/tmp$ gdb bin/</span>stack4 </span><br><span class="line">GNU gdb (GDB) <span class="number">7.0</span><span class="number">.1</span>-debian</span><br><span class="line">Copyright (C) <span class="number">2009</span> Free Software Foundation, Inc.</span><br><span class="line">License GPLv3+: GNU GPL version <span class="number">3</span> or later &lt;<span class="string">http:</span><span class="comment">//gnu.org/licenses/gpl.html&gt;</span></span><br><span class="line">This is free <span class="string">software:</span> you are free to change and redistribute it.</span><br><span class="line">There is NO WARRANTY, to the extent permitted by law.  Type <span class="string">"show copying"</span></span><br><span class="line">and <span class="string">"show warranty"</span> <span class="keyword">for</span> details.</span><br><span class="line">This GDB was configured <span class="keyword">as</span> <span class="string">"i486-linux-gnu"</span>.</span><br><span class="line">For bug reporting instructions, please <span class="string">see:</span></span><br><span class="line">&lt;<span class="string">http:</span><span class="comment">//www.gnu.org/software/gdb/bugs/&gt;...</span></span><br><span class="line">Reading symbols from <span class="regexp">/opt/</span>protostar<span class="regexp">/bin/</span>stack4...done.</span><br><span class="line">gdb$ r</span><br><span class="line">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBB</span><br><span class="line"></span><br><span class="line">Program received signal SIGSEGV, Segmentation fault.</span><br><span class="line">--------------------------------------------------------------------------[regs]</span><br><span class="line"><span class="label">  EAX:</span> <span class="number">0xBFFFF720</span>  <span class="string">EBX:</span> <span class="number">0xB7FD7FF4</span>  <span class="string">ECX:</span> <span class="number">0xBFFFF720</span>  <span class="string">EDX:</span> <span class="number">0xB7FD9334</span>  o d I t s Z a P c </span><br><span class="line"><span class="label">  ESI:</span> <span class="number">0x00000000</span>  <span class="string">EDI:</span> <span class="number">0x00000000</span>  <span class="string">EBP:</span> <span class="number">0x41414141</span>  <span class="string">ESP:</span> <span class="number">0xBFFFF770</span>  <span class="string">EIP:</span> <span class="number">0x41414141</span></span><br><span class="line"><span class="label">  CS:</span> <span class="number">0073</span>  <span class="string">DS:</span> <span class="number">007</span>B  <span class="string">ES:</span> <span class="number">007</span>B  <span class="string">FS:</span> <span class="number">0000</span>  <span class="string">GS:</span> <span class="number">0033</span>  <span class="string">SS:</span> <span class="number">007</span>BError <span class="keyword">while</span> running <span class="string">hook_stop:</span></span><br><span class="line">Cannot access memory at address <span class="number">0x41414141</span></span><br><span class="line"><span class="number">0x41414141</span> <span class="keyword">in</span> ?? ()</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>buff的地址</th>
+<th>不知到是什么</th>
+<th>…</th>
+<th>EIP</th>
+<th>…</th>
+<th>不知道是什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x41414141</td>
+<td>0x41414141</td>
+<td>0x41414141</td>
+<td>0x41414141</td>
+<td>0x41414141</td>
+<td>0x42424242</td>
+</tr>
+</tbody>
+</table>
+<p>​    EIP的值为0x41414141。就是我们写入的字符串“AAAA…”的值，说明字符串已经覆盖了EIP，那么我们只需要减少A的个数来找到使程序不崩溃的那个边界值就是我们下一步的目标。</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">gdb$ r</span><br><span class="line">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBB               </span><br><span class="line"></span><br><span class="line">Program received signal SIGSEGV, Segmentation fault.</span><br><span class="line">--------------------------------------------------------------------------[regs]</span><br><span class="line"><span class="label">  EAX:</span> <span class="number">0xBFFFF720</span>  <span class="literal">EBX</span>: <span class="number">0xB7FD7FF4</span>  <span class="literal">ECX</span>: <span class="number">0xBFFFF720</span>  <span class="literal">EDX</span>: <span class="number">0xB7FD9334</span>  o d I t s Z a P c </span><br><span class="line"><span class="label">  ESI:</span> <span class="number">0x00000000</span>  <span class="literal">EDI</span>: <span class="number">0x00000000</span>  <span class="literal">EBP</span>: <span class="number">0x41414141</span>  <span class="literal">ESP</span>: <span class="number">0xBFFFF770</span>  <span class="literal">EIP</span>: <span class="number">0x42424242</span></span><br><span class="line"><span class="label">  CS:</span> <span class="number">0073</span>  <span class="literal">DS</span>: 007B  <span class="literal">ES</span>: 007B  <span class="literal">FS</span>: <span class="number">0000</span>  <span class="literal">GS</span>: <span class="number">0033</span>  <span class="literal">SS</span>: 007BError while running hook_stop:</span><br><span class="line">Cannot access memory <span class="preprocessor">at</span> address <span class="number">0x42424242</span></span><br><span class="line"><span class="number">0x42424242</span> <span class="keyword">in</span> ?? ()</span><br></pre></td></tr></table></figure>
+<p>​    </p>
+<table>
+<thead>
+<tr>
+<th>buff的地址</th>
+<th>不知到是什么</th>
+<th>…</th>
+<th>EIP</th>
+<th>…</th>
+<th>不知道是什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0x41414141</td>
+<td>0x41414141</td>
+<td>0x41414141</td>
+<td>0x42424242</td>
+<td>不知道是什么</td>
+<td>不知道是什么</td>
+</tr>
+</tbody>
+</table>
+<p>​    尝试的过程就是减少A的个数直到EIP变为0x42424242，那么这个时候值需要将BBBB替换成我们想要的地址，那么程序就会跳转我们想要执行的地方去了。</p>
+<h1 id="这只是这一题的思路">这只是这一题的思路</h1><p>​    刚刚说的只是一种方法，或者说是一种招式，而其中的内涵与深层的含义，才是我们需要学习的。打个不恰当的比方，就好比武功的招式和心法。而上面所说的方法连招式都<strong>算不上</strong>，只能说是一种在刚刚接触溢出的时候提高信心的做法，我相信在成功的做出这一题之后，耐下心来看任何一篇简单的栈溢出入门的文章都会更有体会。比如<a href="http://www.cnblogs.com/fanzhidongyzby/p/3250405.html" target="_blank" rel="external">这里</a>。</p>
+<h1 id="练武不练功到老一场空！本文只是为了让刚刚接触的初学者提高信心，加速对栈溢出最直观的认识，想要在这一篇领域有所作为，扎实的基本功是不可或缺的。一定要阅读栈溢出的基本原理。">练武不练功到老一场空！本文只是为了让刚刚接触的初学者提高信心，加速对栈溢出最直观的认识，想要在这一篇领域有所作为，扎实的基本功是不可或缺的。一定要阅读栈溢出的基本原理。</h1><p>​    下一篇文章会用相同的方法介绍ret2lib。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2015/12/04/栈溢出练习小结/">wargame简单入门</a></p>
+        <p><span>文章作者:</span><a href="/" title="访问 mrh 的个人博客">mrh</a></p>
+        <p><span>发布时间:</span>2015年12月04日 - 17时24分</p>
+        <p><span>最后更新:</span>2016年03月23日 - 23时38分</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2015/12/04/栈溢出练习小结/" title="wargame简单入门">http://yoursite.com/2015/12/04/栈溢出练习小结/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2015/12/04/栈溢出练习小结/　　作者: mrh" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script src="/js/clipboard.min.js"></script>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="中国大陆 (CC BY-NC-SA 3.0 CN)" target = "_blank">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+<nav id="article-nav">
+  
+    <a href="/2015/12/09/protostar-heap1/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          protostar详细解析 heap1 解答
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1_学会用wargame加快学习效率"><span class="toc-number">1.</span> <span class="toc-text">1 学会用wargame加快学习效率</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2_简单的栈溢解题思路与扩展"><span class="toc-number">2.</span> <span class="toc-text">2 简单的栈溢解题思路与扩展</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#第一式_投石问路"><span class="toc-number">2.1.</span> <span class="toc-text">第一式 投石问路</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#这只是这一题的思路"><span class="toc-number">3.</span> <span class="toc-text">这只是这一题的思路</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#练武不练功到老一场空！本文只是为了让刚刚接触的初学者提高信心，加速对栈溢出最直观的认识，想要在这一篇领域有所作为，扎实的基本功是不可或缺的。一定要阅读栈溢出的基本原理。"><span class="toc-number">4.</span> <span class="toc-text">练武不练功到老一场空！本文只是为了让刚刚接触的初学者提高信心，加速对栈溢出最直观的认识，想要在这一篇领域有所作为，扎实的基本功是不可或缺的。一定要阅读栈溢出的基本原理。</span></a></li></ol>
+</div>
+<style>
+    .left-col .switch-btn {
+        display: none;
+    }
+    .left-col .switch-area {
+        display: none;
+    }
+</style>
+
+<input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+            $(".switch-btn, .switch-area").fadeOut(300);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+            $(".switch-btn, .switch-area").fadeIn(500);
+        }
+    })
+
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+        $(".switch-btn, .switch-area").show();
+    }
+</script>
+
+
+
+
+
+
+
+    
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2015/12/09/protostar-heap1/" title="上一篇: protostar详细解析 heap1 解答">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+        
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
+        
+    </div>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2016/04/29/CVE-2016-1749内核代码执行POC分析/">CVE-2016-1749内核代码执行POC分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/19/CVE-2016-1757利用程序分析/">CVE-2016-1757利用程序分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/18/apple沙盒研究之基础知识/">apple沙盒研究之基础知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/13/利用patch绕过kextload对内核签名的检测/">利用patch绕过kextload对内核签名的检测</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/03/CVE-2016-1757简单分析/">CVE-2016-1757简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/30/OSX内核加载mach-o流程分析/">OSX内核加载mach-o流程分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/fishhook源码分析/">fishhook源码分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/16/dyld源码分析load/">dyld源码分析-动态加载load</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/10/Mach-O的动态链接/">Mach-O的动态链接相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/07/mach-o文件格式分析/">mach-o格式分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/03/CVE-2016-0799简单分析/">CVE-2016-0799简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/01/dyld中macho加载的简单分析/">dyld中mach-o文件加载的简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/29/OS-X-内核研究-基础知识/">OS X 内核研究 准备知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/23/通过fusion level02浅谈exploit中的函数调用伪造/">通过fusion level02浅谈exploit中的函数调用伪造</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/19/CVE-2015-7547分析与调试/">对CVE-2015-7547简单的分析与调试</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/09/CVE-2016-1879调试&分析/">CVE-2016-1879 调试&分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/27/frame-faking/">frame-faking-介绍-函数调用伪造</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/14/protostar-heap3/">protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/12/图解DWORDSHOOT/">图解DWORDSHOOT</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/09/protostar-heap2/">protostar详细解析 heap2 解答</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/09/protostar-heap1/">protostar详细解析 heap1 解答</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/04/栈溢出练习小结/">wargame简单入门</a></li></ul>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+    <script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#toc, .switch-btn, .switch-area").toggle();
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+                $(".switch-btn, .switch-area").fadeToggle(300);
+            }
+        })
+    </script>
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                &copy; 2016 mrh
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" >本站到访数: 
+                            <span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>, </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+
+    </div>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="/js/main.js" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function() {
+            var backgroundnum = 21;
+            var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-71141416-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+  <script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+
+  </div>
+</body>
+</html>

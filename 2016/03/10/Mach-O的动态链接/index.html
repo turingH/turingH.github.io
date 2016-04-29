@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Mach-O的动态链接相关知识 | mrh的学习分享</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="0x00 摘要通过分析Mach-O的动态链接过程，加深对Mach-O文件结构的理解。对Mach-O文件格式的简单的分析看这里这里。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mach-O的动态链接相关知识">
+<meta property="og:url" content="http://yoursite.com/2016/03/10/Mach-O的动态链接/index.html">
+<meta property="og:site_name" content="mrh的学习分享">
+<meta property="og:description" content="0x00 摘要通过分析Mach-O的动态链接过程，加深对Mach-O文件结构的理解。对Mach-O文件格式的简单的分析看这里这里。">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/Mach-O-DYLD-HOOK/lazysymbolpointers.png?1">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/Mach-O-DYLD-HOOK/_stub.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/Mach-O-DYLD-HOOK/_stub_helper.png?1">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/Mach-O-DYLD-HOOK/LC_SYMTAB.png?1">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/Mach-O-DYLD-HOOK/LC_DYSYMTAB.png">
+<meta property="og:updated_time" content="2016-03-24T03:37:40.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Mach-O的动态链接相关知识">
+<meta name="twitter:description" content="0x00 摘要通过分析Mach-O的动态链接过程，加深对Mach-O文件结构的理解。对Mach-O文件格式的简单的分析看这里这里。">
+  
+    <link rel="alternative" href="/atom.xml" title="mrh的学习分享" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/img/touxiang.jpeg">
+  
+  
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  
+  
+      <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  <!-- 加载特效 -->
+    <script src="/js/pace.js"></script>
+    <link href="/css/pace/pace-theme-flash.css" rel="stylesheet" />
+  <script>
+      var yiliaConfig = {
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            
+            <img lazy-src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/touxiang.jpeg" class="js-avatar">
+            
+        </a>
+
+        <hgroup>
+          <h1 class="header-author"><a href="/">mrh</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">胸口写一个勇字</p>
+        
+        
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">博客首页</a></li>
+                        
+                            <li><a href="/archives">所有文章</a></li>
+                        
+                            <li><a href="https://github.com/turingH/OSX_CRACKME">CrackMe</a></li>
+                        
+                            <li><a href="https://raw.githubusercontent.com/turingH/ad/master/README.md">安全站点</a></li>
+                        
+                            <li><a href="https://github.com/turingH/MACOSX-SecurityUpdate/blob/master/OSX/10.11.4/10.11.4_03_22_16.csv">10.11.4补丁</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fl github" target="_blank" href="https://github.com/turingH" title="github">github</a>
+                            
+                                <a class="fl weibo" target="_blank" href="http://weibo.com/u/2047262653" title="weibo">weibo</a>
+                            
+                                <a class="fl twitter" target="_blank" href="https://twitter.com/samulehuang" title="twitter">twitter</a>
+                            
+                                <a class="fl facebook" target="_blank" href="https://www.facebook.com/huang.samuel.94" title="facebook">facebook</a>
+                            
+                                <a class="fl rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <a href="/tags/CVE/" style="font-size: 13.33px;">CVE</a> <a href="/tags/DWORDSHOOT/" style="font-size: 10px;">DWORDSHOOT</a> <a href="/tags/OS-X/" style="font-size: 10px;">OS X</a> <a href="/tags/OSX/" style="font-size: 11.67px;">OSX</a> <a href="/tags/bounds-checking/" style="font-size: 10px;">bounds checking</a> <a href="/tags/dlopen/" style="font-size: 10px;">dlopen</a> <a href="/tags/dns/" style="font-size: 10px;">dns</a> <a href="/tags/dos/" style="font-size: 10px;">dos</a> <a href="/tags/dyld/" style="font-size: 15px;">dyld</a> <a href="/tags/dynamic-link/" style="font-size: 10px;">dynamic link</a> <a href="/tags/execv/" style="font-size: 11.67px;">execv</a> <a href="/tags/execve/" style="font-size: 10px;">execve</a> <a href="/tags/exploit/" style="font-size: 20px;">exploit</a> <a href="/tags/frame-faking/" style="font-size: 10px;">frame-faking</a> <a href="/tags/free/" style="font-size: 10px;">free</a> <a href="/tags/freebsd/" style="font-size: 10px;">freebsd</a> <a href="/tags/gethostbyname/" style="font-size: 10px;">gethostbyname</a> <a href="/tags/glibc/" style="font-size: 10px;">glibc</a> <a href="/tags/heap/" style="font-size: 16.67px;">heap</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/kernel/" style="font-size: 15px;">kernel</a> <a href="/tags/kextload/" style="font-size: 10px;">kextload</a> <a href="/tags/level02/" style="font-size: 10px;">level02</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/mach-o/" style="font-size: 18.33px;">mach-o</a> <a href="/tags/openssl/" style="font-size: 10px;">openssl</a> <a href="/tags/osx/" style="font-size: 16.67px;">osx</a> <a href="/tags/patch/" style="font-size: 10px;">patch</a> <a href="/tags/ports/" style="font-size: 11.67px;">ports</a> <a href="/tags/race/" style="font-size: 11.67px;">race</a> <a href="/tags/sandbox/" style="font-size: 10px;">sandbox</a> <a href="/tags/stack/" style="font-size: 13.33px;">stack</a> <a href="/tags/stackoverflow/" style="font-size: 10px;">stackoverflow</a> <a href="/tags/unlink/" style="font-size: 10px;">unlink</a> <a href="/tags/wargame/" style="font-size: 11.67px;">wargame</a>
+                    </div>
+                </section>
+                
+                
+                
+
+                
+                
+                <section class="switch-part switch-part3">
+                
+                    <div id="js-aboutme">啥也不说了，先干黄旭东</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">mrh</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                
+                    <img lazy-src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/touxiang.jpeg" class="js-avatar">
+                
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">mrh</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">胸口写一个勇字</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">博客首页</a></li>
+                
+                    <li><a href="/archives">所有文章</a></li>
+                
+                    <li><a href="https://github.com/turingH/OSX_CRACKME">CrackMe</a></li>
+                
+                    <li><a href="https://raw.githubusercontent.com/turingH/ad/master/README.md">安全站点</a></li>
+                
+                    <li><a href="https://github.com/turingH/MACOSX-SecurityUpdate/blob/master/OSX/10.11.4/10.11.4_03_22_16.csv">10.11.4补丁</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a class="github" target="_blank" href="https://github.com/turingH" title="github">github</a>
+                    
+                        <a class="weibo" target="_blank" href="http://weibo.com/u/2047262653" title="weibo">weibo</a>
+                    
+                        <a class="twitter" target="_blank" href="https://twitter.com/samulehuang" title="twitter">twitter</a>
+                    
+                        <a class="facebook" target="_blank" href="https://www.facebook.com/huang.samuel.94" title="facebook">facebook</a>
+                    
+                        <a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+                    
+                </div>
+            </nav>
+        </header>                
+    </div>
+</nav>
+      <div class="body-wrap"><article id="post-Mach-O的动态链接" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/03/10/Mach-O的动态链接/" class="article-date">
+      <time datetime="2016-03-10T16:40:02.000Z" itemprop="datePublished">2016-03-10</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Mach-O的动态链接相关知识
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/OS-X/">OS X</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dyld/">dyld</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dynamic-link/">dynamic link</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mach-o/">mach-o</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/osx/">osx</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h1 id="0x00_摘要">0x00 摘要</h1><p>通过分析<code>Mach-O</code>的动态链接过程，加深对<code>Mach-O</code>文件结构的理解。对Mach-O文件格式的简单的分析看这里<a href="http://BLOGIMAGE/2016/03/07/mach-o%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%88%86%E6%9E%90/" target="_blank" rel="external">这里</a>。</p>
+<a id="more"></a>
+<h1 id="0x01_Mach-O_Lazy_Bind">0x01 Mach-O Lazy Bind</h1><p>Mach-O文件的通过dyld加载的时候并没有确定每一个函数的具体地址在哪里，而是在真正调用该函数的时候通过<strong>过程连接表</strong>(procedure linkage table)，后面简称PLT，来进行一次<strong>lazybind</strong>。</p>
+<p>结合Mach-O文件的分析与代码的调试简单的分析一下，只能算是管中窥豹了。</p>
+<p>源码很简单。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">const</span> <span class="keyword">char</span> * argv[])</span> </span>&#123;</span><br><span class="line">    <span class="comment">// insert code here...</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Hello, World!\n"</span>);</span><br><span class="line">  	<span class="built_in">printf</span>(<span class="string">"2Hello, World!\n"</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>分别在两个printf函数处下断点，启动程序。</p>
+<h2 id="1-1_第一次调用prinf">1.1 第一次调用prinf</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">lazy_bind`main:</span><br><span class="line">    <span class="number">0x100000f10</span> &lt;+<span class="number">0</span>&gt;:  pushq  %rbp</span><br><span class="line">    <span class="number">0x100000f11</span> &lt;+<span class="number">1</span>&gt;:  movq   %rsp, %rbp</span><br><span class="line">    <span class="number">0x100000f14</span> &lt;+<span class="number">4</span>&gt;:  subq   $<span class="number">0x20</span>, %rsp</span><br><span class="line">    <span class="number">0x100000f18</span> &lt;+<span class="number">8</span>&gt;:  leaq   <span class="number">0x57</span>(%rip), %rax          ; <span class="string">"Hello, World!\n"</span></span><br><span class="line">    <span class="number">0x100000f1f</span> &lt;+<span class="number">15</span>&gt;: movl   $<span class="number">0x0</span>, -<span class="number">0x4</span>(%rbp)</span><br><span class="line">    <span class="number">0x100000f26</span> &lt;+<span class="number">22</span>&gt;: movl   %edi, -<span class="number">0x8</span>(%rbp)</span><br><span class="line">    <span class="number">0x100000f29</span> &lt;+<span class="number">25</span>&gt;: movq   %rsi, -<span class="number">0x10</span>(%rbp)</span><br><span class="line">    <span class="number">0x100000f2d</span> &lt;+<span class="number">29</span>&gt;: movq   %rax, %rdi</span><br><span class="line">    <span class="number">0x100000f30</span> &lt;+<span class="number">32</span>&gt;: movb   $<span class="number">0x0</span>, %al</span><br><span class="line">-&gt;  <span class="number">0x100000f32</span> &lt;+<span class="number">34</span>&gt;: callq  <span class="number">0x100000f56</span>               ; symbol stub <span class="keyword">for</span>: <span class="built_in">printf</span></span><br><span class="line">    <span class="number">0x100000f37</span> &lt;+<span class="number">39</span>&gt;: leaq   <span class="number">0x47</span>(%rip), %rdi          ; <span class="string">"2Hello, World!\n"</span></span><br><span class="line">    <span class="number">0x100000f3e</span> &lt;+<span class="number">46</span>&gt;: movl   %eax, -<span class="number">0x14</span>(%rbp)</span><br><span class="line">    <span class="number">0x100000f41</span> &lt;+<span class="number">49</span>&gt;: movb   $<span class="number">0x0</span>, %al</span><br><span class="line">    <span class="number">0x100000f43</span> &lt;+<span class="number">51</span>&gt;: callq  <span class="number">0x100000f56</span>               ; symbol stub <span class="keyword">for</span>: <span class="built_in">printf</span></span><br><span class="line">    <span class="number">0x100000f48</span> &lt;+<span class="number">56</span>&gt;: xorl   %ecx, %ecx</span><br><span class="line">    <span class="number">0x100000f4a</span> &lt;+<span class="number">58</span>&gt;: movl   %eax, -<span class="number">0x18</span>(%rbp)</span><br><span class="line">    <span class="number">0x100000f4d</span> &lt;+<span class="number">61</span>&gt;: movl   %ecx, %eax</span><br><span class="line">    <span class="number">0x100000f4f</span> &lt;+<span class="number">63</span>&gt;: addq   $<span class="number">0x20</span>, %rsp</span><br><span class="line">    <span class="number">0x100000f53</span> &lt;+<span class="number">67</span>&gt;: popq   %rbp</span><br><span class="line">    <span class="number">0x100000f54</span> &lt;+<span class="number">68</span>&gt;: retq</span><br></pre></td></tr></table></figure>
+<p>在<code>0x100000f52 &lt;+34&gt;</code>行处通过<code>callq 0x100000f64</code>来调用printf。</p>
+<p>执行<code>callq</code>指令之后代码跳转到这里：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">lazy_bind`<span class="built_in">printf</span>:</span><br><span class="line">-&gt;  <span class="number">0x100000f56</span> &lt;+<span class="number">0</span>&gt;: jmpq   *<span class="number">0xb4</span>(%rip)               ; (<span class="keyword">void</span> *)<span class="number">0x0000000100000f6c</span></span><br></pre></td></tr></table></figure>
+<h2 id="1-2___Data,__la_symbol_ptr_获取函数地址">1.2 __Data,__la_symbol_ptr 获取函数地址</h2><p>这里的jmpq要跳转到<code>0x0000000100000f6c</code>这个地址是从__Data,__la_symbol_ptr中的Lazy Symbol Pointers中获取到的。(怎么来的不是很清楚？)希望通过stub来调用printf函数。</p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/Mach-O-DYLD-HOOK/lazysymbolpointers.png?1" alt=""></p>
+<p>通过命令行查看<code>0x100001010</code>处的地址获得了同样的值。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(lldb) x <span class="number">0x100001010</span></span><br><span class="line"><span class="number">0x100001010</span>: <span class="number">6</span>c <span class="number">0f</span> <span class="number">00</span> <span class="number">00</span> <span class="number">01</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>  l...............</span><br><span class="line"><span class="number">0x100001020</span>: <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>  ................</span><br></pre></td></tr></table></figure>
+<h2 id="1-3_通过__stub__helper进行lazybind">1.3 通过__stub__helper进行lazybind</h2><p>在Mach-O中每一个Symbol Stub可能有以下两种行为其中之一：</p>
+<ul>
+<li>跳转到函数的指令，执行函数体</li>
+<li>通过动态链接器查找函数的Symbol(符号)，然后执行函数。</li>
+</ul>
+<p>通过工具查看__stubs的Section数据，发现只有一个函数就是_printf。</p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/Mach-O-DYLD-HOOK/_stub.png" alt="__TEXT,__stubs"></p>
+<p>这里的Data其实就是上面看到的<code>jmpq</code>代码。执行之后代码跳转到了这样的代码片段。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">-&gt;  <span class="number">0x100000f6c</span>: pushq  $<span class="number">0x0</span></span><br><span class="line">    <span class="number">0x100000f71</span>: jmp    <span class="number">0x100000f5c</span></span><br><span class="line">    <span class="number">0x100000f76</span>: gs     				;这里往下都没有！！！！</span><br><span class="line">    <span class="number">0x100000f78</span>: insb   %dx, %es:(%rdi)</span><br><span class="line">    <span class="number">0x100000f79</span>: insb   %dx, %es:(%rdi)</span><br><span class="line">    <span class="number">0x100000f7a</span>: outsl  (%rsi), %dx</span><br><span class="line">    <span class="number">0x100000f7b</span>: subb   $<span class="number">0x20</span>, %al</span><br><span class="line">    <span class="number">0x100000f7d</span>: pushq  %rdi</span><br><span class="line">    <span class="number">0x100000f7e</span>: outsl  (%rsi), %dx</span><br><span class="line">    <span class="number">0x100000f7f</span>: jb     <span class="number">0x100000fed</span></span><br><span class="line">    <span class="number">0x100000f81</span>: andl   %ecx, %fs:(%rdx)</span><br><span class="line">    <span class="number">0x100000f84</span>: addb   %dh, (%rdx)</span><br><span class="line">    <span class="number">0x100000f86</span>: gs     </span><br><span class="line">    <span class="number">0x100000f88</span>: insb   %dx, %es:(%rdi)</span><br><span class="line">    <span class="number">0x100000f89</span>: insb   %dx, %es:(%rdi)</span><br><span class="line">    <span class="number">0x100000f8a</span>: outsl  (%rsi), %dx</span><br></pre></td></tr></table></figure>
+<p>这里就是通过_stub_helper来调用dyld_stub<em>binder函数来计算printf函数的真实地址。通过下面的\</em>_TEXT,__stub_helper具体信息可以看出，jmpq 0x100000f5c,就是在压入参数0x0(函数的link的时候给的编号)之后跳转到Section的起始处，调用了binder。</p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/Mach-O-DYLD-HOOK/_stub_helper.png?1" alt="_stub_helper.png"></p>
+<p>binder是一块汇编代码。这里就不做解释了。作用就是计算具体的函数地址，并调用printf。</p>
+<h2 id="1-4_第二次调用printf函数">1.4 第二次调用printf函数</h2><p>这个释放断点，程序将在调用第二个printf函数的地方停下来。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">lazy_bind`main:</span><br><span class="line">    <span class="number">0x100000f10</span> &lt;+<span class="number">0</span>&gt;:  pushq  %rbp</span><br><span class="line">    <span class="number">0x100000f11</span> &lt;+<span class="number">1</span>&gt;:  movq   %rsp, %rbp</span><br><span class="line">    <span class="number">0x100000f14</span> &lt;+<span class="number">4</span>&gt;:  subq   $<span class="number">0x20</span>, %rsp</span><br><span class="line">    <span class="number">0x100000f18</span> &lt;+<span class="number">8</span>&gt;:  leaq   <span class="number">0x57</span>(%rip), %rax          ; <span class="string">"Hello, World!\n"</span></span><br><span class="line">    <span class="number">0x100000f1f</span> &lt;+<span class="number">15</span>&gt;: movl   $<span class="number">0x0</span>, -<span class="number">0x4</span>(%rbp)</span><br><span class="line">    <span class="number">0x100000f26</span> &lt;+<span class="number">22</span>&gt;: movl   %edi, -<span class="number">0x8</span>(%rbp)</span><br><span class="line">    <span class="number">0x100000f29</span> &lt;+<span class="number">25</span>&gt;: movq   %rsi, -<span class="number">0x10</span>(%rbp)</span><br><span class="line">    <span class="number">0x100000f2d</span> &lt;+<span class="number">29</span>&gt;: movq   %rax, %rdi</span><br><span class="line">    <span class="number">0x100000f30</span> &lt;+<span class="number">32</span>&gt;: movb   $<span class="number">0x0</span>, %al</span><br><span class="line">    <span class="number">0x100000f32</span> &lt;+<span class="number">34</span>&gt;: callq  <span class="number">0x100000f56</span>               ; symbol stub <span class="keyword">for</span>: <span class="built_in">printf</span></span><br><span class="line">    <span class="number">0x100000f37</span> &lt;+<span class="number">39</span>&gt;: leaq   <span class="number">0x47</span>(%rip), %rdi          ; <span class="string">"2Hello, World!\n"</span></span><br><span class="line">    <span class="number">0x100000f3e</span> &lt;+<span class="number">46</span>&gt;: movl   %eax, -<span class="number">0x14</span>(%rbp)</span><br><span class="line">    <span class="number">0x100000f41</span> &lt;+<span class="number">49</span>&gt;: movb   $<span class="number">0x0</span>, %al</span><br><span class="line">-&gt;  <span class="number">0x100000f43</span> &lt;+<span class="number">51</span>&gt;: callq  <span class="number">0x100000f56</span>               ; symbol stub <span class="keyword">for</span>: <span class="built_in">printf</span></span><br><span class="line">    <span class="number">0x100000f48</span> &lt;+<span class="number">56</span>&gt;: xorl   %ecx, %ecx</span><br><span class="line">    <span class="number">0x100000f4a</span> &lt;+<span class="number">58</span>&gt;: movl   %eax, -<span class="number">0x18</span>(%rbp)</span><br><span class="line">    <span class="number">0x100000f4d</span> &lt;+<span class="number">61</span>&gt;: movl   %ecx, %eax</span><br><span class="line">    <span class="number">0x100000f4f</span> &lt;+<span class="number">63</span>&gt;: addq   $<span class="number">0x20</span>, %rsp</span><br><span class="line">    <span class="number">0x100000f53</span> &lt;+<span class="number">67</span>&gt;: popq   %rbp</span><br><span class="line">    <span class="number">0x100000f54</span> &lt;+<span class="number">68</span>&gt;: retq</span><br></pre></td></tr></table></figure>
+<p>执行指令之后发现和第一次调用printf已经不一样了。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">lazy_bind`<span class="built_in">printf</span>:</span><br><span class="line">-&gt;  <span class="number">0x100000f56</span> &lt;+<span class="number">0</span>&gt;: jmpq   *<span class="number">0xb4</span>(%rip)               ; (<span class="keyword">void</span> *)<span class="number">0x00007fff96b1815c</span>: <span class="built_in">printf</span></span><br></pre></td></tr></table></figure>
+<p>通过指令再一次查看<code>0x100001010</code>处的内存值。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(lldb) x <span class="number">0x100001010</span></span><br><span class="line"><span class="number">0x100001010</span>: <span class="number">5</span>c <span class="number">81</span> b1 <span class="number">96</span> ff <span class="number">7f</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>  \...............</span><br><span class="line"><span class="number">0x100001020</span>: <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>  ................</span><br></pre></td></tr></table></figure>
+<p>也就是说 __Data,__la_symbol_ptr中指向printf地址的值已经发生了变化，指向了printf的指令。</p>
+<h2 id="1-5_小结">1.5 小结</h2><p>证明了，延迟绑定只会在第一次调用的时候发生。整个流程与linux中的PLT与GOT在实现逻辑上基本是相同的，只是具体的代码实现不一样。</p>
+<h1 id="0x02_相关LoadCommand">0x02 相关LoadCommand</h1><p>上面只是通过调试简单的了解了动态链接的表现，要理解动态链接还需对几个数据结构有所了解。</p>
+<h2 id="2-1_LC_SYMTAB">2.1 LC_SYMTAB</h2><p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/Mach-O-DYLD-HOOK/LC_SYMTAB.png?1" alt="LC_SYMTAB"></p>
+<p>LC_SYMTAB这个LoadCommand主要提供了两个信息</p>
+<ul>
+<li>Symbol Table的偏移量与Symbol Table中元素的个数</li>
+<li>String Table的偏移量与String Table的长度</li>
+</ul>
+<h3 id="2-1-1_Symbol_Table">2.1.1 Symbol Table</h3><blockquote>
+<p>在计算机科学中，符号表是一种用于语言翻译器（例如编译器和解释器）中的数据结构。在符号表中，程序源代码中的每个标识符都和它的声明或使用信息绑定在一起，比如其数据类型、作用域以及内存地址。</p>
+<p>–wiki</p>
+</blockquote>
+<p>简单的理解就是Symbol Table里面包含了所有会被调用的函数的信息，无论是已经bind的还是没有bind的函数。</p>
+<h3 id="2-2-2_String_Table">2.2.2 String Table</h3><p>这个很好理解，在符号处理时所有会用到的字符串放在了这里。和__TEXT,__cstring不同。</p>
+<h2 id="2-2_LC_DYSYMTAB">2.2 LC_DYSYMTAB</h2><p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/Mach-O-DYLD-HOOK/LC_DYSYMTAB.png" alt="LC_DYSYMTAB"></p>
+<p>LC_DYSYMTAB的数据结构，如图所示。这一个LoadCommand与动态链接相关的就是红框标出的两个字段，标示了需要动态符号表的偏移量与符号个数。</p>
+<p>动态符号表的数据结构非常的简单，是一个32bit的索引的数组。通过索引可以在Symbol Table中寻找到对应的函数信息。</p>
+<h1 id="0x03_小结">0x03 小结</h1><p>通过分析两次printf的调用流程，加深对Mach-O结构以及动态链接的流程理解，为进一步理解dyld的工作原理，源码阅读提供了知识的储备。</p>
+<p>通过和Linux的PTL与GOT比较可以更容易理解逻辑。</p>
+<p>整个流程是如何通过代码实现的还需要进一步的分析与研究。</p>
+<h1 id="0x04_参考">0x04 参考</h1><p>1.Dynamic Linking: ELF vs. Mach-O</p>
+<p><a href="http://timetobleed.com/dynamic-linking-elf-vs-mach-o/" target="_blank" rel="external">http://timetobleed.com/dynamic-linking-elf-vs-mach-o/</a></p>
+<p>2.Dynamic symbol table duel: ELF vs Mach-O, round 2</p>
+<p><a href="http://timetobleed.com/dynamic-symbol-table-duel-elf-vs-mach-o-round-2/" target="_blank" rel="external">http://timetobleed.com/dynamic-symbol-table-duel-elf-vs-mach-o-round-2/</a></p>
+<h1 id="PS:">PS:</h1><p>更多文章可以在我的学习分享博客<a href="http://BLOGIMAGE/" target="_blank" rel="external">http://BLOGIMAGE/</a></p>
+<p>希望可以多多交流，不足之处还希望大家可以给与指正：）</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/03/10/Mach-O的动态链接/">Mach-O的动态链接相关知识</a></p>
+        <p><span>文章作者:</span><a href="/" title="访问 mrh 的个人博客">mrh</a></p>
+        <p><span>发布时间:</span>2016年03月10日 - 11时40分</p>
+        <p><span>最后更新:</span>2016年03月23日 - 23时37分</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/03/10/Mach-O的动态链接/" title="Mach-O的动态链接相关知识">http://yoursite.com/2016/03/10/Mach-O的动态链接/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2016/03/10/Mach-O的动态链接/　　作者: mrh" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script src="/js/clipboard.min.js"></script>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="中国大陆 (CC BY-NC-SA 3.0 CN)" target = "_blank">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+<nav id="article-nav">
+  
+    <a href="/2016/03/16/dyld源码分析load/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          dyld源码分析-动态加载load
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/03/07/mach-o文件格式分析/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">mach-o格式分析</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x00_摘要"><span class="toc-number">1.</span> <span class="toc-text">0x00 摘要</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01_Mach-O_Lazy_Bind"><span class="toc-number">2.</span> <span class="toc-text">0x01 Mach-O Lazy Bind</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1_第一次调用prinf"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 第一次调用prinf</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2___Data,__la_symbol_ptr_获取函数地址"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 __Data,__la_symbol_ptr 获取函数地址</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3_通过__stub__helper进行lazybind"><span class="toc-number">2.3.</span> <span class="toc-text">1.3 通过__stub__helper进行lazybind</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4_第二次调用printf函数"><span class="toc-number">2.4.</span> <span class="toc-text">1.4 第二次调用printf函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-5_小结"><span class="toc-number">2.5.</span> <span class="toc-text">1.5 小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02_相关LoadCommand"><span class="toc-number">3.</span> <span class="toc-text">0x02 相关LoadCommand</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1_LC_SYMTAB"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 LC_SYMTAB</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-1_Symbol_Table"><span class="toc-number">3.1.1.</span> <span class="toc-text">2.1.1 Symbol Table</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-2_String_Table"><span class="toc-number">3.1.2.</span> <span class="toc-text">2.2.2 String Table</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2_LC_DYSYMTAB"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 LC_DYSYMTAB</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03_小结"><span class="toc-number">4.</span> <span class="toc-text">0x03 小结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04_参考"><span class="toc-number">5.</span> <span class="toc-text">0x04 参考</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#PS:"><span class="toc-number">6.</span> <span class="toc-text">PS:</span></a></li></ol>
+</div>
+<style>
+    .left-col .switch-btn {
+        display: none;
+    }
+    .left-col .switch-area {
+        display: none;
+    }
+</style>
+
+<input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+            $(".switch-btn, .switch-area").fadeOut(300);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+            $(".switch-btn, .switch-area").fadeIn(500);
+        }
+    })
+
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+        $(".switch-btn, .switch-area").show();
+    }
+</script>
+
+
+
+
+
+
+
+    
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/03/16/dyld源码分析load/" title="上一篇: dyld源码分析-动态加载load">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+        
+            <a href="/2016/03/07/mach-o文件格式分析/" title="下一篇: mach-o格式分析">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2016/04/29/CVE-2016-1749内核代码执行POC分析/">CVE-2016-1749内核代码执行POC分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/19/CVE-2016-1757利用程序分析/">CVE-2016-1757利用程序分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/18/apple沙盒研究之基础知识/">apple沙盒研究之基础知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/13/利用patch绕过kextload对内核签名的检测/">利用patch绕过kextload对内核签名的检测</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/03/CVE-2016-1757简单分析/">CVE-2016-1757简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/30/OSX内核加载mach-o流程分析/">OSX内核加载mach-o流程分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/fishhook源码分析/">fishhook源码分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/16/dyld源码分析load/">dyld源码分析-动态加载load</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/10/Mach-O的动态链接/">Mach-O的动态链接相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/07/mach-o文件格式分析/">mach-o格式分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/03/CVE-2016-0799简单分析/">CVE-2016-0799简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/01/dyld中macho加载的简单分析/">dyld中mach-o文件加载的简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/29/OS-X-内核研究-基础知识/">OS X 内核研究 准备知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/23/通过fusion level02浅谈exploit中的函数调用伪造/">通过fusion level02浅谈exploit中的函数调用伪造</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/19/CVE-2015-7547分析与调试/">对CVE-2015-7547简单的分析与调试</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/09/CVE-2016-1879调试&分析/">CVE-2016-1879 调试&分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/27/frame-faking/">frame-faking-介绍-函数调用伪造</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/14/protostar-heap3/">protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/12/图解DWORDSHOOT/">图解DWORDSHOOT</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/09/protostar-heap2/">protostar详细解析 heap2 解答</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/09/protostar-heap1/">protostar详细解析 heap1 解答</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/04/栈溢出练习小结/">wargame简单入门</a></li></ul>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+    <script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#toc, .switch-btn, .switch-area").toggle();
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+                $(".switch-btn, .switch-area").fadeToggle(300);
+            }
+        })
+    </script>
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                &copy; 2016 mrh
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" >本站到访数: 
+                            <span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>, </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+
+    </div>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="/js/main.js" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function() {
+            var backgroundnum = 21;
+            var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-71141416-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+  <script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+
+  </div>
+</body>
+</html>
