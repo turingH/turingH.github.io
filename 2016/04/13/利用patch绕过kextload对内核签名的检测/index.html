@@ -8,7 +8,7 @@
   <meta name="description" content="0x00 摘要​    分析CVE-2016-1757的EXP过程中，发现EXP通过对kextload程序的patch，绕过了OSX对驱动扩展数字签名的检测，成功加载未签名的驱动扩展。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="利用patch绕过kextload对内核签名的检测">
-<meta property="og:url" content="http://yoursite.com/2016/04/13/利用patch绕过kextload对内核签名的检测/index.html">
+<meta property="og:url" content="http://turingh.github.io/2016/04/13/利用patch绕过kextload对内核签名的检测/index.html">
 <meta property="og:site_name" content="mrh的学习分享">
 <meta property="og:description" content="0x00 摘要​    分析CVE-2016-1757的EXP过程中，发现EXP通过对kextload程序的patch，绕过了OSX对驱动扩展数字签名的检测，成功加载未签名的驱动扩展。">
 <meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/patch_kextload/ida_diff.png">
@@ -258,7 +258,7 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-        <h1 id="0x00_摘要">0x00 摘要</h1><p>​    分析<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/" target="_blank" rel="external">CVE-2016-1757</a>的EXP过程中，发现EXP通过对kextload程序的patch，绕过了<code>OSX</code>对驱动扩展数字签名的检测，成功加载未签名的驱动扩展。</p>
+        <h1 id="0x00_摘要">0x00 摘要</h1><p>​    分析<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/">CVE-2016-1757</a>的EXP过程中，发现EXP通过对kextload程序的patch，绕过了<code>OSX</code>对驱动扩展数字签名的检测，成功加载未签名的驱动扩展。</p>
 <a id="more"></a>
 <h1 id="0x01_数字签名与内核扩展">0x01 数字签名与内核扩展</h1><p>​    <code>OSX</code>系统在加载内核扩展时要求必须拥有苹果的开发者签名。在开发过程中，在自己的调试环境中可以通过修改参数加载没有签名的驱动，进行开发与调试。</p>
 <h2 id="1-1_OS_X_10-11之后版本">1.1 OS X 10.11之后版本</h2><p>​    在OS X 10.11中引入的Rootless机制之后只需要关闭Rootless机制就可以加载没有签名的驱动扩展。细节可以参考这一篇文章。<a href="http://tadaland.com/os-x-rootless.html" target="_blank" rel="external">OS X 10.11中Rootless的实现与解释以及关闭方法</a></p>
@@ -287,7 +287,7 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span><br><span class="line">@function SecStaticCodeCheckValidity</span><br><span class="line">	Performs static validation on the given SecStaticCode object. The call obtains and</span><br><span class="line">	verifies the signature on the code object. It checks the validity of all</span><br><span class="line">	sealed components (including resources, if any). It validates the code against</span><br><span class="line">	a SecRequirement if one is given. The call succeeds if all these conditions</span><br><span class="line">	are satisfactory. It fails otherwise.</span><br><span class="line">*/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*蹩脚的翻译一下</span><br><span class="line">@function SecStaticCodeCheckValidity</span><br><span class="line">	认证传入的SecStaticCode对象的合法性，该函数调用获取并检测数字签名的合法性。</span><br><span class="line">	认证内容包含了所有的组件(如果存在资源文件同样会检测)。</span><br><span class="line">	如果提供了加密的内容，也会对加密部分进行认证。</span><br><span class="line">	当所有条件满足时函数调用返回成功。</span><br><span class="line">*/</span></span><br></pre></td></tr></table></figure>
 <p>这是该函数在头文件中的定义。</p>
 <h1 id="0x03_小结">0x03 小结</h1><p>​    经过测试确实可以绕过数字签名的检测成功加载了未签名的内核扩展。</p>
-<p>​    通过对<code>kextload</code>的<code>patch</code>，绕过两个检测函数，从而达到了绕过<code>OSX</code>系统对驱动扩展的签名检测，结合<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/" target="_blank" rel="external">CVE-2016-1757</a>的<code>root</code>权限执行任意代码，从而实现了，普通用户可以加载任意未签名的内核扩展。</p>
+<p>​    通过对<code>kextload</code>的<code>patch</code>，绕过两个检测函数，从而达到了绕过<code>OSX</code>系统对驱动扩展的签名检测，结合<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/">CVE-2016-1757</a>的<code>root</code>权限执行任意代码，从而实现了，普通用户可以加载任意未签名的内核扩展。</p>
 <h1 id="0x04_勘误">0x04 勘误</h1><p>​    由于不够严谨，遗漏了一个patch的点，这里补上。更详细的原理在<code>exploit</code>的分析文章中可以看到。</p>
 <h2 id="4-1_sub_1000023BC">4.1 sub_1000023BC</h2><p>在<code>sub_1000023BC</code>函数中的对sub_085c的调用被patch修改绕过签名验证。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">__text:<span class="number">0000000100002802</span>                 mov     esi, <span class="number">1</span></span><br><span class="line">__text:<span class="number">0000000100002807</span>                 mov     rdi, r15</span><br><span class="line">__text:<span class="number">000000010000280</span>A                 mov     edx, r12d</span><br><span class="line">__text:<span class="number">000000010000280</span>D                 call    sub_10000085C</span><br><span class="line">__text:<span class="number">0000000100002812</span>                 test    eax, eax</span><br><span class="line">__text:<span class="number">0000000100002814</span>                 mov     r12, r14</span><br><span class="line">__text:<span class="number">0000000100002817</span>                 mov     r14, [rbp+var_CD0]</span><br><span class="line">__text:<span class="number">000000010000281</span>E                 jnz     loc_1000028FA</span><br></pre></td></tr></table></figure>
@@ -295,7 +295,7 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">__text:<span class="number">000000010000277</span>E                 mov     r14, r12</span><br><span class="line">__text:<span class="number">0000000100002781</span>                 movzx   r12d, [rbp+var_CB9]</span><br><span class="line">__text:<span class="number">0000000100002789</span>                 mov     esi, <span class="number">1</span></span><br><span class="line">__text:<span class="number">000000010000278</span>E                 mov     rdi, r15</span><br><span class="line">__text:<span class="number">0000000100002791</span>                 mov     edx, r12d</span><br><span class="line">__text:<span class="number">0000000100002794</span>                 nop</span><br><span class="line">__text:<span class="number">0000000100002795</span>                 nop</span><br><span class="line">__text:<span class="number">0000000100002796</span>                 nop</span><br><span class="line">__text:<span class="number">0000000100002797</span>                 xor     eax, eax</span><br><span class="line">__text:<span class="number">0000000100002799</span>                 mov     ebx, eax</span><br><span class="line">__text:<span class="number">000000010000279</span>B                 test    ebx, ebx</span><br></pre></td></tr></table></figure>
 <p><code>bindiif</code>如下图所示:</p>
 <p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/patch_kextload/kanwu1.png" alt="勘误1"></p>
-<h1 id="ps:">ps:</h1><p>这是我的学习分享博客<a href="http://turingh.github.io/" target="_blank" rel="external">http://turingh.github.io/</a></p>
+<h1 id="ps:">ps:</h1><p>这是我的学习分享博客<a href="http://turingh.github.io/">http://turingh.github.io/</a></p>
 <p>欢迎大家来探讨，不足之处还请指正。</p>
 
       
@@ -310,8 +310,8 @@
         <p><span>发布时间:</span>2016年04月13日 - 13时21分</p>
         <p><span>最后更新:</span>2016年04月19日 - 14时44分</p>
         <p>
-            <span>原始链接:</span><a class="post-url" href="/2016/04/13/利用patch绕过kextload对内核签名的检测/" title="利用patch绕过kextload对内核签名的检测">http://yoursite.com/2016/04/13/利用patch绕过kextload对内核签名的检测/</a>
-            <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2016/04/13/利用patch绕过kextload对内核签名的检测/　　作者: mrh" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <span>原始链接:</span><a class="post-url" href="/2016/04/13/利用patch绕过kextload对内核签名的检测/" title="利用patch绕过kextload对内核签名的检测">http://turingh.github.io/2016/04/13/利用patch绕过kextload对内核签名的检测/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://turingh.github.io/2016/04/13/利用patch绕过kextload对内核签名的检测/　　作者: mrh" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
             <script src="/js/clipboard.min.js"></script>
             <script> var clipboard = new Clipboard('.copy-path'); </script>
         </p>

@@ -8,7 +8,7 @@
   <meta name="description">
 <meta property="og:type" content="website">
 <meta property="og:title" content="mrh的学习分享">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta property="og:url" content="http://turingh.github.io/index.html">
 <meta property="og:site_name" content="mrh的学习分享">
 <meta property="og:description">
 <meta name="twitter:card" content="summary">
@@ -247,13 +247,13 @@
           
         <h1 id="0x00_版本小结">0x00 版本小结</h1><p>在<code>10.11.4</code>版本开始着手研究<code>OS X</code>系统安全方面的知识，上周苹果发布了<code>10.11.5</code>版本，<code>10.11.4</code>版本的补丁中还有大量的漏洞没有研究完，又放出了新的版本，这里稍微做一下总结。</p>
 <h1 id="0x01_10-11-4_小结">0x01 10.11.4 小结</h1><h2 id="1-1_基础知识">1.1 基础知识</h2><h3 id="1-1-1_macho格式学习">1.1.1 macho格式学习</h3><p>​    因为刚开始研究<code>OS X</code>系统，花了一部分时间研究了mach-o文件格式的知识，在后续的漏洞分析中发现，mach-o文件的知识还不够扎实，还会有很多似懂非懂的问题。</p>
-<p><a href="http://turingh.github.io/2016/03/07/mach-o%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%88%86%E6%9E%90/" target="_blank" rel="external">mach-o格式分析</a></p>
-<p><a href="http://turingh.github.io/2016/03/10/Mach-O%E7%9A%84%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/" target="_blank" rel="external">Mach-O的动态链接相关知识</a></p>
-<p><a href="http://turingh.github.io/2016/03/22/fishhook%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" target="_blank" rel="external">fishhook源码分析</a></p>
-<p><a href="http://turingh.github.io/2016/03/30/OSX%E5%86%85%E6%A0%B8%E5%8A%A0%E8%BD%BDmach-o%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" target="_blank" rel="external">OSX内核加载mach-o流程分析</a></p>
-<h3 id="1-1-2_dyld源码分析">1.1.2 dyld源码分析</h3><p><a href="http://turingh.github.io/2016/03/16/dyld%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90load/" target="_blank" rel="external">dyld源码分析-动态加载load</a></p>
-<p><a href="http://turingh.github.io/2016/03/01/dyld%E4%B8%ADmacho%E5%8A%A0%E8%BD%BD%E7%9A%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/" target="_blank" rel="external">dyld中mach-o文件加载的简单分析</a></p>
-<h2 id="1-2漏洞分析">1.2漏洞分析</h2><p>​    主要分析了两个漏洞<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/" target="_blank" rel="external">CVE-2016-1757</a>以及<a href="http://turingh.github.io/2016/04/29/CVE-2016-1749%E5%86%85%E6%A0%B8%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8CPOC%E5%88%86%E6%9E%90/" target="_blank" rel="external">CVE-2016-1749</a>。两个漏洞一个是应用层一个是内核层的，在分析研究漏洞的过程中，也熟悉掌握了ida，bindiff，lldb等一系列工具的实际操作。在分析另外一个内核漏洞的过程中，发现在内核框架的掌握上有比较大的缺憾，所以花了大量的时间熟悉了内核开发与一些相关部分的源码，所以有半个月时间左右没有通过日志总结学习的小结，在<code>10.11.5</code>版本的漏洞研究时将补充相关的内容。</p>
+<p><a href="http://turingh.github.io/2016/03/07/mach-o%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%88%86%E6%9E%90/">mach-o格式分析</a></p>
+<p><a href="http://turingh.github.io/2016/03/10/Mach-O%E7%9A%84%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/">Mach-O的动态链接相关知识</a></p>
+<p><a href="http://turingh.github.io/2016/03/22/fishhook%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">fishhook源码分析</a></p>
+<p><a href="http://turingh.github.io/2016/03/30/OSX%E5%86%85%E6%A0%B8%E5%8A%A0%E8%BD%BDmach-o%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/">OSX内核加载mach-o流程分析</a></p>
+<h3 id="1-1-2_dyld源码分析">1.1.2 dyld源码分析</h3><p><a href="http://turingh.github.io/2016/03/16/dyld%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90load/">dyld源码分析-动态加载load</a></p>
+<p><a href="http://turingh.github.io/2016/03/01/dyld%E4%B8%ADmacho%E5%8A%A0%E8%BD%BD%E7%9A%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/">dyld中mach-o文件加载的简单分析</a></p>
+<h2 id="1-2漏洞分析">1.2漏洞分析</h2><p>​    主要分析了两个漏洞<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/">CVE-2016-1757</a>以及<a href="http://turingh.github.io/2016/04/29/CVE-2016-1749%E5%86%85%E6%A0%B8%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8CPOC%E5%88%86%E6%9E%90/">CVE-2016-1749</a>。两个漏洞一个是应用层一个是内核层的，在分析研究漏洞的过程中，也熟悉掌握了ida，bindiff，lldb等一系列工具的实际操作。在分析另外一个内核漏洞的过程中，发现在内核框架的掌握上有比较大的缺憾，所以花了大量的时间熟悉了内核开发与一些相关部分的源码，所以有半个月时间左右没有通过日志总结学习的小结，在<code>10.11.5</code>版本的漏洞研究时将补充相关的内容。</p>
 <ul>
 <li>libkern c++ 运行时源码学习</li>
 <li>kext内核扩展加载流程</li>
