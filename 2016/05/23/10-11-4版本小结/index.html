@@ -3,28 +3,21 @@
 <head>
   <meta charset="utf-8">
   
-  <title>apple沙盒研究之基础知识 | mrh的学习分享</title>
+  <title>10-11-4版本小结 | mrh的学习分享</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="1 基础知识1.1 什么是沙盒？
-在计算机安全领域，沙盒（英语：sandbox，又译为沙箱）是一种安全机制，为运行中的程序提供的隔离环境。通常是作为一些来源不可信、具破坏力或无法判定程序意图的程序提供实验之用[1]#cite_note-1)。
-沙盒通常严格控制其中的程序所能访问的资源，比如，沙盒可以提供用后即回收的磁盘及内存空间。在沙盒中，网络访问、对真实系统的访问、对输入设备的读取通常被禁止或是">
+  <meta name="description" content="0x00 版本小结在10.11.4版本开始着手研究OS X系统安全方面的知识，上周苹果发布了10.11.5版本，10.11.4版本的补丁中还有大量的漏洞没有研究完，又放出了新的版本，这里稍微做一下总结。
+0x01 10.11.4 小结1.1 基础知识1.1.1 macho格式学习​    因为刚开始研究OS X系统，花了一部分时间研究了mach-o文件格式的知识，在后续的漏洞分析中发现，mach-">
 <meta property="og:type" content="article">
-<meta property="og:title" content="apple沙盒研究之基础知识">
-<meta property="og:url" content="http://yoursite.com/2016/04/18/apple沙盒研究之基础知识/index.html">
+<meta property="og:title" content="10-11-4版本小结">
+<meta property="og:url" content="http://yoursite.com/2016/05/23/10-11-4版本小结/index.html">
 <meta property="og:site_name" content="mrh的学习分享">
-<meta property="og:description" content="1 基础知识1.1 什么是沙盒？
-在计算机安全领域，沙盒（英语：sandbox，又译为沙箱）是一种安全机制，为运行中的程序提供的隔离环境。通常是作为一些来源不可信、具破坏力或无法判定程序意图的程序提供实验之用[1]#cite_note-1)。
-沙盒通常严格控制其中的程序所能访问的资源，比如，沙盒可以提供用后即回收的磁盘及内存空间。在沙盒中，网络访问、对真实系统的访问、对输入设备的读取通常被禁止或是">
-<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/apple_sandbox/sandbox_feels_like.png.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/apple_sandbox/sandbox_really.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/apple_sandbox/sandbox_workflow.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/apple_sandbox/sandbox_birdview.png">
-<meta property="og:updated_time" content="2016-04-19T18:52:38.000Z">
+<meta property="og:description" content="0x00 版本小结在10.11.4版本开始着手研究OS X系统安全方面的知识，上周苹果发布了10.11.5版本，10.11.4版本的补丁中还有大量的漏洞没有研究完，又放出了新的版本，这里稍微做一下总结。
+0x01 10.11.4 小结1.1 基础知识1.1.1 macho格式学习​    因为刚开始研究OS X系统，花了一部分时间研究了mach-o文件格式的知识，在后续的漏洞分析中发现，mach-">
+<meta property="og:updated_time" content="2016-05-23T18:53:54.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="apple沙盒研究之基础知识">
-<meta name="twitter:description" content="1 基础知识1.1 什么是沙盒？
-在计算机安全领域，沙盒（英语：sandbox，又译为沙箱）是一种安全机制，为运行中的程序提供的隔离环境。通常是作为一些来源不可信、具破坏力或无法判定程序意图的程序提供实验之用[1]#cite_note-1)。
-沙盒通常严格控制其中的程序所能访问的资源，比如，沙盒可以提供用后即回收的磁盘及内存空间。在沙盒中，网络访问、对真实系统的访问、对输入设备的读取通常被禁止或是">
+<meta name="twitter:title" content="10-11-4版本小结">
+<meta name="twitter:description" content="0x00 版本小结在10.11.4版本开始着手研究OS X系统安全方面的知识，上周苹果发布了10.11.5版本，10.11.4版本的补丁中还有大量的漏洞没有研究完，又放出了新的版本，这里稍微做一下总结。
+0x01 10.11.4 小结1.1 基础知识1.1.1 macho格式学习​    因为刚开始研究OS X系统，花了一部分时间研究了mach-o文件格式的知识，在后续的漏洞分析中发现，mach-">
   
     <link rel="alternative" href="/atom.xml" title="mrh的学习分享" type="application/atom+xml">
   
@@ -222,11 +215,11 @@
         </header>                
     </div>
 </nav>
-      <div class="body-wrap"><article id="post-apple沙盒研究之基础知识" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-10-11-4版本小结" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2016/04/18/apple沙盒研究之基础知识/" class="article-date">
-      <time datetime="2016-04-18T15:12:47.000Z" itemprop="datePublished">2016-04-18</time>
+      <a href="/2016/05/23/10-11-4版本小结/" class="article-date">
+      <time datetime="2016-05-23T18:21:22.000Z" itemprop="datePublished">2016-05-23</time>
 </a>
     </div>
   
@@ -239,7 +232,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      apple沙盒研究之基础知识
+      10-11-4版本小结
     </h1>
   
 
@@ -254,7 +247,7 @@
 
         
     <div class="article-tag tagcloud">
-        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/sandbox/">sandbox</a></li></ul>
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/OS-X/">OS X</a></li></ul>
     </div>
 
         <div class="clearfix"></div>
@@ -264,46 +257,19 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-        <h1 id="1_基础知识">1 基础知识</h1><h1 id="1-1_什么是沙盒？">1.1 什么是沙盒？</h1><blockquote>
-<p>在<a href="https://zh.wikipedia.org/wiki/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%AE%89%E5%85%A8" target="_blank" rel="external">计算机安全</a>领域，<strong>沙盒</strong>（英语：sandbox，又译为<strong>沙箱</strong>）是一种安全机制，为运行中的程序提供的隔离环境。通常是作为一些来源不可信、具破坏力或无法判定程序意图的程序提供实验之用<a href="https://zh.wikipedia.org/wiki/%E6%B2%99%E7%9B%92_(%E9%9B%BB%E8%85%A6%E5%AE%89%E5%85%A8" target="_blank" rel="external">[1]</a>#cite_note-1)。</p>
-<p>沙盒通常严格控制其中的程序所能访问的资源，比如，沙盒可以提供<a href="https://zh.wikipedia.org/wiki/%E5%A1%97%E9%8A%B7%E7%A9%BA%E9%96%93" target="_blank" rel="external">用后即回收</a>的磁盘及内存空间。在沙盒中，网络访问、对真实系统的访问、对输入设备的读取通常被禁止或是严格限制。从这个角度来说，沙盒属于<a href="https://zh.wikipedia.org/wiki/%E8%99%9A%E6%8B%9F%E5%8C%96" target="_blank" rel="external">虚拟化</a>的一种。</p>
-<p>沙盒中的所有改动对<a href="https://zh.wikipedia.org/wiki/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F" target="_blank" rel="external">操作系统</a>不会造成任何损失。通常，这种技术被<a href="https://zh.wikipedia.org/wiki/%E8%AE%A1%E7%AE%97%E6%9C%BA" target="_blank" rel="external">计算机</a>技术人员广泛用于测试可能<a href="https://zh.wikipedia.org/wiki/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%97%85%E6%AF%92" target="_blank" rel="external">带毒</a>的程序或是其他的<a href="https://zh.wikipedia.org/wiki/%E6%81%B6%E6%84%8F%E8%BD%AF%E4%BB%B6" target="_blank" rel="external">恶意代码</a><a href="https://zh.wikipedia.org/wiki/%E6%B2%99%E7%9B%92_(%E9%9B%BB%E8%85%A6%E5%AE%89%E5%85%A8" target="_blank" rel="external">[2]</a>#cite_note-2)。</p>
-<p>— 维基百科,沙盒 (计算机安全)</p>
-</blockquote>
-<p>这样一段话说的已经很清楚了，关于在<code>OS X</code>系统中沙盒的简单应用，也有文章解释过了，这些不是本文的核心内容，有兴趣的读者可以自行<code>google</code>。</p>
-<p>在<code>OS X</code>以及<code>IOS</code>系统中限制了进程对一些资源的访问权限，例如网络、某些特殊路径、文件的读写等等，限定了进程的一些行为，从而保证进程不会做出超越权限的操作。</p>
-<a id="more"></a>
-<p>沙盒听上去的感觉是一个进程在一个有保护的环境中执行，不会做出规定范围内不允许的事情，给人的感觉可能是这样的：</p>
-<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/apple_sandbox/sandbox_feels_like.png.png" alt="沙盒"></p>
-<p>这样的理解对应用开发来说已经够用了，通过理解沙盒的内部实现，发现沙盒的实质其实更像是这样的：</p>
-<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/apple_sandbox/sandbox_really.png" alt="沙盒"></p>
-<p>而在<code>OS X</code>中沙盒也被称作<code>seatbelt</code>。<code>APP</code>的一举一动都被<code>TrustedBSD</code>的<code>HOOK</code>组件监控，根据沙盒使用的<code>profile</code>中的配置做出相应的处理。</p>
-<p>下面 就通过简单的分析沙盒的工作流程，详细了解沙盒的工作原理。</p>
-<h2 id="1-2_沙盒工作流程与相关系统组件">1.2 沙盒工作流程与相关系统组件</h2><p>沙盒的大致工作流程入下图所示：</p>
-<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/apple_sandbox/sandbox_workflow.png" alt="sandbox_workflow"></p>
+        <h1 id="0x00_版本小结">0x00 版本小结</h1><p>在<code>10.11.4</code>版本开始着手研究<code>OS X</code>系统安全方面的知识，上周苹果发布了<code>10.11.5</code>版本，<code>10.11.4</code>版本的补丁中还有大量的漏洞没有研究完，又放出了新的版本，这里稍微做一下总结。</p>
+<h1 id="0x01_10-11-4_小结">0x01 10.11.4 小结</h1><h2 id="1-1_基础知识">1.1 基础知识</h2><h3 id="1-1-1_macho格式学习">1.1.1 macho格式学习</h3><p>​    因为刚开始研究<code>OS X</code>系统，花了一部分时间研究了mach-o文件格式的知识，在后续的漏洞分析中发现，mach-o文件的知识还不够扎实，还会有很多似懂非懂的问题。</p>
+<h5 id="mach-o格式分析"><a href="http://turingh.github.io/2016/03/07/mach-o%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E5%88%86%E6%9E%90/" target="_blank" rel="external">mach-o格式分析</a></h5><h5 id="fishhook源码分析"><a href="http://turingh.github.io/2016/03/22/fishhook%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" target="_blank" rel="external">fishhook源码分析</a></h5><h5 id="OSX内核加载mach-o流程分析"><a href="http://turingh.github.io/2016/03/30/OSX%E5%86%85%E6%A0%B8%E5%8A%A0%E8%BD%BDmach-o%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90/" target="_blank" rel="external">OSX内核加载mach-o流程分析</a></h5><h3 id="1-1-2_dyld源码分析">1.1.2 dyld源码分析</h3><h5 id="dyld源码分析-动态加载load"><a href="http://turingh.github.io/2016/03/16/dyld%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90load/" target="_blank" rel="external">dyld源码分析-动态加载load</a></h5><h5 id="Mach-O的动态链接相关知识"><a href="http://turingh.github.io/2016/03/10/Mach-O%E7%9A%84%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/" target="_blank" rel="external">Mach-O的动态链接相关知识</a></h5><h5 id="dyld中mach-o文件加载的简单分析"><a href="http://turingh.github.io/2016/03/01/dyld%E4%B8%ADmacho%E5%8A%A0%E8%BD%BD%E7%9A%84%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/" target="_blank" rel="external">dyld中mach-o文件加载的简单分析</a></h5><h2 id="1-2漏洞分析">1.2漏洞分析</h2><p>​    主要分析了两个漏洞<a href="http://turingh.github.io/2016/04/03/CVE-2016-1757%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/" target="_blank" rel="external">CVE-2016-1757</a>以及<a href="http://turingh.github.io/2016/04/29/CVE-2016-1749%E5%86%85%E6%A0%B8%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8CPOC%E5%88%86%E6%9E%90/" target="_blank" rel="external">CVE-2016-1749</a>。两个漏洞一个是应用层一个是内核层的，在分析研究漏洞的过程中，也熟悉掌握了ida，bindiff，lldb等一系列工具的实际操作。在分析另外一个内核漏洞的过程中，发现在内核框架的掌握上有比较大的缺憾，所以花了大量的时间熟悉了内核开发与一些相关部分的源码，所以有半个月时间左右没有通过日志总结学习的小结，在<code>10.11.5</code>版本的漏洞研究时将补充相关的内容。</p>
 <ul>
-<li><code>1</code>进程尝试进行一次系统调用（system call），调用内核功能。</li>
-<li><code>2、3</code>MAC层需要根据该进程的安全策略判断此次系统调用是否可以执行。</li>
-<li><code>4、5、6、7、8、9</code>如果存在策略的话，通过<code>sandbox.kext</code>（hook函数）和<code>AppleMatch.kext</code>（沙盒的profile解析）两个内核扩展实现权限的检查。</li>
-<li><code>10</code>返回调用结果</li>
+<li>libkern c++ 运行时源码学习</li>
+<li>kext内核扩展加载流程</li>
+<li>iokit框架工作的原理及细节的简单深入分析</li>
+<li>mach-o的dyld中重定向的代码细节</li>
 </ul>
-<p>与沙盒系统相关的模块大致如下：</p>
-<ul>
-<li>libSystem.dylib: 提供<code>sandbox_init</code>、<code>sandbox_free_error</code>等函数。</li>
-<li>libSandbox.dylib: 提供解析，编译，生成<code>*.sb</code>的沙盒<code>profile</code>的函数。</li>
-<li>sandbox.kext：提供了system call的hook函数</li>
-<li>AppleMatch.kext：提供了解析<code>profile</code>的函数</li>
+<h1 id="0x02_10-11-5_目标">0x02 10.11.5 目标</h1><ul>
+<li>提高漏洞分析的能力和速度（POC构建，EXP编写）</li>
+<li>提高基础能力的学习（内核源码，系统结构）</li>
 </ul>
-<p>结构图大致如下：</p>
-<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/apple_sandbox/sandbox_birdview.png" alt="结构图"></p>
-<h1 id="1-3_小结">1.3 小结</h1><p>​    沙盒的工作流程大致可以总结为：</p>
-<ol>
-<li><p>通过<code>sandbox_init</code>初始化某沙盒策略脚本并编译为二进制文件</p>
-</li>
-<li><p>在进程进行<code>system call</code>时，通过<code>TrustedBSD</code>提供的<code>hook</code>模块，利用<code>Sandbox.kext</code>提供的<code>system call hook</code>函数，结合沙盒策略进行判断，该进程是否有权限执行该<code>system call</code>。</p>
-</li>
-</ol>
-<p>   通过对这些基础知识的了解，可以进入对沙盒的进一步研究了，在下一章通过逆向以及部分源码，从代码实现的层面进行更深一层次的分析。</p>
 
       
     </div>
@@ -312,13 +278,13 @@
   
     
     <div class="copyright">
-        <p><span>本文标题:</span><a href="/2016/04/18/apple沙盒研究之基础知识/">apple沙盒研究之基础知识</a></p>
+        <p><span>本文标题:</span><a href="/2016/05/23/10-11-4版本小结/">10-11-4版本小结</a></p>
         <p><span>文章作者:</span><a href="/" title="访问 mrh 的个人博客">mrh</a></p>
-        <p><span>发布时间:</span>2016年04月18日 - 11时12分</p>
-        <p><span>最后更新:</span>2016年04月19日 - 14时52分</p>
+        <p><span>发布时间:</span>2016年05月23日 - 14时21分</p>
+        <p><span>最后更新:</span>2016年05月23日 - 14时53分</p>
         <p>
-            <span>原始链接:</span><a class="post-url" href="/2016/04/18/apple沙盒研究之基础知识/" title="apple沙盒研究之基础知识">http://yoursite.com/2016/04/18/apple沙盒研究之基础知识/</a>
-            <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2016/04/18/apple沙盒研究之基础知识/　　作者: mrh" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <span>原始链接:</span><a class="post-url" href="/2016/05/23/10-11-4版本小结/" title="10-11-4版本小结">http://yoursite.com/2016/05/23/10-11-4版本小结/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2016/05/23/10-11-4版本小结/　　作者: mrh" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
             <script src="/js/clipboard.min.js"></script>
             <script> var clipboard = new Clipboard('.copy-path'); </script>
         </p>
@@ -331,18 +297,9 @@
 
 <nav id="article-nav">
   
-    <a href="/2016/04/19/CVE-2016-1757利用程序分析/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption"><</strong>
-      <div class="article-nav-title">
-        
-          CVE-2016-1757利用程序分析
-        
-      </div>
-    </a>
   
-  
-    <a href="/2016/04/13/利用patch绕过kextload对内核签名的检测/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">利用patch绕过kextload对内核签名的检测</div>
+    <a href="/2016/04/29/CVE-2016-1749内核代码执行POC分析/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">CVE-2016-1749内核代码执行POC分析</div>
       <strong class="article-nav-caption">></strong>
     </a>
   
@@ -353,7 +310,7 @@
 
     <div id="toc" class="toc-article">
     <strong class="toc-title">文章目录</strong>
-    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1_基础知识"><span class="toc-number">1.</span> <span class="toc-text">1 基础知识</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-1_什么是沙盒？"><span class="toc-number">2.</span> <span class="toc-text">1.1 什么是沙盒？</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2_沙盒工作流程与相关系统组件"><span class="toc-number">2.1.</span> <span class="toc-text">1.2 沙盒工作流程与相关系统组件</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-3_小结"><span class="toc-number">3.</span> <span class="toc-text">1.3 小结</span></a></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x00_版本小结"><span class="toc-number">1.</span> <span class="toc-text">0x00 版本小结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01_10-11-4_小结"><span class="toc-number">2.</span> <span class="toc-text">0x01 10.11.4 小结</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1_基础知识"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 基础知识</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-1_macho格式学习"><span class="toc-number">2.1.1.</span> <span class="toc-text">1.1.1 macho格式学习</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#mach-o格式分析"><span class="toc-number">2.1.1.0.1.</span> <span class="toc-text">mach-o格式分析</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#fishhook源码分析"><span class="toc-number">2.1.1.0.2.</span> <span class="toc-text">fishhook源码分析</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#OSX内核加载mach-o流程分析"><span class="toc-number">2.1.1.0.3.</span> <span class="toc-text">OSX内核加载mach-o流程分析</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-2_dyld源码分析"><span class="toc-number">2.1.2.</span> <span class="toc-text">1.1.2 dyld源码分析</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#dyld源码分析-动态加载load"><span class="toc-number">2.1.2.0.1.</span> <span class="toc-text">dyld源码分析-动态加载load</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#Mach-O的动态链接相关知识"><span class="toc-number">2.1.2.0.2.</span> <span class="toc-text">Mach-O的动态链接相关知识</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#dyld中mach-o文件加载的简单分析"><span class="toc-number">2.1.2.0.3.</span> <span class="toc-text">dyld中mach-o文件加载的简单分析</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2漏洞分析"><span class="toc-number">2.2.</span> <span class="toc-text">1.2漏洞分析</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02_10-11-5_目标"><span class="toc-number">3.</span> <span class="toc-text">0x02 10.11.5 目标</span></a></li></ol>
 </div>
 <style>
     .left-col .switch-btn {
@@ -406,13 +363,11 @@
 
     <div class="scroll" id="post-nav-button">
         
-            <a href="/2016/04/19/CVE-2016-1757利用程序分析/" title="上一篇: CVE-2016-1757利用程序分析">
-                <i class="fa fa-angle-left"></i>
-            </a>
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
         
         <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
         
-            <a href="/2016/04/13/利用patch绕过kextload对内核签名的检测/" title="下一篇: 利用patch绕过kextload对内核签名的检测">
+            <a href="/2016/04/29/CVE-2016-1749内核代码执行POC分析/" title="下一篇: CVE-2016-1749内核代码执行POC分析">
                 <i class="fa fa-angle-right"></i>
             </a>
         

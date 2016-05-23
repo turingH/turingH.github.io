@@ -144,7 +144,7 @@
                 
                 <section class="switch-part switch-part2">
                     <div class="widget tagcloud" id="js-tagcloud">
-                        <a href="/tags/CVE/" style="font-size: 13.33px;">CVE</a> <a href="/tags/DWORDSHOOT/" style="font-size: 10px;">DWORDSHOOT</a> <a href="/tags/OS-X/" style="font-size: 10px;">OS X</a> <a href="/tags/OSX/" style="font-size: 11.67px;">OSX</a> <a href="/tags/bounds-checking/" style="font-size: 10px;">bounds checking</a> <a href="/tags/dlopen/" style="font-size: 10px;">dlopen</a> <a href="/tags/dns/" style="font-size: 10px;">dns</a> <a href="/tags/dos/" style="font-size: 10px;">dos</a> <a href="/tags/dyld/" style="font-size: 15px;">dyld</a> <a href="/tags/dynamic-link/" style="font-size: 10px;">dynamic link</a> <a href="/tags/execv/" style="font-size: 11.67px;">execv</a> <a href="/tags/execve/" style="font-size: 10px;">execve</a> <a href="/tags/exploit/" style="font-size: 20px;">exploit</a> <a href="/tags/frame-faking/" style="font-size: 10px;">frame-faking</a> <a href="/tags/free/" style="font-size: 10px;">free</a> <a href="/tags/freebsd/" style="font-size: 10px;">freebsd</a> <a href="/tags/gethostbyname/" style="font-size: 10px;">gethostbyname</a> <a href="/tags/glibc/" style="font-size: 10px;">glibc</a> <a href="/tags/heap/" style="font-size: 16.67px;">heap</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/kernel/" style="font-size: 15px;">kernel</a> <a href="/tags/kextload/" style="font-size: 10px;">kextload</a> <a href="/tags/level02/" style="font-size: 10px;">level02</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/mach-o/" style="font-size: 18.33px;">mach-o</a> <a href="/tags/openssl/" style="font-size: 10px;">openssl</a> <a href="/tags/osx/" style="font-size: 16.67px;">osx</a> <a href="/tags/patch/" style="font-size: 10px;">patch</a> <a href="/tags/ports/" style="font-size: 11.67px;">ports</a> <a href="/tags/race/" style="font-size: 11.67px;">race</a> <a href="/tags/sandbox/" style="font-size: 10px;">sandbox</a> <a href="/tags/stack/" style="font-size: 13.33px;">stack</a> <a href="/tags/stackoverflow/" style="font-size: 10px;">stackoverflow</a> <a href="/tags/unlink/" style="font-size: 10px;">unlink</a> <a href="/tags/wargame/" style="font-size: 11.67px;">wargame</a>
+                        <a href="/tags/CVE/" style="font-size: 13.33px;">CVE</a> <a href="/tags/DWORDSHOOT/" style="font-size: 10px;">DWORDSHOOT</a> <a href="/tags/OS-X/" style="font-size: 11.67px;">OS X</a> <a href="/tags/OSX/" style="font-size: 11.67px;">OSX</a> <a href="/tags/bounds-checking/" style="font-size: 10px;">bounds checking</a> <a href="/tags/dlopen/" style="font-size: 10px;">dlopen</a> <a href="/tags/dns/" style="font-size: 11.67px;">dns</a> <a href="/tags/dos/" style="font-size: 10px;">dos</a> <a href="/tags/dyld/" style="font-size: 15px;">dyld</a> <a href="/tags/dynamic-link/" style="font-size: 10px;">dynamic link</a> <a href="/tags/execv/" style="font-size: 11.67px;">execv</a> <a href="/tags/execve/" style="font-size: 10px;">execve</a> <a href="/tags/exploit/" style="font-size: 20px;">exploit</a> <a href="/tags/frame-faking/" style="font-size: 10px;">frame-faking</a> <a href="/tags/free/" style="font-size: 10px;">free</a> <a href="/tags/freebsd/" style="font-size: 10px;">freebsd</a> <a href="/tags/gethostbyname/" style="font-size: 11.67px;">gethostbyname</a> <a href="/tags/glibc/" style="font-size: 11.67px;">glibc</a> <a href="/tags/heap/" style="font-size: 16.67px;">heap</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/kernel/" style="font-size: 15px;">kernel</a> <a href="/tags/kextload/" style="font-size: 10px;">kextload</a> <a href="/tags/level02/" style="font-size: 10px;">level02</a> <a href="/tags/linux/" style="font-size: 11.67px;">linux</a> <a href="/tags/mach-o/" style="font-size: 18.33px;">mach-o</a> <a href="/tags/openssl/" style="font-size: 10px;">openssl</a> <a href="/tags/osx/" style="font-size: 16.67px;">osx</a> <a href="/tags/patch/" style="font-size: 10px;">patch</a> <a href="/tags/ports/" style="font-size: 11.67px;">ports</a> <a href="/tags/race/" style="font-size: 11.67px;">race</a> <a href="/tags/sandbox/" style="font-size: 10px;">sandbox</a> <a href="/tags/stack/" style="font-size: 13.33px;">stack</a> <a href="/tags/stackoverflow/" style="font-size: 11.67px;">stackoverflow</a> <a href="/tags/unlink/" style="font-size: 10px;">unlink</a> <a href="/tags/wargame/" style="font-size: 11.67px;">wargame</a>
                     </div>
                 </section>
                 
@@ -217,6 +217,139 @@
     </div>
 </nav>
       <div class="body-wrap">
+  
+    <article id="post-图解DWORDSHOOT" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2015/12/12/图解DWORDSHOOT/" class="article-date">
+      <time datetime="2015-12-12T14:53:38.000Z" itemprop="datePublished">2015-12-12</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/12/12/图解DWORDSHOOT/">图解DWORDSHOOT</a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+              <p>在解决protostar heap3之前需要学习一些新的堆溢出的知识，其中之一就是DWORDSHOOT。</p>
+<h1 id="1_简介">1 简介</h1><p>DWORD SHOOT是发生在一种发生在<strong>双向链表删除节点</strong>的时会发生的情况。他有可能<strong>导致任意地址</strong>被改写。</p>
+          
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/protostar/">protostar</a>
+    </div>
+
+
+      
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/DWORDSHOOT/">DWORDSHOOT</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/exploit/">exploit</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/heap/">heap</a></li></ul>
+    </div>
+
+      
+        <p class="article-more-link">
+          <a  href="/2015/12/12/图解DWORDSHOOT/#more">查看更多 >></a>
+        </p>
+      
+      <div class="clearfix"></div>
+    </div>
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-protostar-heap2" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2015/12/09/protostar-heap2/" class="article-date">
+      <time datetime="2015-12-09T19:10:06.000Z" itemprop="datePublished">2015-12-09</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/12/09/protostar-heap2/">protostar详细解析 heap2 解答</a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+              <h1 id="1源码">1源码</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> auth &#123;</span><br><span class="line">  <span class="keyword">char</span> name[<span class="number">32</span>];</span><br><span class="line">  <span class="keyword">int</span> auth;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> auth *auth;</span><br><span class="line"><span class="keyword">char</span> *service;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">  <span class="keyword">char</span> line[<span class="number">128</span>];</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">"[ auth = %p, service = %p ]\n"</span>, auth, service);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span>(fgets(line, <span class="keyword">sizeof</span>(line), <span class="built_in">stdin</span>) == <span class="literal">NULL</span>) <span class="keyword">break</span>;</span><br><span class="line">      </span><br><span class="line">      <span class="keyword">if</span>(<span class="built_in">strncmp</span>(line, <span class="string">"auth "</span>, <span class="number">5</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">          auth = <span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(auth));</span><br><span class="line">          <span class="built_in">memset</span>(auth, <span class="number">0</span>, <span class="keyword">sizeof</span>(auth));</span><br><span class="line">          <span class="keyword">if</span>(<span class="built_in">strlen</span>(line + <span class="number">5</span>) &lt; <span class="number">31</span>) &#123;</span><br><span class="line">              <span class="built_in">strcpy</span>(auth-&gt;name, line + <span class="number">5</span>);</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span>(<span class="built_in">strncmp</span>(line, <span class="string">"reset"</span>, <span class="number">5</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">          <span class="built_in">free</span>(auth);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span>(<span class="built_in">strncmp</span>(line, <span class="string">"service"</span>, <span class="number">6</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">          service = strdup(line + <span class="number">7</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span>(<span class="built_in">strncmp</span>(line, <span class="string">"login"</span>, <span class="number">5</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">          <span class="keyword">if</span>(auth-&gt;auth) &#123;</span><br><span class="line">              <span class="built_in">printf</span>(<span class="string">"you have logged in already!\n"</span>);</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              <span class="built_in">printf</span>(<span class="string">"please enter your password\n"</span>);</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/protostar/">protostar</a>
+    </div>
+
+
+      
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/exploit/">exploit</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/heap/">heap</a></li></ul>
+    </div>
+
+      
+        <p class="article-more-link">
+          <a  href="/2015/12/09/protostar-heap2/#more">查看更多 >></a>
+        </p>
+      
+      <div class="clearfix"></div>
+    </div>
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+
+
   
     <article id="post-protostar-heap1" class="article article-type-post" itemscope itemprop="blogPost">
   

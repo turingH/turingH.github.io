@@ -2,6 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2016/05/23/10-11-4%E7%89%88%E6%9C%AC%E5%B0%8F%E7%BB%93/</loc>
+    <lastmod>2016-05-23T18:53:54.000Z</lastmod>
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2016/04/29/CVE-2016-1749%E5%86%85%E6%A0%B8%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8CPOC%E5%88%86%E6%9E%90/</loc>
     <lastmod>2016-04-29T20:37:51.000Z</lastmod>
   </url>
@@ -104,6 +109,11 @@
   <url>
     <loc>http://yoursite.com/2016/03/03/CVE-2016-0799%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90/</loc>
     <lastmod>2016-03-24T03:35:35.000Z</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2016/02/19/CVE-2015-7547%E5%88%86%E6%9E%90%E4%B8%8E%E8%B0%83%E8%AF%95%E5%89%AF%E6%9C%AC/</loc>
+    <lastmod>2016-03-24T03:35:30.000Z</lastmod>
   </url>
   
   <url>
