@@ -3,28 +3,19 @@
 <head>
   <meta charset="utf-8">
   
-  <title>图解DWORDSHOOT | mrh的学习分享</title>
+  <title>nlist-Mach-O文件重定向信息数据结构分析 | mrh的学习分享</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="在解决protostar heap3之前需要学习一些新的堆溢出的知识，其中之一就是DWORDSHOOT。
-1 简介DWORD SHOOT是发生在一种发生在双向链表删除节点的时会发生的情况。他有可能导致任意地址被改写。">
+  <meta name="description" content="0x00 摘要在研究Mach-O的重定向相关内容时，就一定会遇到nlist这个数据结构，他定义在文件中，简单的对头文件中的注释做了翻译和整理，体现在图上面，nlist的数据结构看似非常简单，使用的时候却有点复杂，理解nlist的数据结构是进一步对OSX内核进行分析非常重要的一步。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="图解DWORDSHOOT">
-<meta property="og:url" content="http://turingh.github.io/2015/12/12/图解DWORDSHOOT/index.html">
+<meta property="og:title" content="nlist-Mach-O文件重定向信息数据结构分析">
+<meta property="og:url" content="http://turingh.github.io/2016/05/24/nlist-Mach-O文件重定向信息数据结构分析/index.html">
 <meta property="og:site_name" content="mrh的学习分享">
-<meta property="og:description" content="在解决protostar heap3之前需要学习一些新的堆溢出的知识，其中之一就是DWORDSHOOT。
-1 简介DWORD SHOOT是发生在一种发生在双向链表删除节点的时会发生的情况。他有可能导致任意地址被改写。">
-<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/dwordshoot_heap.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/dwordshoot_fd.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/dwordshoot_bk.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/dwordshoot_unlink.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/dwordshoot_attack_heap.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/dwordshoot_attack_fd_bk.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/dwordshoot_attack_unlink.png">
-<meta property="og:updated_time" content="2016-03-24T03:38:38.000Z">
+<meta property="og:description" content="0x00 摘要在研究Mach-O的重定向相关内容时，就一定会遇到nlist这个数据结构，他定义在文件中，简单的对头文件中的注释做了翻译和整理，体现在图上面，nlist的数据结构看似非常简单，使用的时候却有点复杂，理解nlist的数据结构是进一步对OSX内核进行分析非常重要的一步。">
+<meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/nlist/nlist%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90.png">
+<meta property="og:updated_time" content="2016-05-25T03:58:37.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="图解DWORDSHOOT">
-<meta name="twitter:description" content="在解决protostar heap3之前需要学习一些新的堆溢出的知识，其中之一就是DWORDSHOOT。
-1 简介DWORD SHOOT是发生在一种发生在双向链表删除节点的时会发生的情况。他有可能导致任意地址被改写。">
+<meta name="twitter:title" content="nlist-Mach-O文件重定向信息数据结构分析">
+<meta name="twitter:description" content="0x00 摘要在研究Mach-O的重定向相关内容时，就一定会遇到nlist这个数据结构，他定义在文件中，简单的对头文件中的注释做了翻译和整理，体现在图上面，nlist的数据结构看似非常简单，使用的时候却有点复杂，理解nlist的数据结构是进一步对OSX内核进行分析非常重要的一步。">
   
     <link rel="alternative" href="/atom.xml" title="mrh的学习分享" type="application/atom+xml">
   
@@ -226,11 +217,11 @@
         </header>                
     </div>
 </nav>
-      <div class="body-wrap"><article id="post-图解DWORDSHOOT" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-nlist-Mach-O文件重定向信息数据结构分析" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2015/12/12/图解DWORDSHOOT/" class="article-date">
-      <time datetime="2015-12-12T14:53:38.000Z" itemprop="datePublished">2015-12-12</time>
+      <a href="/2016/05/24/nlist-Mach-O文件重定向信息数据结构分析/" class="article-date">
+      <time datetime="2016-05-25T03:30:50.000Z" itemprop="datePublished">2016-05-24</time>
 </a>
     </div>
   
@@ -243,7 +234,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      图解DWORDSHOOT
+      nlist-Mach-O文件重定向信息数据结构分析
     </h1>
   
 
@@ -252,13 +243,13 @@
       <div class="article-info article-info-post">
         
     <div class="article-category tagcloud">
-    <a class="article-category-link" href="/categories/protostar/">protostar</a>
+    <a class="article-category-link" href="/categories/OS-X/">OS X</a>
     </div>
 
 
         
     <div class="article-tag tagcloud">
-        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/DWORDSHOOT/">DWORDSHOOT</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/exploit/">exploit</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/heap/">heap</a></li></ul>
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/OS-X/">OS X</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dyld/">dyld</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mach-o/">mach-o</a></li></ul>
     </div>
 
         <div class="clearfix"></div>
@@ -268,25 +259,17 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-        <p>在解决protostar heap3之前需要学习一些新的堆溢出的知识，其中之一就是DWORDSHOOT。</p>
-<h1 id="1_简介">1 简介</h1><p>DWORD SHOOT是发生在一种发生在<strong>双向链表删除节点</strong>的时会发生的情况。他有可能<strong>导致任意地址</strong>被改写。</p>
+        <h1 id="0x00_摘要">0x00 摘要</h1><p>在研究<code>Mach-O</code>的重定向相关内容时，就一定会遇到nlist这个数据结构，他定义在<mach-o nlist.h="">文件中，简单的对头文件中的注释做了翻译和整理，体现在图上面，nlist的数据结构看似非常简单，使用的时候却有点复杂，理解nlist的数据结构是进一步对OSX内核进行分析非常重要的一步。</mach-o></p>
+<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/nlist/nlist%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90.png" alt="nlist分析图"></p>
 <a id="more"></a>
-<h1 id="2_unlink原理">2 unlink原理</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> node</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">char</span> data[<span class="number">32</span>];</span><br><span class="line">    <span class="keyword">struct</span> node *fd;			<span class="comment">//指向前一个节点</span></span><br><span class="line">    <span class="keyword">struct</span> node *bk;			<span class="comment">//指向前一个节点</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">unlink</span> <span class="params">(<span class="keyword">struct</span> node *p)</span>	<span class="comment">//将节点从双向链表中移出</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="keyword">struct</span> node *FD;</span><br><span class="line">    <span class="keyword">struct</span> node *BK;</span><br><span class="line"></span><br><span class="line">    FD = p-&gt;fd;</span><br><span class="line">    BK = p-&gt;bk;</span><br><span class="line"></span><br><span class="line">    FD-&gt;bk = BK;</span><br><span class="line">    BK-&gt;fd = FD;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>正常情况下，unlink函数执行时内存中的数据状态入下图所示：</p>
-<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/dwordshoot_heap.png" alt="Image text"></p>
-<p>在ulink执行中正确的流程如下图所示：</p>
-<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/dwordshoot_fd.png" alt="Image text"></p>
-<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/dwordshoot_bk.png" alt="Image text"></p>
-<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/dwordshoot_unlink.png" alt="Image text"></p>
-<h1 id="3_DWORDSHOOT原理">3 DWORDSHOOT原理</h1><p>​    在对堆内存溢出后DWORDSHOOT可以修改任意地址内存，在发生攻击时的程序流程如下所示，通过堆溢出可在对一个节点数据修改（或者其他方式）改变内存分配上下面一个节点的fd和bk数据。</p>
-<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/dwordshoot_attack_heap.png" alt="Image text"></p>
-<p>那么在执行FD和BK的初始化的时候发生的事情就会和预想的很不同了。</p>
-<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/dwordshoot_attack_fd_bk.png" alt="Image text"></p>
-<p>所以在最终执行unlink时就会导致预定的地址数据被改写。</p>
-<p><img src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/dwordshoot_attack_unlink.png" alt="Image text"></p>
-<p>从而成功的改写了进程中free函数，使得调用free函数时实际上是执行了shellcode。当然也可以修改其他在unlink之后会调用的库函数。</p>
-<h1 id="4_防止类似问题发生">4 防止类似问题发生</h1><p>​    只需要再unlink之前做出相应检测就可以避免这种bug产生了。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">assert (p-&gt;fd &amp;&amp; p-&gt;fd-&gt;bk == p);</span><br><span class="line">assert (p-&gt;bk &amp;&amp; p-&gt;bk-&gt;fd == p);</span><br></pre></td></tr></table></figure>
+<h1 id="0x01_简单介绍">0x01 简单介绍</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> nlist &#123;</span><br><span class="line">	<span class="keyword">union</span> &#123;</span><br><span class="line"><span class="preprocessor">#<span class="keyword">ifndef</span> __LP64__</span></span><br><span class="line">		<span class="keyword">char</span> *n_name;	<span class="comment">/* for use when in-core */</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">endif</span></span></span><br><span class="line">		<span class="keyword">uint32_t</span> n_strx;	<span class="comment">/* index into the string table */</span></span><br><span class="line">	&#125; n_un;</span><br><span class="line">	<span class="keyword">uint8_t</span> n_type;		<span class="comment">/* type flag, see below */</span></span><br><span class="line">	<span class="keyword">uint8_t</span> n_sect;		<span class="comment">/* section number or NO_SECT */</span></span><br><span class="line">	<span class="keyword">int16_t</span> n_desc;		<span class="comment">/* see &lt;mach-o/stab.h&gt; */</span></span><br><span class="line">	<span class="keyword">uint32_t</span> n_value;	<span class="comment">/* value of this symbol (or stab offset) */</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span><br><span class="line"> * This is the symbol table entry structure for 64-bit architectures.</span><br><span class="line"> */</span></span><br><span class="line"><span class="keyword">struct</span> nlist_64 &#123;</span><br><span class="line">    <span class="keyword">union</span> &#123;</span><br><span class="line">        <span class="keyword">uint32_t</span>  n_strx; <span class="comment">/* index into the string table */</span></span><br><span class="line">    &#125; n_un;</span><br><span class="line">    <span class="keyword">uint8_t</span> n_type;        <span class="comment">/* type flag, see below */</span></span><br><span class="line">    <span class="keyword">uint8_t</span> n_sect;        <span class="comment">/* section number or NO_SECT */</span></span><br><span class="line">    <span class="keyword">uint16_t</span> n_desc;       <span class="comment">/* see &lt;mach-o/stab.h&gt; */</span></span><br><span class="line">    <span class="keyword">uint64_t</span> n_value;      <span class="comment">/* value of this symbol (or stab offset) */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="1-1_n_type">1.1 n_type</h2><p>​    <code>n_type</code>拥有8个bit，他的分配如下。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span><br><span class="line"> * The n_type field really contains four fields:</span><br><span class="line"> *	unsigned char N_STAB:3,</span><br><span class="line"> *		      N_PEXT:1,</span><br><span class="line"> *		      N_TYPE:3,</span><br><span class="line"> *		      N_EXT:1;</span><br><span class="line"> * which are used via the following masks.</span><br><span class="line"> */</span></span><br></pre></td></tr></table></figure>
+<p>而<code>N_TYPE</code>又分出好多种，具体的定义可以参见上面的思维导图，或者源码中的注释。</p>
+<p><code>n_type</code>字段主要用来标识重定义符号不同的种类。</p>
+<h2 id="1-2_n_desc">1.2 n_desc</h2><p>​    <code>n_desc</code>的用法与<code>n_type</code>类似，也是被掩码切分成好多块，分别表示不同的含义。用来标识重定义符一些特性。</p>
+<h2 id="1-3_n_value">1.3 n_value</h2><p>​    <code>n_value</code>值的具体意义根据<code>n_type</code>、<code>n_sect</code>的变化，而拥有各自不同的含义。</p>
+<h1 id="0x02_小结">0x02 小结</h1><p>其实<mach-o nlist.h="">中的注释已经解释的非常清楚了，在阅读本文之后，结合思维导图阅读源码文件，不仅可以减少理解的时间，而且可以更加系统的去理解nlist数据结构，或者有目的性的阅读与当前需求相关的部分。</mach-o></p>
 
       
     </div>
@@ -295,13 +278,13 @@
   
     
     <div class="copyright">
-        <p><span>本文标题:</span><a href="/2015/12/12/图解DWORDSHOOT/">图解DWORDSHOOT</a></p>
+        <p><span>本文标题:</span><a href="/2016/05/24/nlist-Mach-O文件重定向信息数据结构分析/">nlist-Mach-O文件重定向信息数据结构分析</a></p>
         <p><span>文章作者:</span><a href="/" title="访问 mrh 的个人博客">mrh</a></p>
-        <p><span>发布时间:</span>2015年12月12日 - 09时53分</p>
-        <p><span>最后更新:</span>2016年03月23日 - 23时38分</p>
+        <p><span>发布时间:</span>2016年05月24日 - 23时30分</p>
+        <p><span>最后更新:</span>2016年05月24日 - 23时58分</p>
         <p>
-            <span>原始链接:</span><a class="post-url" href="/2015/12/12/图解DWORDSHOOT/" title="图解DWORDSHOOT">http://turingh.github.io/2015/12/12/图解DWORDSHOOT/</a>
-            <span class="copy-path" data-clipboard-text="原文: http://turingh.github.io/2015/12/12/图解DWORDSHOOT/　　作者: mrh" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <span>原始链接:</span><a class="post-url" href="/2016/05/24/nlist-Mach-O文件重定向信息数据结构分析/" title="nlist-Mach-O文件重定向信息数据结构分析">http://turingh.github.io/2016/05/24/nlist-Mach-O文件重定向信息数据结构分析/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://turingh.github.io/2016/05/24/nlist-Mach-O文件重定向信息数据结构分析/　　作者: mrh" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
             <script src="/js/clipboard.min.js"></script>
             <script> var clipboard = new Clipboard('.copy-path'); </script>
         </p>
@@ -314,18 +297,9 @@
 
 <nav id="article-nav">
   
-    <a href="/2015/12/14/protostar-heap3/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption"><</strong>
-      <div class="article-nav-title">
-        
-          protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法
-        
-      </div>
-    </a>
   
-  
-    <a href="/2015/12/09/protostar-heap2/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">protostar详细解析 heap2 解答</div>
+    <a href="/2016/05/23/10-11-4版本小结/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">10-11-4版本小结</div>
       <strong class="article-nav-caption">></strong>
     </a>
   
@@ -336,7 +310,7 @@
 
     <div id="toc" class="toc-article">
     <strong class="toc-title">文章目录</strong>
-    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1_简介"><span class="toc-number">1.</span> <span class="toc-text">1 简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2_unlink原理"><span class="toc-number">2.</span> <span class="toc-text">2 unlink原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3_DWORDSHOOT原理"><span class="toc-number">3.</span> <span class="toc-text">3 DWORDSHOOT原理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4_防止类似问题发生"><span class="toc-number">4.</span> <span class="toc-text">4 防止类似问题发生</span></a></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x00_摘要"><span class="toc-number">1.</span> <span class="toc-text">0x00 摘要</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01_简单介绍"><span class="toc-number">2.</span> <span class="toc-text">0x01 简单介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1_n_type"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 n_type</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2_n_desc"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 n_desc</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3_n_value"><span class="toc-number">2.3.</span> <span class="toc-text">1.3 n_value</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02_小结"><span class="toc-number">3.</span> <span class="toc-text">0x02 小结</span></a></li></ol>
 </div>
 <style>
     .left-col .switch-btn {
@@ -389,13 +363,11 @@
 
     <div class="scroll" id="post-nav-button">
         
-            <a href="/2015/12/14/protostar-heap3/" title="上一篇: protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法">
-                <i class="fa fa-angle-left"></i>
-            </a>
+            <a href="/" title="回到主页"><i class="fa fa-home"></i></a>
         
         <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
         
-            <a href="/2015/12/09/protostar-heap2/" title="下一篇: protostar详细解析 heap2 解答">
+            <a href="/2016/05/23/10-11-4版本小结/" title="下一篇: 10-11-4版本小结">
                 <i class="fa fa-angle-right"></i>
             </a>
         
