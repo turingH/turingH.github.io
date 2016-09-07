@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>libmalloc源码分析之nanozone_s的处理 | mrh的学习分享</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="摘要根据申请内存的大小不同，libmalloc会从不同的堆上空间将内存分配给申请者，而最小的一个一档，是从nano_zone_s中，通过nano_*函数获取堆上已分配的内存。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="libmalloc源码分析之nanozone_s的处理">
+<meta property="og:url" content="http://turingh.github.io/2016/06/28/libmalloc源码分析之nanozone-s的处理/index.html">
+<meta property="og:site_name" content="mrh的学习分享">
+<meta property="og:description" content="摘要根据申请内存的大小不同，libmalloc会从不同的堆上空间将内存分配给申请者，而最小的一个一档，是从nano_zone_s中，通过nano_*函数获取堆上已分配的内存。">
+<meta property="og:updated_time" content="2016-06-30T02:58:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="libmalloc源码分析之nanozone_s的处理">
+<meta name="twitter:description" content="摘要根据申请内存的大小不同，libmalloc会从不同的堆上空间将内存分配给申请者，而最小的一个一档，是从nano_zone_s中，通过nano_*函数获取堆上已分配的内存。">
+  
+    <link rel="alternative" href="/atom.xml" title="mrh的学习分享" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/img/touxiang.jpeg">
+  
+  
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  
+  
+      <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  <!-- 加载特效 -->
+    <script src="/js/pace.js"></script>
+    <link href="/css/pace/pace-theme-flash.css" rel="stylesheet" />
+  <script>
+      var yiliaConfig = {
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            
+            <img lazy-src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/touxiang.jpeg" class="js-avatar">
+            
+        </a>
+
+        <hgroup>
+          <h1 class="header-author"><a href="/">mrh</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">胸口写一个勇字</p>
+        
+        
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">博客首页</a></li>
+                        
+                            <li><a href="/archives">所有文章</a></li>
+                        
+                            <li><a href="https://github.com/turingH/OSX_CRACKME">CrackMe</a></li>
+                        
+                            <li><a href="https://raw.githubusercontent.com/turingH/ad/master/README.md">安全站点</a></li>
+                        
+                            <li><a href="https://github.com/turingH/MACOSX-SecurityUpdate/blob/master/OSX/10.11.4/10.11.4_03_22_16.csv">10.11.4补丁</a></li>
+                        
+                            <li><a href="https://github.com/turingH/MACOSX-SecurityUpdate/blob/master/OSX/10.11.5/10.11.5_05_16_16.csv">10.11.5补丁</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fl github" target="_blank" href="https://github.com/turingH" title="github">github</a>
+                            
+                                <a class="fl weibo" target="_blank" href="http://weibo.com/u/2047262653" title="weibo">weibo</a>
+                            
+                                <a class="fl twitter" target="_blank" href="https://twitter.com/samulehuang" title="twitter">twitter</a>
+                            
+                                <a class="fl facebook" target="_blank" href="https://www.facebook.com/huang.samuel.94" title="facebook">facebook</a>
+                            
+                                <a class="fl rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <a href="/tags/CVE/" style="font-size: 18px;">CVE</a> <a href="/tags/DWORDSHOOT/" style="font-size: 10px;">DWORDSHOOT</a> <a href="/tags/IOS/" style="font-size: 10px;">IOS</a> <a href="/tags/OS-X/" style="font-size: 14px;">OS X</a> <a href="/tags/OSX/" style="font-size: 12px;">OSX</a> <a href="/tags/POC/" style="font-size: 10px;">POC</a> <a href="/tags/Pegasus/" style="font-size: 10px;">Pegasus</a> <a href="/tags/XNU/" style="font-size: 10px;">XNU</a> <a href="/tags/bounds-checking/" style="font-size: 10px;">bounds checking</a> <a href="/tags/dlopen/" style="font-size: 10px;">dlopen</a> <a href="/tags/dns/" style="font-size: 12px;">dns</a> <a href="/tags/dos/" style="font-size: 10px;">dos</a> <a href="/tags/dyld/" style="font-size: 18px;">dyld</a> <a href="/tags/dynamic-link/" style="font-size: 10px;">dynamic link</a> <a href="/tags/execv/" style="font-size: 14px;">execv</a> <a href="/tags/execve/" style="font-size: 10px;">execve</a> <a href="/tags/exploit/" style="font-size: 20px;">exploit</a> <a href="/tags/frame-faking/" style="font-size: 10px;">frame-faking</a> <a href="/tags/free/" style="font-size: 10px;">free</a> <a href="/tags/freebsd/" style="font-size: 10px;">freebsd</a> <a href="/tags/gethostbyname/" style="font-size: 12px;">gethostbyname</a> <a href="/tags/glibc/" style="font-size: 12px;">glibc</a> <a href="/tags/heap/" style="font-size: 18px;">heap</a> <a href="/tags/hook/" style="font-size: 10px;">hook</a> <a href="/tags/kernel/" style="font-size: 16px;">kernel</a> <a href="/tags/kextload/" style="font-size: 10px;">kextload</a> <a href="/tags/level02/" style="font-size: 10px;">level02</a> <a href="/tags/linux/" style="font-size: 12px;">linux</a> <a href="/tags/mach-o/" style="font-size: 20px;">mach-o</a> <a href="/tags/malloc/" style="font-size: 12px;">malloc</a> <a href="/tags/nano/" style="font-size: 10px;">nano</a> <a href="/tags/openssl/" style="font-size: 10px;">openssl</a> <a href="/tags/osx/" style="font-size: 18px;">osx</a> <a href="/tags/patch/" style="font-size: 10px;">patch</a> <a href="/tags/ports/" style="font-size: 14px;">ports</a> <a href="/tags/race/" style="font-size: 14px;">race</a> <a href="/tags/sandbox/" style="font-size: 10px;">sandbox</a> <a href="/tags/stack/" style="font-size: 14px;">stack</a> <a href="/tags/stackoverflow/" style="font-size: 12px;">stackoverflow</a> <a href="/tags/unlink/" style="font-size: 10px;">unlink</a> <a href="/tags/wargame/" style="font-size: 12px;">wargame</a> <a href="/tags/基本功要扎实/" style="font-size: 12px;">基本功要扎实</a>
+                    </div>
+                </section>
+                
+                
+                
+
+                
+                
+                <section class="switch-part switch-part3">
+                
+                    <div id="js-aboutme">啥也不说了，先干黄旭东</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">mrh</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                
+                    <img lazy-src="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/touxiang.jpeg" class="js-avatar">
+                
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">mrh</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">胸口写一个勇字</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">博客首页</a></li>
+                
+                    <li><a href="/archives">所有文章</a></li>
+                
+                    <li><a href="https://github.com/turingH/OSX_CRACKME">CrackMe</a></li>
+                
+                    <li><a href="https://raw.githubusercontent.com/turingH/ad/master/README.md">安全站点</a></li>
+                
+                    <li><a href="https://github.com/turingH/MACOSX-SecurityUpdate/blob/master/OSX/10.11.4/10.11.4_03_22_16.csv">10.11.4补丁</a></li>
+                
+                    <li><a href="https://github.com/turingH/MACOSX-SecurityUpdate/blob/master/OSX/10.11.5/10.11.5_05_16_16.csv">10.11.5补丁</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a class="github" target="_blank" href="https://github.com/turingH" title="github">github</a>
+                    
+                        <a class="weibo" target="_blank" href="http://weibo.com/u/2047262653" title="weibo">weibo</a>
+                    
+                        <a class="twitter" target="_blank" href="https://twitter.com/samulehuang" title="twitter">twitter</a>
+                    
+                        <a class="facebook" target="_blank" href="https://www.facebook.com/huang.samuel.94" title="facebook">facebook</a>
+                    
+                        <a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+                    
+                </div>
+            </nav>
+        </header>                
+    </div>
+</nav>
+      <div class="body-wrap"><article id="post-libmalloc源码分析之nanozone-s的处理" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/06/28/libmalloc源码分析之nanozone-s的处理/" class="article-date">
+      <time datetime="2016-06-29T02:11:53.000Z" itemprop="datePublished">2016-06-28</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      libmalloc源码分析之nanozone_s的处理
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/OS-X/">OS X</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/malloc/">malloc</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nano/">nano</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/基本功要扎实/">基本功要扎实</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h1 id="摘要">摘要</h1><p>根据申请内存的大小不同，<code>libmalloc</code>会从不同的堆上空间将内存分配给申请者，而最小的一个一档，是从<code>nano_zone_s</code>中，通过<code>nano_*</code>函数获取堆上已分配的内存。</p>
+<a id="more"></a>
+<h1 id="nano_zone_s">nano_zone_s</h1><p><code>nano_zone_s</code>的数据结构如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> nanozone_s &#123;				<span class="comment">// vm_allocate()'d, so page-aligned to begin with.</span></span><br><span class="line">	<span class="keyword">malloc_zone_t</span>		basic_zone;		<span class="comment">// first page will be given read-only protection</span></span><br><span class="line">	<span class="keyword">uint8_t</span>			pad[PAGE_MAX_SIZE - <span class="keyword">sizeof</span>(<span class="keyword">malloc_zone_t</span>)];</span><br><span class="line"></span><br><span class="line">	<span class="comment">// remainder of structure is R/W (contains no function pointers)</span></span><br><span class="line">	<span class="comment">// page-aligned</span></span><br><span class="line">	<span class="keyword">struct</span> nano_meta_s		meta_data[NANO_MAG_SIZE][NANO_SLOT_SIZE]; <span class="comment">// max: NANO_MAG_SIZE cores x NANO_SLOT_SIZE slots for nano blocks &#123;16 .. 256&#125;</span></span><br><span class="line">	_malloc_lock_s			band_resupply_lock[NANO_MAG_SIZE];</span><br><span class="line">    <span class="keyword">uintptr_t</span>           band_max_mapped_baseaddr[NANO_MAG_SIZE];</span><br><span class="line">	<span class="keyword">size_t</span>			core_mapped_size[NANO_MAG_SIZE];</span><br><span class="line"></span><br><span class="line">	<span class="keyword">unsigned</span>			debug_flags;</span><br><span class="line">	<span class="keyword">unsigned</span>			our_signature;</span><br><span class="line">	<span class="keyword">unsigned</span>			phys_ncpus;</span><br><span class="line">	<span class="keyword">unsigned</span>			logical_ncpus;</span><br><span class="line">	<span class="keyword">unsigned</span>			hyper_shift;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* security cookie */</span></span><br><span class="line">	<span class="keyword">uintptr_t</span>			cookie;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span><br><span class="line">	 * The nano zone constructed by create_nano_zone() would like to hand off tiny, small, and large</span><br><span class="line">	 * allocations to the default scalable zone. Record the latter as the "helper" zone here.</span><br><span class="line">	 */</span></span><br><span class="line">	<span class="keyword">malloc_zone_t</span>		*helper_zone;</span><br><span class="line">&#125; <span class="keyword">nanozone_t</span>;</span><br></pre></td></tr></table></figure>
+<p>在<a href="http://turingh.github.io/2016/06/28/libmalloc%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8B%E5%88%9D%E5%A7%8B%E5%8C%96/#szone_t、nanozone_t">libmalloc源码分析之初始化</a>中做过简单的介绍，这个数据结构中，主要需要理解的是几个宏和一个数据结构。</p>
+<h2 id="一些需要理解的宏定义">一些需要理解的宏定义</h2><h3 id="NANO_MAX_SIZE">NANO_MAX_SIZE</h3><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="hexcolor">#def</span>ine NANO_MAX_SIZE			<span class="number">256</span> </span><br><span class="line"><span class="comment">/* Buckets sized &#123;16, 32, 48, 64, 80, 96, 112, ...&#125; */</span></span><br></pre></td></tr></table></figure>
+<p>定义了<code>nano_zone</code>中可以申请的内存块的最大值为256</p>
+<h3 id="SLOT_IN_BAND_SIZE">SLOT_IN_BAND_SIZE</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">define</span> NANO_OFFSET_BITS		<span class="number">17</span>	</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> SLOT_IN_BAND_SIZE 	(<span class="number">1</span> &lt;&lt; NANO_OFFSET_BITS)</span></span><br></pre></td></tr></table></figure>
+<p><code>SLOT_IN_BAND_SIZE</code>的值为2^17==128*1024,所以<code>SLOT_IN_BAND_SIZE</code>的值等于<code>128KB</code>。用来表示，在每一个<code>nano</code>内存分配的<code>BAND</code>之中，一个每一个<code>SLOT</code>的大小是<code>128KB</code>。</p>
+<h3 id="BAND_SIZE">BAND_SIZE</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">define</span> NANO_SLOT_BITS			<span class="number">4</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> NANO_OFFSET_BITS		<span class="number">17</span>	</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> BAND_SIZE 		(<span class="number">1</span> &lt;&lt; (NANO_SLOT_BITS + NANO_OFFSET_BITS)) </span></span><br><span class="line"><span class="comment">/*  == Number of bytes covered by a page table entry */</span></span><br></pre></td></tr></table></figure>
+<p><code>BAND_SIZE</code>的值为2^21==2*1024*1024,所以<code>BAND_SIZE</code>的值等于<code>2MB</code>。用来表示，在每一个<code>nano_zone_t</code>的分配中，每一个BAND的大小是2MB。</p>
+<h3 id="NANO_MAG_SIZE">NANO_MAG_SIZE</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">define</span> NANO_MAG_BITS            <span class="number">5</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> NANO_MAG_SIZE            (<span class="number">1</span> &lt;&lt; NANO_MAG_BITS)</span></span><br></pre></td></tr></table></figure>
+<p><code>NANO_MAG_SIZE</code>的值为2^5==32，用来最多支持多少个核。</p>
+<h3 id="NANO_SLOT_SIZE">NANO_SLOT_SIZE</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">define</span> NANO_SLOT_BITS			<span class="number">4</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> NANO_SLOT_SIZE      	(<span class="number">1</span> &lt;&lt; NANO_SLOT_BITS)</span></span><br></pre></td></tr></table></figure>
+<p>表示一共有2^4,也就是16种<code>SLOT</code>的大小。分别是16,32,48,64,…,256。</p>
+<h2 id="nano_meta_s">nano_meta_s</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> nano_meta_s &#123;</span><br><span class="line">	OSQueueHead			slot_LIFO CACHE_ALIGN;</span><br><span class="line">  	<span class="comment">//用于重复利用释放内存的队列</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span>		slot_madvised_log_page_count;</span><br><span class="line">	<span class="keyword">volatile</span> <span class="keyword">uintptr_t</span>		slot_current_base_addr;</span><br><span class="line">  	<span class="comment">//slot的基址</span></span><br><span class="line">	<span class="keyword">volatile</span> <span class="keyword">uintptr_t</span>		slot_limit_addr;</span><br><span class="line">  	<span class="comment">//slot可以分配的地址最大值</span></span><br><span class="line">	<span class="keyword">volatile</span> <span class="keyword">size_t</span>		slot_objects_mapped;</span><br><span class="line">  	<span class="comment">//slot中已经映射了多少个objects</span></span><br><span class="line">	<span class="keyword">volatile</span> <span class="keyword">size_t</span>		slot_objects_skipped;</span><br><span class="line">  	<span class="comment">//slot开始的时候会跳过多少个object开始使用</span></span><br><span class="line">	<span class="keyword">bitarray_t</span>			slot_madvised_pages;</span><br><span class="line">    <span class="keyword">volatile</span> <span class="keyword">uintptr_t</span>		slot_bump_addr CACHE_ALIGN; </span><br><span class="line">  	<span class="comment">//slot当前开始分配的地址</span></span><br><span class="line">    <span class="comment">// position on cache line distinct from that of slot_LIFO</span></span><br><span class="line">    <span class="keyword">volatile</span> <span class="keyword">boolean_t</span>		slot_exhausted;</span><br><span class="line">  	<span class="comment">// slot是否已经用尽</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span>		slot_bytes;</span><br><span class="line">  	<span class="comment">// 该slot中存储的bytes是多少(16、32、48...)</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span>		slot_objects;</span><br><span class="line">  	<span class="comment">// 该slot中存储了多少个object(slot总内存/slot_bytes)</span></span><br><span class="line">&#125; *<span class="keyword">nano_meta_admin_t</span>;</span><br></pre></td></tr></table></figure>
+<p>这个数据结构就是<code>nano_zone_s</code>中的<code>meta_data</code>的数据结构，具体用来描述每一个<code>slot</code>的状态和属性。</p>
+<h1 id="nano_malloc">nano_malloc</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> *</span><br><span class="line"><span class="title">malloc</span><span class="params">(size_t size)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">void</span>	*retval;</span><br><span class="line">	retval = malloc_zone_malloc(inline_malloc_default_zone(), size);</span><br><span class="line">	<span class="keyword">if</span> (retval == <span class="literal">NULL</span>) &#123;</span><br><span class="line">		errno = ENOMEM;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> retval;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> *</span><br><span class="line"><span class="title">malloc_zone_malloc</span><span class="params">(malloc_zone_t *zone, size_t size)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">void</span>	*ptr;</span><br><span class="line">	<span class="comment">/*...*/</span></span><br><span class="line">	ptr = zone-&gt;<span class="built_in">malloc</span>(zone, size);</span><br><span class="line">	<span class="comment">/*...*/</span></span><br><span class="line">	<span class="keyword">return</span> ptr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> *</span><br><span class="line"><span class="title">nano_malloc</span><span class="params">(nanozone_t *nanozone, size_t size)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (size &lt;= NANO_MAX_SIZE) &#123;</span><br><span class="line">		<span class="keyword">void</span> *p = _nano_malloc_check_clear(nanozone, size, <span class="number">0</span>);</span><br><span class="line">		<span class="keyword">if</span> (p) &#123;</span><br><span class="line">			<span class="keyword">return</span> p;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="comment">/* FALLTHROUGH to helper zone */</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">malloc_zone_t</span> *zone = (<span class="keyword">malloc_zone_t</span> *)(nanozone-&gt;helper_zone);</span><br><span class="line">	<span class="keyword">return</span> zone-&gt;<span class="built_in">malloc</span>(zone, size);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为默认的<code>zone</code>是使用<code>nano_zone_t</code>，在<code>malloc_zone_malloc</code>中的<code>zone-&gt;malloc()</code>函数被调用之后，在</p>
+<p><code>nano_malloc</code>会依据申请的size进行判断，当只有当<code>size</code>小于<code>NANO_MAX_SIZE</code>的时候才会调用<code>nano_malloc</code>的内部实现<code>_nano_malloc_check_clear</code>，否则就通过<code>nanozone-&gt;helper_zone</code>的<code>malloc</code>函数，进一步判断使用<code>tiny</code>、<code>small</code>、还是<code>large</code>。</p>
+<h3 id="第一次调用_nano_malloc_check_clear">第一次调用_nano_malloc_check_clear</h3><p>所以需要重点分析的函数是<code>_nano_malloc_check_clear</code>。而第一次调用<code>malloc</code>的话，主要流程在<code>segregated_next_block</code>中实现。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> </span><br><span class="line">_nano_malloc_check_clear(<span class="keyword">nanozone_t</span> *nanozone, <span class="keyword">size_t</span> size, <span class="keyword">boolean_t</span> cleared_requested)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">void</span>		*ptr;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span>	slot_key;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span>	slot_bytes = segregated_size_to_fit(nanozone, size, &amp;slot_key); <span class="comment">// Note slot_key is set here</span></span><br><span class="line">	<span class="comment">//SLOT_BYTES是固定的16、32、64、128、、、、</span></span><br><span class="line">	<span class="comment">//slot_key 1~16</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span>	mag_index = NANO_MAG_INDEX(nanozone);</span><br><span class="line">	<span class="comment">//获取cpu对应的index</span></span><br><span class="line">  </span><br><span class="line">	<span class="comment">//选择cpu以及对应的内存大小块</span></span><br><span class="line">	<span class="keyword">nano_meta_admin_t</span>	pMeta = &amp;(nanozone-&gt;meta_data[mag_index][slot_key]);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//检测是否存在已经释放过，可以直接拿来用的内存</span></span><br><span class="line">	ptr = OSAtomicDequeue( &amp;(pMeta-&gt;slot_LIFO), offsetof(<span class="keyword">struct</span> chained_block_s,next));</span><br><span class="line">	<span class="keyword">if</span> (ptr) &#123;</span><br><span class="line">		<span class="comment">/*...*/</span></span><br><span class="line">      	<span class="comment">//如果队列中存在函数，则直接使用队列中的数据</span></span><br><span class="line">      	<span class="comment">//第一次调用malloc时，不会执行这一块代码，所以后面再另做分析</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="comment">//没有释放过的内存，所以调用函数 获取内存</span></span><br><span class="line">		ptr = segregated_next_block(nanozone, pMeta, slot_bytes, mag_index);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (cleared_requested &amp;&amp; ptr)</span><br><span class="line">		<span class="built_in">memset</span>(ptr, <span class="number">0</span>, slot_bytes); <span class="comment">// <span class="doctag">TODO:</span> Needs a memory barrier after memset to ensure zeroes land first?</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> ptr;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="segregated_size_to_fit">segregated_size_to_fit</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span><br><span class="line">input : size = 0 </span><br><span class="line">size = NANO_REGIME_QUANTA_SIZE==&gt;(1&lt;&lt;4)==&gt;2^4==&gt;16</span><br><span class="line">k = (16 + 16 - 1) &gt;&gt; 4 ==&gt; 31&gt;&gt;4 ==&gt; 1</span><br><span class="line">slot_bytes = 1 &lt;&lt; 4 ==&gt; 16</span><br><span class="line">*pkey = 0 </span><br><span class="line"></span><br><span class="line">input : size = 16 </span><br><span class="line">size = 16</span><br><span class="line">k = (16+16-1) &gt;&gt; 4 ==&gt;1</span><br><span class="line">slot_bytes = 16</span><br><span class="line">*pkey = 0</span><br><span class="line"></span><br><span class="line">input : size = 32</span><br><span class="line">size : 32</span><br><span class="line">k = (32+16-1)&gt;&gt;4 ==&gt;2</span><br><span class="line">slot_bytes = 2&lt;&lt;4 = 32</span><br><span class="line">*pkey = 2-1 ==&gt;1</span><br><span class="line"></span><br><span class="line">0~16 :</span><br><span class="line">pkey ==&gt; 0</span><br><span class="line">slot_bytes ==&gt; 16B</span><br><span class="line"></span><br><span class="line">17~32</span><br><span class="line">pkey ==&gt; 1</span><br><span class="line">slot_bytes ==&gt; 32B</span><br><span class="line"></span><br><span class="line">256</span><br><span class="line">pkey ==&gt; 16</span><br><span class="line">slot_bytes ==&gt; 256B</span><br><span class="line">*/</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> INLINE <span class="keyword">unsigned</span> <span class="keyword">int</span></span><br><span class="line"><span class="title">segregated_size_to_fit</span><span class="params">(nanozone_t *nanozone, size_t size, <span class="keyword">unsigned</span> <span class="keyword">int</span> *pKey)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> k, slot_bytes;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (<span class="number">0</span> == size)</span><br><span class="line">		size = NANO_REGIME_QUANTA_SIZE; <span class="comment">// Historical behavior</span></span><br><span class="line"></span><br><span class="line">	k = (size + NANO_REGIME_QUANTA_SIZE - <span class="number">1</span>) &gt;&gt; SHIFT_NANO_QUANTUM; <span class="comment">// round up and shift for number of quanta</span></span><br><span class="line">	slot_bytes = k &lt;&lt; SHIFT_NANO_QUANTUM; <span class="comment">// multiply by power of two quanta size</span></span><br><span class="line">	*pKey = k - <span class="number">1</span>; <span class="comment">// Zero-based!</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> slot_bytes;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该函数实现的功能是根据申请的<code>size</code>大小，计算到相应的需要申请的相应的slot_bytes。例如申请的大小是20的话，<code>slot_bytes</code>就应当是32。</p>
+<h4 id="初见segregated_next_block">初见segregated_next_block</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> INLINE <span class="keyword">void</span> *</span><br><span class="line"><span class="title">segregated_next_block</span><span class="params">(nanozone_t *nanozone, nano_meta_admin_t pMeta, <span class="keyword">unsigned</span> <span class="keyword">int</span> slot_bytes, <span class="keyword">unsigned</span> <span class="keyword">int</span> mag_index)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">		<span class="keyword">uintptr_t</span> theLimit = pMeta-&gt;slot_limit_addr; <span class="comment">// Capture the slot limit that bounds slot_bump_addr right now</span></span><br><span class="line">		<span class="comment">//pMeta-&gt;slot_limit_addr</span></span><br><span class="line">		<span class="comment">//当前这块pMeta可用内存的结束地址。</span></span><br><span class="line">		<span class="keyword">uintptr_t</span> b = OSAtomicAdd64Barrier(slot_bytes, (<span class="keyword">volatile</span> <span class="keyword">int64_t</span> *)&amp;(pMeta-&gt;slot_bump_addr));</span><br><span class="line">		<span class="comment">//原子的为pMeta-&gt;slot_bump_addr添加slot_bytes的长度，偏移到下一个地址</span></span><br><span class="line">		b -= slot_bytes; <span class="comment">// Atomic op returned addr of *next* free block. Subtract to get addr for *this* allocation.</span></span><br><span class="line">		<span class="comment">//减去添加的偏移量，获取当前可以获取的地址</span></span><br><span class="line">		<span class="keyword">if</span> (b &lt; theLimit) &#123; <span class="comment">// Did we stay within the bound of the present slot allocation?</span></span><br><span class="line">			<span class="comment">//如果地址还在范围之内，则返回地址</span></span><br><span class="line">			<span class="comment">//<span class="doctag">todo:</span>b不仅小于thelimit且远远小于thelimit，就可以获取一个就指向其他内存块的地址了。</span></span><br><span class="line">			<span class="keyword">return</span> (<span class="keyword">void</span> *)b; <span class="comment">// Yep, so the slot_bump_addr this thread incremented is good to go</span></span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="keyword">if</span> (pMeta-&gt;slot_exhausted) &#123; <span class="comment">// exhausted all the bands availble for this slot?</span></span><br><span class="line">				<span class="keyword">return</span> <span class="number">0</span>; <span class="comment">// We're toast</span></span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				<span class="comment">// One thread will grow the heap, others will see its been grown and retry allocation</span></span><br><span class="line">				_malloc_lock_lock(&amp;nanozone-&gt;band_resupply_lock[mag_index]);</span><br><span class="line">				<span class="comment">// re-check state now that we've taken the lock</span></span><br><span class="line">				<span class="keyword">if</span> (pMeta-&gt;slot_exhausted) &#123;</span><br><span class="line">					_malloc_lock_unlock(&amp;nanozone-&gt;band_resupply_lock[mag_index]);</span><br><span class="line">					<span class="keyword">return</span> <span class="number">0</span>; <span class="comment">// Toast</span></span><br><span class="line">				&#125; <span class="keyword">else</span> <span class="keyword">if</span> (b &lt; pMeta-&gt;slot_limit_addr) &#123;</span><br><span class="line">					_malloc_lock_unlock(&amp;nanozone-&gt;band_resupply_lock[mag_index]);</span><br><span class="line">					<span class="keyword">continue</span>; <span class="comment">// ... the slot was successfully grown by first-taker (not us). Now try again.</span></span><br><span class="line">				&#125; <span class="keyword">else</span> <span class="keyword">if</span> (segregated_band_grow(nanozone, pMeta, slot_bytes, mag_index)) &#123;</span><br><span class="line">					_malloc_lock_unlock(&amp;nanozone-&gt;band_resupply_lock[mag_index]);</span><br><span class="line">					<span class="keyword">continue</span>; <span class="comment">// ... the slot has been successfully grown by us. Now try again.</span></span><br><span class="line">				&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">					pMeta-&gt;slot_exhausted = TRUE;</span><br><span class="line">					_malloc_lock_unlock(&amp;nanozone-&gt;band_resupply_lock[mag_index]);</span><br><span class="line">					<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为是第一次调用<code>segregated_next_block</code>函数，<code>theLimit</code>的值为0，<code>b</code>的值也为0。</p>
+<p>又因为<code>pMeta-&gt;slot_exhausted</code>的值也是0，且<code>pMeta-&gt;slot_limit_addr</code>的值也为0，所以会调用</p>
+<p><code>segregated_band_grow(nanozone, pMeta, slot_bytes, mag_index)</code>。</p>
+<p>该函数的实现非常的有<strong>技巧</strong>性，所以不只有<strong>初始化</strong><code>nano_zone</code>中<code>band</code>的功能，在后面的分析还会遇到，遇到之后再做详细分析。</p>
+<h4 id="获得第一个BAND">获得第一个BAND</h4><p><code>segregated_band_grow</code>函数实现了2个功能。</p>
+<ul>
+<li><code>BAND</code>用尽后的增长</li>
+<li>以及一个特殊情况，创建第一个<code>BAND</code></li>
+</ul>
+<h5 id="什么是BAND">什么是BAND</h5><p>每一个<code>BAND</code>的大小为2MB，是<code>nano_zone_t</code>向堆申请内存的单位，每一个独立的cpu每次申请一个<code>BAND</code>，当一个<code>BAND</code>用完之后，会再申请一个<code>BAND</code>。每一个cpu的<code>BAND</code>是分开使用的。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> boolean_t</span><br><span class="line"><span class="title">segregated_band_grow</span><span class="params">(nanozone_t *nanozone, nano_meta_admin_t pMeta, <span class="keyword">unsigned</span> <span class="keyword">int</span> slot_bytes, <span class="keyword">unsigned</span> <span class="keyword">int</span> mag_index)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">nano_blk_addr_t</span> u; <span class="comment">// the compiler holds this in a register</span></span><br><span class="line">	<span class="keyword">uintptr_t</span> p, s;</span><br><span class="line">	<span class="keyword">size_t</span> watermark, hiwater;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (<span class="number">0</span> == pMeta-&gt;slot_current_base_addr) &#123; <span class="comment">// First encounter?</span></span><br><span class="line"></span><br><span class="line">		u.fields.nano_signature = NANOZONE_SIGNATURE;</span><br><span class="line">		u.fields.nano_mag_index = mag_index;</span><br><span class="line">		u.fields.nano_band = <span class="number">0</span>;</span><br><span class="line">		u.fields.nano_slot = (slot_bytes &gt;&gt; SHIFT_NANO_QUANTUM) - <span class="number">1</span>;</span><br><span class="line">		u.fields.nano_offset = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">		p = u.addr;</span><br><span class="line">		<span class="comment">//使用union计算地址是多少</span></span><br><span class="line">		pMeta-&gt;slot_bytes = slot_bytes;</span><br><span class="line">		pMeta-&gt;slot_objects = SLOT_IN_BAND_SIZE / slot_bytes;  <span class="comment">//128KB/slot_bytes==&gt;有多少个分片。</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		p = pMeta-&gt;slot_current_base_addr + BAND_SIZE; <span class="comment">// Growing, so stride ahead by BAND_SIZE 1&lt;&lt;21 ==&gt; 2^21</span></span><br><span class="line">		<span class="comment">//再slot_current_base_addr再增加2</span></span><br><span class="line">		u.addr = (<span class="keyword">uint64_t</span>)p;</span><br><span class="line">		<span class="keyword">if</span> (<span class="number">0</span> == u.fields.nano_band) <span class="comment">// Did the band index wrap?</span></span><br><span class="line">			<span class="keyword">return</span> FALSE;</span><br><span class="line"></span><br><span class="line">		assert(slot_bytes == pMeta-&gt;slot_bytes);</span><br><span class="line">	&#125;</span><br><span class="line">	pMeta-&gt;slot_current_base_addr = p;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//band_size大小是2MB</span></span><br><span class="line">	<span class="comment">//根据当前slot_current_base_addr，计算得到band的开始地址，用于内存申请。</span></span><br><span class="line">	<span class="keyword">mach_vm_address_t</span> vm_addr = p &amp; ~((<span class="keyword">uintptr_t</span>)(BAND_SIZE - <span class="number">1</span>)); <span class="comment">// Address of the (2MB) band covering this (128KB) slot</span></span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span> (nanozone-&gt;band_max_mapped_baseaddr[mag_index] &lt; vm_addr) &#123;</span><br><span class="line">		<span class="comment">// Obtain the next band to cover this slot</span></span><br><span class="line">		<span class="comment">// 申请2MB的空间用于这个band</span></span><br><span class="line">		<span class="keyword">kern_return_t</span> kr = mach_vm_map(mach_task_self(), &amp;vm_addr, BAND_SIZE,</span><br><span class="line">		                               <span class="number">0</span>, VM_MAKE_TAG(VM_MEMORY_MALLOC_NANO), MEMORY_OBJECT_NULL, <span class="number">0</span>, FALSE,</span><br><span class="line">		                               VM_PROT_DEFAULT, VM_PROT_ALL, VM_INHERIT_DEFAULT);</span><br><span class="line">      	<span class="comment">/* ...*/</span></span><br><span class="line">		nanozone-&gt;band_max_mapped_baseaddr[mag_index] = vm_addr;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Randomize the starting allocation from this slot (introduces 11 to 14 bits of entropy)</span></span><br><span class="line">	<span class="keyword">if</span> (<span class="number">0</span> == pMeta-&gt;slot_objects_mapped) &#123; <span class="comment">// First encounter?</span></span><br><span class="line">		<span class="comment">//SLOT_IN_BAND_SIZE / slot_bytes 这个slot会被分成多少份。</span></span><br><span class="line">		pMeta-&gt;slot_objects_skipped = (malloc_entropy[<span class="number">1</span>] % (SLOT_IN_BAND_SIZE / slot_bytes));</span><br><span class="line">		<span class="comment">//通过取余在内存开始处空出几个slot_bytes不用。</span></span><br><span class="line">		pMeta-&gt;slot_bump_addr = p + (pMeta-&gt;slot_objects_skipped * slot_bytes);</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		pMeta-&gt;slot_bump_addr = p;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	pMeta-&gt;slot_limit_addr = p + (SLOT_IN_BAND_SIZE / slot_bytes) * slot_bytes; <span class="comment">//p+128KB</span></span><br><span class="line">	pMeta-&gt;slot_objects_mapped += (SLOT_IN_BAND_SIZE / slot_bytes); <span class="comment">//128KB/slot_bytes</span></span><br><span class="line"></span><br><span class="line">	u.fields.nano_signature = NANOZONE_SIGNATURE;</span><br><span class="line">	u.fields.nano_mag_index = mag_index;</span><br><span class="line">	u.fields.nano_band = <span class="number">0</span>;</span><br><span class="line">	u.fields.nano_slot = <span class="number">0</span>;</span><br><span class="line">	u.fields.nano_offset = <span class="number">0</span>;</span><br><span class="line">	s = u.addr; <span class="comment">// Base for this core.</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// Set the high water mark for this CPU's entire magazine, if this resupply raised it.</span></span><br><span class="line">    watermark = nanozone-&gt;core_mapped_size[mag_index];</span><br><span class="line">    hiwater = MAX( watermark, p - s + SLOT_IN_BAND_SIZE );</span><br><span class="line">    nanozone-&gt;core_mapped_size[mag_index] = hiwater;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="获取pMeta-&gt;slot_current_base_addr">获取pMeta-&gt;slot_current_base_addr</h5><p>第一次调用<code>segregated_band_grow</code>，因为<code>0 == pMeta-&gt;slot_current_base_addr</code>，所以进行初始化，利用</p>
+<p><code>nano_blk_addr_t</code>这个结构，计算当前的<code>slot_current_base_addr</code>的地址是多少。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> nano_blk_addr_s &#123;</span><br><span class="line">	<span class="keyword">uint64_t</span></span><br><span class="line">nano_offset:NANO_OFFSET_BITS,		<span class="comment">// locates the block</span></span><br><span class="line">nano_slot:NANO_SLOT_BITS,		<span class="comment">// bucket of homogenous quanta-multiple blocks</span></span><br><span class="line">nano_band:NANO_BAND_BITS,</span><br><span class="line">nano_mag_index:NANO_MAG_BITS,		<span class="comment">// the core that allocated this block</span></span><br><span class="line">nano_signature:NANO_SIGNATURE_BITS;	<span class="comment">// 0x00006nnnnnnnnnnn the address range devoted to us.</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="preprocessor">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">union</span>  &#123;</span><br><span class="line">	<span class="keyword">uint64_t</span>			addr;</span><br><span class="line">	<span class="keyword">struct</span> nano_blk_addr_s	fields;</span><br><span class="line">&#125; <span class="keyword">nano_blk_addr_t</span>;</span><br><span class="line"></span><br><span class="line">		<span class="comment">/*...*/</span></span><br><span class="line">		u.fields.nano_signature = NANOZONE_SIGNATURE;</span><br><span class="line">		u.fields.nano_mag_index = mag_index;</span><br><span class="line">		u.fields.nano_band = <span class="number">0</span>;</span><br><span class="line">		u.fields.nano_slot = (slot_bytes &gt;&gt; SHIFT_NANO_QUANTUM) - <span class="number">1</span>;</span><br><span class="line">		u.fields.nano_offset = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">		p = u.addr;</span><br><span class="line">		<span class="comment">/*...*/</span></span><br></pre></td></tr></table></figure>
+<p>先根据不同的<code>mag_index</code>和<code>slot_bytes</code>填写<code>union</code>中的<code>fileds</code>。因为<code>union</code>使用不同的数据类型范围同一块内存。所以用<code>u.addr</code>来获取前面填入的数据，就得到了当前的<code>slot_current_base_addr</code>。</p>
+<p>通过一段简单的代码来验证一下。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">nano_blk_addr_t</span> u;</span><br><span class="line"> <span class="keyword">uintptr_t</span> p;</span><br><span class="line"> <span class="built_in">printf</span>(<span class="string">"mag,band,slot,addr"</span>);</span><br><span class="line"> <span class="keyword">int</span> imag=<span class="number">0</span>;</span><br><span class="line"> <span class="keyword">int</span> iband=<span class="number">0</span> ;</span><br><span class="line"> <span class="keyword">int</span> islot_bytes=<span class="number">0</span>;</span><br><span class="line"> <span class="keyword">for</span> (imag = <span class="number">0</span>;imag!=<span class="number">32</span>;imag++) &#123;</span><br><span class="line">     <span class="keyword">for</span> (iband = <span class="number">0</span> ; iband!=<span class="number">2</span> ; iband++) &#123;</span><br><span class="line">         <span class="keyword">for</span> (islot_bytes=<span class="number">16</span>;islot_bytes!=<span class="number">256</span>+<span class="number">16</span>;islot_bytes = islot_bytes + <span class="number">16</span>) &#123;</span><br><span class="line">             u.fields.nano_signature = NANOZONE_SIGNATURE;</span><br><span class="line">             u.fields.nano_mag_index = imag;</span><br><span class="line">             u.fields.nano_band = iband;</span><br><span class="line">             u.fields.nano_slot = (islot_bytes &gt;&gt; SHIFT_NANO_QUANTUM) - <span class="number">1</span>;</span><br><span class="line">             u.fields.nano_offset = <span class="number">0</span>;</span><br><span class="line"> </span><br><span class="line">             p = u.addr;</span><br><span class="line">             <span class="comment">//mach_vm_address_t vm_addr = p &amp; ~((uintptr_t)(BAND_SIZE - 1));</span></span><br><span class="line">             <span class="built_in">printf</span>(<span class="string">"\n%d,%d,%d,%llx"</span>,imag,iband,islot_bytes,u.addr);</span><br><span class="line">    </span><br><span class="line">         &#125;</span><br><span class="line"> </span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>打印的结果太多了，这里就整理出比较有特征的几个结果，用作分析。</p>
+<table>
+<thead>
+<tr>
+<th>mag</th>
+<th>band</th>
+<th>slot</th>
+<th>addr</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>16</td>
+<td>0x600000000000</td>
+</tr>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>32</td>
+<td>0x600000020000</td>
+</tr>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>256</td>
+<td>0x6000001e0000</td>
+</tr>
+<tr>
+<td>0</td>
+<td>1</td>
+<td>16</td>
+<td>0x600000200000</td>
+</tr>
+<tr>
+<td>0</td>
+<td>1</td>
+<td>256</td>
+<td>0x6000003e0000</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0</td>
+<td>16</td>
+<td>0x608000000000</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>16</td>
+<td>0x608000200000</td>
+</tr>
+</tbody>
+</table>
+<p>表-1</p>
+<p>可以明显看出有一下几个特性</p>
+<ul>
+<li>所有的<code>band</code>基址是从<code>0x600000000000</code>开始的。</li>
+<li>每一个<code>cpu</code>单独使用一个<code>band</code>：<code>mag</code>不同的时候，<code>band</code>号为0，<code>slot_bytes</code>为16时，两个<code>addr</code>不同。</li>
+<li>同一个<code>cpu</code>的一个<code>band</code>用完之后，线性的申请下一个<code>band</code>。</li>
+<li>相同的<code>band</code>，即<code>band</code>号相同时,0x200000(2MB)的空间，被划分为0x10(16)个，大小为0x2000(128KB)的<code>slot</code>。且为线性分布。</li>
+</ul>
+<p>而不是第一次调用的情况则十分简单，直接在<code>slot_current_base_addr</code>的基础上添加<code>BAND_SIZE</code>，也就是2MB(0x200000)获取新的<code>slot_current_base_addr</code>。</p>
+<p>例如：</p>
+<p>当<code>band</code>为0，<code>slot_bytes</code>为256时，新的<code>slot_current_base_addr</code>为</p>
+<blockquote>
+<p>0x6000001e0000+0x200000=0x6000003e0000</p>
+</blockquote>
+<p>与表-1中结果一致。</p>
+<p>余下的代码比较好理解，就是根据计算出来的地址，想内核申请内存，且根据相关数据填写<code>pMeta</code>的的数据，在下一次调用<code>malloc</code>时，非常方便的从已经处理好的<code>pMeta</code>中获取内存空间。再根据pMeta中相关的数据，计算得到需要返回给调用者的指针。</p>
+<h1 id="nano_free">nano_free</h1><p><code>free</code>的操作，相对简单，就是将不用的内存，添加到每一个pMeta的队列之中，而每一个队列，在<code>malloc</code>时，如果发现需要使用的队列中存在元素，则优先使用队列中已经释放的内存。</p>
+<p>逻辑相对简单，就不对源码做出分析了，有兴趣的读者可以自行阅读源码。相信在了解了上面流程之后，不是一件难的事情。</p>
+<h1 id="小结">小结</h1><p><code>nano</code>的内存分配逻辑相对简单，和之前分析过的<code>linux</code><a href="http://turingh.github.io/2015/12/14/protostar-heap3/">堆内存的分配策略</a>是不同的，在所申请的内存范围很小的时候，可以加快申请的速度，并且提高内存的复用。</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/06/28/libmalloc源码分析之nanozone-s的处理/">libmalloc源码分析之nanozone_s的处理</a></p>
+        <p><span>文章作者:</span><a href="/" title="访问 mrh 的个人博客">mrh</a></p>
+        <p><span>发布时间:</span>2016年06月28日 - 22时11分</p>
+        <p><span>最后更新:</span>2016年06月29日 - 22时58分</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/06/28/libmalloc源码分析之nanozone-s的处理/" title="libmalloc源码分析之nanozone_s的处理">http://turingh.github.io/2016/06/28/libmalloc源码分析之nanozone-s的处理/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://turingh.github.io/2016/06/28/libmalloc源码分析之nanozone-s的处理/　　作者: mrh" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script src="/js/clipboard.min.js"></script>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="中国大陆 (CC BY-NC-SA 3.0 CN)" target = "_blank">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+<nav id="article-nav">
+  
+    <a href="/2016/07/05/再看CVE-2016-1757浅析mach message的使用/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          再看CVE-2016-1757---浅析mach message的使用
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/06/28/libmalloc源码分析之初始化/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">libmalloc源码分析之初始化</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#摘要"><span class="toc-number">1.</span> <span class="toc-text">摘要</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#nano_zone_s"><span class="toc-number">2.</span> <span class="toc-text">nano_zone_s</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#一些需要理解的宏定义"><span class="toc-number">2.1.</span> <span class="toc-text">一些需要理解的宏定义</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#NANO_MAX_SIZE"><span class="toc-number">2.1.1.</span> <span class="toc-text">NANO_MAX_SIZE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SLOT_IN_BAND_SIZE"><span class="toc-number">2.1.2.</span> <span class="toc-text">SLOT_IN_BAND_SIZE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#BAND_SIZE"><span class="toc-number">2.1.3.</span> <span class="toc-text">BAND_SIZE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#NANO_MAG_SIZE"><span class="toc-number">2.1.4.</span> <span class="toc-text">NANO_MAG_SIZE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#NANO_SLOT_SIZE"><span class="toc-number">2.1.5.</span> <span class="toc-text">NANO_SLOT_SIZE</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#nano_meta_s"><span class="toc-number">2.2.</span> <span class="toc-text">nano_meta_s</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#nano_malloc"><span class="toc-number">3.</span> <span class="toc-text">nano_malloc</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#第一次调用_nano_malloc_check_clear"><span class="toc-number">3.0.1.</span> <span class="toc-text">第一次调用_nano_malloc_check_clear</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#segregated_size_to_fit"><span class="toc-number">3.0.1.1.</span> <span class="toc-text">segregated_size_to_fit</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#初见segregated_next_block"><span class="toc-number">3.0.1.2.</span> <span class="toc-text">初见segregated_next_block</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#获得第一个BAND"><span class="toc-number">3.0.1.3.</span> <span class="toc-text">获得第一个BAND</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#什么是BAND"><span class="toc-number">3.0.1.3.1.</span> <span class="toc-text">什么是BAND</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#获取pMeta->slot_current_base_addr"><span class="toc-number">3.0.1.3.2.</span> <span class="toc-text">获取pMeta->slot_current_base_addr</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#nano_free"><span class="toc-number">4.</span> <span class="toc-text">nano_free</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#小结"><span class="toc-number">5.</span> <span class="toc-text">小结</span></a></li></ol>
+</div>
+<style>
+    .left-col .switch-btn {
+        display: none;
+    }
+    .left-col .switch-area {
+        display: none;
+    }
+</style>
+
+<input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+            $(".switch-btn, .switch-area").fadeOut(300);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+            $(".switch-btn, .switch-area").fadeIn(500);
+        }
+    })
+
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+        $(".switch-btn, .switch-area").show();
+    }
+</script>
+
+
+
+
+
+
+
+    
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/07/05/再看CVE-2016-1757浅析mach message的使用/" title="上一篇: 再看CVE-2016-1757---浅析mach message的使用">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+        
+            <a href="/2016/06/28/libmalloc源码分析之初始化/" title="下一篇: libmalloc源码分析之初始化">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2016/09/07/CVE-2016-4656分析与调试/">CVE-2016-4656分析与调试</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/05/再看CVE-2016-1757浅析mach message的使用/">再看CVE-2016-1757---浅析mach message的使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/28/libmalloc源码分析之nanozone-s的处理/">libmalloc源码分析之nanozone_s的处理</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/28/libmalloc源码分析之初始化/">libmalloc源码分析之初始化</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/24/nlist-Mach-O文件重定向信息数据结构分析/">nlist-Mach-O文件重定向信息数据结构分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/23/10-11-4版本小结/">10-11-4版本小结</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/29/CVE-2016-1749内核代码执行POC分析/">CVE-2016-1749内核代码执行POC分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/19/CVE-2016-1757利用程序分析/">CVE-2016-1757利用程序分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/18/apple沙盒研究之基础知识/">apple沙盒研究之基础知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/13/利用patch绕过kextload对内核签名的检测/">利用patch绕过kextload对内核签名的检测</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/03/CVE-2016-1757简单分析/">CVE-2016-1757简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/30/OSX内核加载mach-o流程分析/">OSX内核加载mach-o流程分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/22/fishhook源码分析/">fishhook源码分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/16/dyld源码分析load/">dyld源码分析-动态加载load</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/10/Mach-O的动态链接/">Mach-O的动态链接相关知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/07/mach-o文件格式分析/">mach-o格式分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/03/CVE-2016-0799简单分析/">CVE-2016-0799简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/03/01/dyld中macho加载的简单分析/">dyld中mach-o文件加载的简单分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/29/OS-X-内核研究-基础知识/">OS X 内核研究 准备知识</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/23/通过fusion level02浅谈exploit中的函数调用伪造/">通过fusion level02浅谈exploit中的函数调用伪造</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/19/CVE-2015-7547分析与调试/">对CVE-2015-7547简单的分析与调试</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/19/CVE-2015-7547分析与调试副本/">对CVE-2015-7547简单的分析与调试</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/09/CVE-2016-1879调试&分析/">CVE-2016-1879 调试&分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/27/frame-faking/">frame-faking-介绍-函数调用伪造</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/14/protostar-heap3/">protostar详细解析 heap3-通过heap3理解堆腐坏的原理及利用方法</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/12/图解DWORDSHOOT/">图解DWORDSHOOT</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/09/protostar-heap2/">protostar详细解析 heap2 解答</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/09/protostar-heap1/">protostar详细解析 heap1 解答</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/04/栈溢出练习小结/">wargame简单入门</a></li></ul>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+    <script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#toc, .switch-btn, .switch-area").toggle();
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+                $(".switch-btn, .switch-area").fadeToggle(300);
+            }
+        })
+    </script>
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                &copy; 2016 mrh
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/luuman/hexo-theme-spfk" target="_blank">spfk</a> by luuman
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" >本站到访数: 
+                            <span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>, </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+
+    </div>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="/js/main.js" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function() {
+            var backgroundnum = 21;
+            var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-71141416-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+  <script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+
+  </div>
+</body>
+</html>
