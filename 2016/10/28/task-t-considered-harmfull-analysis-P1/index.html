@@ -5,23 +5,23 @@
   
   <title>XNU内核中task_t相关漏洞分析笔记(Part I) | mrh的学习分享</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="0x00 摘要​    前两天Project Zero的blog上面，Ian Beer发表了一篇新的文章，讨论了在xnu 的内核在设计上存在的一个问题，从而可以导致提权，沙箱逃逸等一洗了的问题。并且提供了相应的的POC与EXP源码。这篇文章是调试与分析其中第一个漏洞的部分记录。
+  <meta name="description" content="0x00 摘要​    前两天Project Zero的blog上面，Ian Beer发表了一篇新的文章，讨论了在xnu 的内核在设计上存在的一个问题，从而可以导致提权，沙箱逃逸等一洗了的问题。并且提供了相应的的POC与EXP源码。这篇文章是调试与分析其中第一个漏洞CVE-2016-4625的部分。
 task_t considered harmful
-OS X/iOS kernel use-after-free in">
+OS X/iOS kernel use-aft">
 <meta property="og:type" content="article">
 <meta property="og:title" content="XNU内核中task_t相关漏洞分析笔记(Part I)">
 <meta property="og:url" content="http://turingh.github.io/2016/10/28/task-t-considered-harmfull-analysis-P1/index.html">
 <meta property="og:site_name" content="mrh的学习分享">
-<meta property="og:description" content="0x00 摘要​    前两天Project Zero的blog上面，Ian Beer发表了一篇新的文章，讨论了在xnu 的内核在设计上存在的一个问题，从而可以导致提权，沙箱逃逸等一洗了的问题。并且提供了相应的的POC与EXP源码。这篇文章是调试与分析其中第一个漏洞的部分记录。
+<meta property="og:description" content="0x00 摘要​    前两天Project Zero的blog上面，Ian Beer发表了一篇新的文章，讨论了在xnu 的内核在设计上存在的一个问题，从而可以导致提权，沙箱逃逸等一洗了的问题。并且提供了相应的的POC与EXP源码。这篇文章是调试与分析其中第一个漏洞CVE-2016-4625的部分。
 task_t considered harmful
-OS X/iOS kernel use-after-free in">
+OS X/iOS kernel use-aft">
 <meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/task_t_analysis/EXP_flow.png">
-<meta property="og:updated_time" content="2016-10-29T02:45:36.000Z">
+<meta property="og:updated_time" content="2016-10-29T02:52:39.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="XNU内核中task_t相关漏洞分析笔记(Part I)">
-<meta name="twitter:description" content="0x00 摘要​    前两天Project Zero的blog上面，Ian Beer发表了一篇新的文章，讨论了在xnu 的内核在设计上存在的一个问题，从而可以导致提权，沙箱逃逸等一洗了的问题。并且提供了相应的的POC与EXP源码。这篇文章是调试与分析其中第一个漏洞的部分记录。
+<meta name="twitter:description" content="0x00 摘要​    前两天Project Zero的blog上面，Ian Beer发表了一篇新的文章，讨论了在xnu 的内核在设计上存在的一个问题，从而可以导致提权，沙箱逃逸等一洗了的问题。并且提供了相应的的POC与EXP源码。这篇文章是调试与分析其中第一个漏洞CVE-2016-4625的部分。
 task_t considered harmful
-OS X/iOS kernel use-after-free in">
+OS X/iOS kernel use-aft">
   
     <link rel="alternative" href="/atom.xml" title="mrh的学习分享" type="application/atom+xml">
   
@@ -265,7 +265,7 @@ OS X/iOS kernel use-after-free in">
     <div class="article-entry" itemprop="articleBody">
       
           
-        <h1 id="0x00_摘要">0x00 摘要</h1><p>​    前两天<a href="https://googleprojectzero.blogspot.com/" target="_blank" rel="external">Project Zero</a>的blog上面，Ian Beer发表了一篇新的文章，讨论了在<code>xnu</code> 的内核在设计上存在的一个问题，从而可以导致提权，沙箱逃逸等一洗了的问题。并且提供了相应的的POC与EXP源码。这篇文章是调试与分析其中第一个漏洞的部分记录。</p>
+        <h1 id="0x00_摘要">0x00 摘要</h1><p>​    前两天<a href="https://googleprojectzero.blogspot.com/" target="_blank" rel="external">Project Zero</a>的blog上面，Ian Beer发表了一篇新的文章，讨论了在<code>xnu</code> 的内核在设计上存在的一个问题，从而可以导致提权，沙箱逃逸等一洗了的问题。并且提供了相应的的POC与EXP源码。这篇文章是调试与分析其中第一个漏洞<a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2016-4625" target="_blank" rel="external">CVE-2016-4625</a>的部分。</p>
 <p><a href="https://googleprojectzero.blogspot.com/2016/10/taskt-considered-harmful.html" target="_blank" rel="external">task_t considered harmful</a></p>
 <p><a href="https://bugs.chromium.org/p/project-zero/issues/detail?id=831&amp;can=1&amp;q=apple&amp;sort=-id" target="_blank" rel="external">OS X/iOS kernel use-after-free in IOSurface</a></p>
 <a id="more"></a>
@@ -368,7 +368,7 @@ OS X/iOS kernel use-after-free in">
         <p><span>本文标题:</span><a href="/2016/10/28/task-t-considered-harmfull-analysis-P1/">XNU内核中task_t相关漏洞分析笔记(Part I)</a></p>
         <p><span>文章作者:</span><a href="/" title="访问 mrh 的个人博客">mrh</a></p>
         <p><span>发布时间:</span>2016年10月28日 - 16时09分</p>
-        <p><span>最后更新:</span>2016年10月28日 - 22时45分</p>
+        <p><span>最后更新:</span>2016年10月28日 - 22时52分</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="/2016/10/28/task-t-considered-harmfull-analysis-P1/" title="XNU内核中task_t相关漏洞分析笔记(Part I)">http://turingh.github.io/2016/10/28/task-t-considered-harmfull-analysis-P1/</a>
             <span class="copy-path" data-clipboard-text="原文: http://turingh.github.io/2016/10/28/task-t-considered-harmfull-analysis-P1/　　作者: mrh" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
