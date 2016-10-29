@@ -4,7 +4,7 @@
   <subtitle><![CDATA[胸口写一个勇字]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://turingh.github.io/"/>
-  <updated>2016-10-29T02:43:20.000Z</updated>
+  <updated>2016-10-29T02:45:36.000Z</updated>
   <id>http://turingh.github.io/</id>
   
   <author>
@@ -19,10 +19,11 @@
     <link href="http://turingh.github.io/2016/10/28/task-t-considered-harmfull-analysis-P1/"/>
     <id>http://turingh.github.io/2016/10/28/task-t-considered-harmfull-analysis-P1/</id>
     <published>2016-10-28T20:09:25.000Z</published>
-    <updated>2016-10-29T02:43:20.000Z</updated>
+    <updated>2016-10-29T02:45:36.000Z</updated>
     <content type="html"><![CDATA[<h1 id="0x00_摘要">0x00 摘要</h1><p>​    前两天<a href="https://googleprojectzero.blogspot.com/" target="_blank" rel="external">Project Zero</a>的blog上面，Ian Beer发表了一篇新的文章，讨论了在<code>xnu</code> 的内核在设计上存在的一个问题，从而可以导致提权，沙箱逃逸等一洗了的问题。并且提供了相应的的POC与EXP源码。这篇文章是调试与分析其中第一个漏洞的部分记录。</p>
 <p><a href="https://googleprojectzero.blogspot.com/2016/10/taskt-considered-harmful.html" target="_blank" rel="external">task_t considered harmful</a></p>
 <p><a href="https://bugs.chromium.org/p/project-zero/issues/detail?id=831&amp;can=1&amp;q=apple&amp;sort=-id" target="_blank" rel="external">OS X/iOS kernel use-after-free in IOSurface</a></p>
+<a id="more"></a>
 <h1 id="0x01_准备工作">0x01 准备工作</h1><h2 id="1-1_基础知识">1.1 基础知识</h2><p>​    在阅读本文之前，需要稍微了解一下<code>mach_msg</code>相关的知识，以及一些使用<code>mach_msg</code>的技巧，理解父进程与子进程交换<code>port</code>之后可以做一些操作。</p>
 <ul>
 <li><a href="http://turingh.github.io/2016/07/05/%E5%86%8D%E7%9C%8BCVE-2016-1757%E6%B5%85%E6%9E%90mach%20message%E7%9A%84%E4%BD%BF%E7%94%A8/">再看CVE-2016-1757—浅析mach message的使用</a></li>
@@ -113,7 +114,10 @@
 <p>3.<a href="http://kb.parallels.com/cn/116526" target="_blank" rel="external">How to boot into OS X Recovery Mode on Parallels Desktop</a></p>
 ]]></content>
     <summary type="html">
-    <![CDATA[<h1 id="0x00_摘要">0x00 摘要</h1><p>​    前两天<a href="https://googleprojectzero.blogspot.com/" target="_blank" rel="external">Project Zero</a>的bl]]>
+    <![CDATA[<h1 id="0x00_摘要">0x00 摘要</h1><p>​    前两天<a href="https://googleprojectzero.blogspot.com/">Project Zero</a>的blog上面，Ian Beer发表了一篇新的文章，讨论了在<code>xnu</code> 的内核在设计上存在的一个问题，从而可以导致提权，沙箱逃逸等一洗了的问题。并且提供了相应的的POC与EXP源码。这篇文章是调试与分析其中第一个漏洞的部分记录。</p>
+<p><a href="https://googleprojectzero.blogspot.com/2016/10/taskt-considered-harmful.html">task_t considered harmful</a></p>
+<p><a href="https://bugs.chromium.org/p/project-zero/issues/detail?id=831&amp;can=1&amp;q=apple&amp;sort=-id">OS X/iOS kernel use-after-free in IOSurface</a></p>]]>
+    
     </summary>
     
       <category term="CVE" scheme="http://turingh.github.io/tags/CVE/"/>

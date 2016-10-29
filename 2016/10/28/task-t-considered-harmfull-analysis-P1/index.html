@@ -16,7 +16,7 @@ OS X/iOS kernel use-after-free in">
 task_t considered harmful
 OS X/iOS kernel use-after-free in">
 <meta property="og:image" content="https://raw.githubusercontent.com/turingH/BLOGIMAGE/master/png/task_t_analysis/EXP_flow.png">
-<meta property="og:updated_time" content="2016-10-29T02:43:20.000Z">
+<meta property="og:updated_time" content="2016-10-29T02:45:36.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="XNU内核中task_t相关漏洞分析笔记(Part I)">
 <meta name="twitter:description" content="0x00 摘要​    前两天Project Zero的blog上面，Ian Beer发表了一篇新的文章，讨论了在xnu 的内核在设计上存在的一个问题，从而可以导致提权，沙箱逃逸等一洗了的问题。并且提供了相应的的POC与EXP源码。这篇文章是调试与分析其中第一个漏洞的部分记录。
@@ -268,6 +268,7 @@ OS X/iOS kernel use-after-free in">
         <h1 id="0x00_摘要">0x00 摘要</h1><p>​    前两天<a href="https://googleprojectzero.blogspot.com/" target="_blank" rel="external">Project Zero</a>的blog上面，Ian Beer发表了一篇新的文章，讨论了在<code>xnu</code> 的内核在设计上存在的一个问题，从而可以导致提权，沙箱逃逸等一洗了的问题。并且提供了相应的的POC与EXP源码。这篇文章是调试与分析其中第一个漏洞的部分记录。</p>
 <p><a href="https://googleprojectzero.blogspot.com/2016/10/taskt-considered-harmful.html" target="_blank" rel="external">task_t considered harmful</a></p>
 <p><a href="https://bugs.chromium.org/p/project-zero/issues/detail?id=831&amp;can=1&amp;q=apple&amp;sort=-id" target="_blank" rel="external">OS X/iOS kernel use-after-free in IOSurface</a></p>
+<a id="more"></a>
 <h1 id="0x01_准备工作">0x01 准备工作</h1><h2 id="1-1_基础知识">1.1 基础知识</h2><p>​    在阅读本文之前，需要稍微了解一下<code>mach_msg</code>相关的知识，以及一些使用<code>mach_msg</code>的技巧，理解父进程与子进程交换<code>port</code>之后可以做一些操作。</p>
 <ul>
 <li><a href="http://turingh.github.io/2016/07/05/%E5%86%8D%E7%9C%8BCVE-2016-1757%E6%B5%85%E6%9E%90mach%20message%E7%9A%84%E4%BD%BF%E7%94%A8/">再看CVE-2016-1757—浅析mach message的使用</a></li>
@@ -367,7 +368,7 @@ OS X/iOS kernel use-after-free in">
         <p><span>本文标题:</span><a href="/2016/10/28/task-t-considered-harmfull-analysis-P1/">XNU内核中task_t相关漏洞分析笔记(Part I)</a></p>
         <p><span>文章作者:</span><a href="/" title="访问 mrh 的个人博客">mrh</a></p>
         <p><span>发布时间:</span>2016年10月28日 - 16时09分</p>
-        <p><span>最后更新:</span>2016年10月28日 - 22时43分</p>
+        <p><span>最后更新:</span>2016年10月28日 - 22时45分</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="/2016/10/28/task-t-considered-harmfull-analysis-P1/" title="XNU内核中task_t相关漏洞分析笔记(Part I)">http://turingh.github.io/2016/10/28/task-t-considered-harmfull-analysis-P1/</a>
             <span class="copy-path" data-clipboard-text="原文: http://turingh.github.io/2016/10/28/task-t-considered-harmfull-analysis-P1/　　作者: mrh" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
