@@ -4,7 +4,7 @@
   <subtitle><![CDATA[胸口写一个勇字]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://turingh.github.io/"/>
-  <updated>2016-11-07T23:41:00.000Z</updated>
+  <updated>2016-11-08T02:58:14.000Z</updated>
   <id>http://turingh.github.io/</id>
   
   <author>
@@ -15,11 +15,11 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title><![CDATA[CVE-2016-4699分析与调试]]></title>
-    <link href="http://turingh.github.io/2016/11/07/CVE-2016-4699%E5%88%86%E6%9E%90%E4%B8%8E%E8%B0%83%E8%AF%95/"/>
-    <id>http://turingh.github.io/2016/11/07/CVE-2016-4699分析与调试/</id>
+    <title><![CDATA[CVE-2016-4669分析与调试]]></title>
+    <link href="http://turingh.github.io/2016/11/07/CVE-2016-4669%E5%88%86%E6%9E%90%E4%B8%8E%E8%B0%83%E8%AF%95/"/>
+    <id>http://turingh.github.io/2016/11/07/CVE-2016-4669分析与调试/</id>
     <published>2016-11-07T19:57:00.000Z</published>
-    <updated>2016-11-07T23:41:00.000Z</updated>
+    <updated>2016-11-08T02:58:14.000Z</updated>
     <content type="html"><![CDATA[<h1 id="0x00_摘要">0x00 摘要</h1><p>本文记录了对<a href="http://www.cve.mitre.org/cgi-bin/cvename.cgi?name=2016-4669" target="_blank" rel="external">CVE-2016-4669</a>的<a href="https://bugs.chromium.org/p/project-zero/issues/attachment?aid=244431" target="_blank" rel="external">POC</a>的调试中遇到的问题，以及相关知识的整理，该漏洞的原始报告在<a href="https://bugs.chromium.org/p/project-zero/issues/detail?id=882&amp;can=1&amp;q=apple&amp;sort=-id" target="_blank" rel="external">这里</a>。原始报告中的内容，本文不在复述。</p>
 <a id="more"></a>
 <h1 id="0x01_基础知识">0x01 基础知识</h1><h2 id="1-1_MIG">1.1 MIG</h2><p><code>MIG</code>是<code>Mach</code>系统中使用的一种自动生成代码的脚本语言，以<code>.def</code>结尾。通过工具生成的代码分为<code>xxx.h</code>,<code>xxxClient.c</code>和<code>xxxServer.c</code>三个部分，在编译应用层程序时，和<code>xxxClient.c</code>文件一起编译，使用自动生成的代码。这里就是<code>poc</code>中的<code>taskUser.c</code>和<code>task.h</code>。</p>
