@@ -2,8 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://turingh.github.io/2017/01/15/CVE-2016-7644-%E4%B8%89%E8%B0%88Mach-IPC/</loc>
+    <lastmod>2017-01-30T23:46:33.000Z</lastmod>
+  </url>
+  
+  <url>
     <loc>http://turingh.github.io/2017/01/10/CVE-2016-7637-%E5%86%8D%E8%B0%88Mach-IPC/</loc>
-    <lastmod>2017-01-10T19:49:36.000Z</lastmod>
+    <lastmod>2017-01-10T19:49:38.000Z</lastmod>
   </url>
   
   <url>
